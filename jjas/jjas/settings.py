@@ -143,3 +143,5 @@ STATICFILES_FINDERS = [
 # In settings.py
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
+
+LOGIN_URL = 'login_view'

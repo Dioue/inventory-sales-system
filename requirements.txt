@@ -4,3 +4,4 @@ python-dotenv
 psycopg2
 django-unfold
 django-compressor
+requests

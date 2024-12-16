@@ -1,0 +1,29 @@
+<!-- templates/_base.html -->
+
+{% load compress %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    {% block title %}
+    <title>JJAS TRADING | Base</title>
+    {% endblock %}
+
+    {% compress css %}
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    {% endcompress %}
+</head>
+
+<body>
+        {% block content %}
+        {% endblock content %}
+    <script src="{% static 'js/flowbite.min.js' %}"></script>
+</body>
+
+</html>

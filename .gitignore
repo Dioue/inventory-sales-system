@@ -1,1 +1,35 @@
+# Python bytecode
+*.pyc
+*.pyo
+__pycache__/
+
+# virtual env
 venv/
+
+# Django migrations
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# SQLite database (if used locally)
+db.sqlite3
+
+# Logs
+*.log
+
+# Cache files
+*.cache
+.cache/
+
+# Compiled files
+*.compiled
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Node.js modules
+node_modules/
+
+# Tailwind generated CSS
+static/css/output.css
+static/css/CACHE/

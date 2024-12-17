@@ -31,5 +31,4 @@ htmlcov/
 node_modules/
 
 # Tailwind generated CSS
-static/css/output.css
-static/css/CACHE/
+/jjas/static/CACHE

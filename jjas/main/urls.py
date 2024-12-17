@@ -11,6 +11,7 @@ urlpatterns = [
     path("forgot-password/", views.ForgotPasswordView.as_view(), name="forgot_password"),
     path("dashboard", auth_views.SystemDashboardView.as_view(), name= 'system_dashboard'),
     path('products/', auth_views.ProductComponentView.as_view(), name='auth_product_component'),
+    path('process-actions/', auth_views.ProcessDeleteView.as_view(), name='process_multiple_delete'),
     path('category/', auth_views.CategoryComponentView.as_view(), name='auth_category_component'),
     path('sales/', auth_views.SalesComponentView.as_view(), name='auth_sales_component'),
     path('delivery/', auth_views.DeliveryComponentView.as_view(), name='auth_delivery_component'),

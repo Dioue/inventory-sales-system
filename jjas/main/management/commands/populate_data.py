@@ -28,15 +28,15 @@ class Command(BaseCommand):
                 if not Category.objects.filter(code=code).exists():
                     return code  # Return the unique code if it does not exist
 
-        """ # Create Categories
+        # Create Categories
         for _ in range(10):
             Category.objects.create(
                 created_by=user,
                 code=generate_category_code(),  # Using the new function to generate the code
                 category_name=fake.unique.word()
-            ) """
+            )
 
-        """ # Create Units (UoM) with predefined valid values and ensure uniqueness
+        # Create Units (UoM) with predefined valid values and ensure uniqueness
         valid_units = ['set', 'piece', 'box']
 
         for unit in valid_units:
@@ -44,9 +44,9 @@ class Command(BaseCommand):
             Unit.objects.create(
                 created_by=user,
                 name=unit
-            ) """
+            )
 
-        """ # Create Suppliers
+        # Create Suppliers
         for _ in range(5):
             # Generate a company name with common formats (Inc., Corp., Ltd, etc.)
             company_name = fake.company() + " " + random.choice(["Inc.", "Corp.", "Ltd", "Limited", "LLC", "Co.", "Group"])
@@ -58,7 +58,7 @@ class Command(BaseCommand):
                 created_by=user,
                 name=company_name,
                 contact=contact
-            ) """
+            )
 
 
         # Function to generate a product code based on category code

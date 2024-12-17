@@ -8,6 +8,6 @@
     "flowbite": "^2.5.2"
   },
   "scripts": {
-  "watch": "npx tailwindcss -i ./static/css/tailwind.css -o ./static/css/output.css --watch"
-}
+    "watch": "tailwindcss -i ./static/css/tailwind.css -o ./static/css/output.css --watch"
+  }
 }

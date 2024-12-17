@@ -74,8 +74,8 @@ class Product(SystemGeneratedData):
         default=ProductStatus.AVAILABLE
     )
     unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True)
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.name

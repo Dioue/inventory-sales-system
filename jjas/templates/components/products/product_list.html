@@ -62,13 +62,21 @@
   <div class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 dark:bg-gray-900 overflow-x-auto sm:rounded-lg mt-5">
     <div class="flex items-center flex-column flex-wrap md:flex-row space-y-4 md:space-y-0">
         <div class="relative">
-            <label for="table-search" class="sr-only">Search</label>
-            <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
-                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                </svg>
-            </div>
-            <input type="text" id="table-search-users" class="block p-2 ps-10 text-sm text-gray-900 border border-gray-400 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for users">
+            <form method="get">
+                <label for="table-search-product" class="sr-only">Search</label>
+                <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                    </svg>
+                </div>
+                <input 
+                    type="text" 
+                    id="table-search-product" 
+                    name="table-search-product" 
+                    class="block p-2 ps-10 text-sm text-gray-900 border border-gray-400 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                    placeholder="Search for users" 
+                    value="{{ search_query }}">
+            </form>
         </div>
         <button id="dropdownFilterButton" data-dropdown-toggle="dropdownFilter" class="inline-flex items-center text-gray-500 bg-white border border-gray-400 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-4 py-2 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 ml-2 mb-1" type="button">
             <span class="sr-only">Action button</span>
@@ -117,61 +125,76 @@
 
 <!-- Product list table -->
 <div class="relative overflow-x-auto border border-gray-400 rounded-lg bg-gray-50 sm:rounded-lg">
-    <form id="multiple-delete-request" method="post" action="{% url 'process_multiple_delete' %}">
-        {% csrf_token %}
-        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                    <th scope="col" class="p-4">
-                        <div class="flex items-center">
-                            <input id="checkbox-all" type="checkbox" onclick="toggleAll(this)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                            <label for="checkbox-all" class="sr-only">checkbox</label>
-                        </div>
+    <form id="multiple-delete-request" method="post" action="{% url 'process_product_delete' %}">
+    {% csrf_token %}
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400" id="product_list_table">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="p-4">
+                    <div class="flex items-center">
+                        <input id="checkbox-all" type="checkbox" onclick="toggleAll(this)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <label for="checkbox-all" class="sr-only">checkbox</label>
+                    </div>
+                </th>
+                {% if fields %}
+                    {% for f in fields %}
+                        <th scope="col" class="px-6 py-3">
+                            <span class="flex items-center">
+                                <a href="?sort_by={{ f|lower }}&order=asc" class="text-gray-900 dark:text-white hover:text-blue-600">{{ f }}</a>
+                                <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4"/>
+                                </svg>
+                            </span>
+                        </th>
+                    {% endfor %}
+                    <th scope="col" class="px-6 py-3">
+                        Action
                     </th>
-                    {% if fields %}
-                        {% for f in fields %}
-                        <th scope="col" class="px-6 py-3">{{f}}</th>
-                        {% endfor %}
-                    {% endif %}
-                    
-                </tr>
-            </thead>
-            <tbody>
-                {% if page_obj %}
-                    {% for product in page_obj %}
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% if page_obj %}
+                {% for obj in page_obj %}
                     <tr class="bg-white dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                         <td class="w-4 p-4">
-                            <div class="flex items-center" id="checkbox_container">
-                                <input name="selected_items" value="{{ product.product_id }}" type="checkbox" class="product_checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                <label for="checkbox-{{ product.product_id }}" class="sr-only">checkbox</label>
+                            <div class="flex items-center">
+                                <input 
+                                    name="selected_items" 
+                                    value="{{ obj.product_id }}" 
+                                    type="checkbox" 
+                                    id="checkbox-{{ obj.product_id }}" 
+                                    class="checkbox_helper w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                <label for="checkbox-{{ obj.product_id }}" class="sr-only">checkbox</label>
                             </div>
                         </td>
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            {{ product.name }}
+                            {{ obj.name|default:"N/A" }}
                         </th>
-                        <td class="px-6 py-4">{{ product.category }}</td>
-                        <td class="px-6 py-4">{{ product.application }}</td>
-                        <td class="px-6 py-4">{{ product.side }}</td>
-                        <td class="px-6 py-4">{{ product.quantity_left }}</td>
-                        <td class="px-6 py-4">{{ product.critical_level }}</td>
-                        <td class="px-6 py-4">{{ product.cost_price }}</td>
-                        <td class="px-6 py-4">{{ product.selling_price }}</td>
-                        <td class="px-6 py-4">{{ product.product_status }}</td>
+                        <td class="px-6 py-4">{{ obj.cost_price|default:"-" }}</td>
+                        <td class="px-6 py-4">{{ obj.selling_price|default:"-" }}</td>
+                        <td class="px-6 py-4">{{ obj.category|default:"Unknown" }}</td>
+                        <td class="px-6 py-4">{{ obj.application|default:"Unknown" }}</td>
+                        <td class="px-6 py-4">{{ obj.side|default:"Unknown" }}</td>
+                        <td class="px-6 py-4">{{ obj.quantity_left|default:0 }}</td>
+                        <td class="px-6 py-4">{{ obj.critical_level|default:"Not Set" }}</td>
+                        <td class="px-6 py-4">{{ obj.product_status|default:"Unavailable" }}</td>
                         <td class="flex items-center px-6 py-4">
                             <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                         </td>
                     </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="10" class="text-center px-6 py-4 bg-white text-gray-500 dark:text-gray-400">
-                            <h3>Looks like there is no data for this list. Add new data?</h3>
-                        </td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </form>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="{{fields_count}}" class="text-center px-6 py-4 bg-white text-gray-500 dark:text-gray-400">
+                        <h3>No data to show</h3>
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</form>
+
     
     <!-- Pagination Controls -->
     <nav class="flex items-center justify-between pt-4 pb-4 pl-5 pr-5" aria-label="Table navigation">

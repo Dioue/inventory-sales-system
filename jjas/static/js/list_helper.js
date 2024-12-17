@@ -8,14 +8,14 @@ const toggleAll = (source) => {
 // Function to update the selected product count
 const updateSelectedCount = () => {
     // Get all the checked product checkboxes (exclude the "select all" checkbox)
-    let checkedItems = document.querySelectorAll('input.product_checkbox:checked');
+    let checkedItems = document.querySelectorAll('input.checkbox_helper:checked');
     let selectedCount = checkedItems.length;
 
     // Get necessary DOM elements
     let message = document.getElementById('delete-modal-text');
     let buttonId = document.getElementById('delete_button_modal');
     let buttonAll = document.getElementById('checkbox-all');
-    let allCheckboxes = document.querySelectorAll('.product_checkbox');
+    let allCheckboxes = document.querySelectorAll('.checkbox_helper');
 
     // Check if "select all" is checked
     let isSelectAllChecked = buttonAll && buttonAll.checked;
@@ -35,13 +35,13 @@ const updateSelectedCount = () => {
     }
     // If multiple items or "select all" is checked, enable the button and update the message
     else if (selectedCount > 1 || isSelectAllChecked) {
-        message.innerHTML = `Are you sure you want to delete ${selectedCount} products?`;
+        message.innerHTML = `Are you sure you want to delete ${selectedCount} items?`;
         buttonId.classList.remove('cursor-not-allowed');
         buttonId.disabled = false;
     }
     // If a single item is selected, enable the button and update the message
     else {
-        message.innerHTML = 'Are you sure you want to delete this product?';
+        message.innerHTML = 'Are you sure you want to delete this item?';
         buttonId.classList.remove('cursor-not-allowed');
         buttonId.disabled = false;
     }
@@ -51,7 +51,7 @@ const updateSelectedCount = () => {
 let selectAllCheckbox = document.getElementById('checkbox-all');
 if (selectAllCheckbox) {
     selectAllCheckbox.addEventListener('change', function () {
-        let allCheckboxes = document.querySelectorAll('.product_checkbox');
+        let allCheckboxes = document.querySelectorAll('.checkbox_helper');
         allCheckboxes.forEach(function (checkbox) {
             checkbox.checked = selectAllCheckbox.checked;
         });
@@ -60,7 +60,7 @@ if (selectAllCheckbox) {
 }
 
 // Attach event listeners to the checkboxes
-document.querySelectorAll('.product_checkbox').forEach(function (checkbox) {
+document.querySelectorAll('.checkbox_helper').forEach(function (checkbox) {
     checkbox.addEventListener('change', updateSelectedCount);
 });
 

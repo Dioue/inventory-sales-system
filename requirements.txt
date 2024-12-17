@@ -6,3 +6,4 @@ django-unfold
 django-compressor
 requests
 faker
+django-filter

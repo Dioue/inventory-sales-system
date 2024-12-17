@@ -18,7 +18,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR('Superuser (admin) does not exist.'))
             return
 
-        # Function to generate the category code (For Categories)
+        """ # Function to generate the category code (For Categories)
         def generate_category_code():
             while True:
                 # Generate 1-3 uppercase letters
@@ -58,7 +58,7 @@ class Command(BaseCommand):
                 created_by=user,
                 name=company_name,
                 contact=contact
-            )
+            ) """
 
 
         # Function to generate a product code based on category code
@@ -84,7 +84,7 @@ class Command(BaseCommand):
         ]
 
         # Create Products
-        for _ in range(20):
+        for _ in range(50000):
             # Pick a random category
             category = Category.objects.order_by('?').first()
             category_code = category.code  # Get the code of the chosen category

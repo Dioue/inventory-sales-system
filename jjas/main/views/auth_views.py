@@ -38,8 +38,23 @@ class ProductComponentView(BaseComponentView):
         # Get the page object for the current page
         page_obj = paginator.get_page(page_number)
 
+        # State fields for table header and filter by
+        fields = [
+            "Product Name",
+            "Category",
+            "Application",
+            "Side",
+            "Quantity",
+            "Critical Level",
+            "Cost",
+            "Selling Price",
+            "Product Status",
+            "Actions"
+        ]
+
         # Add the page object to the context
         context['page_obj'] = page_obj
+        context['fields'] = fields
 
         return context
     

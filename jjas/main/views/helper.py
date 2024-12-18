@@ -7,3 +7,4 @@ def check_internet_connection():
         return True
     except requests.ConnectionError:
         return False
+    

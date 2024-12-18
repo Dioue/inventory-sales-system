@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -78,6 +79,9 @@ class ProductComponentView(BaseComponentView):
             ],
             "fields_count": 10,
             "search_query": search_query,
+            "header_crumbs": [
+                {"name": "Product List", "url": reverse("auth_product_component")},
+            ]
         })
         return context
 
@@ -101,6 +105,9 @@ class CategoryComponentView(BaseComponentView):
             "fields": ["Category Name", "Code"],
             "fields_count": 3,
             "search_query": search_query,
+            "header_crumbs": [
+                {"name": "Category List", "url": reverse("auth_category_component")},
+            ]
         })
         return context
 
@@ -127,6 +134,9 @@ class SalesComponentView(BaseComponentView):
             ],
             "fields_count": 9,
             "search_query": search_query,
+            "header_crumbs": [
+                {"name": "Sales Record", "url": reverse("auth_sales_component")},
+            ]
         })
         return context
 
@@ -154,6 +164,9 @@ class DeliveryComponentView(BaseComponentView):
             ],
             "fields_count": 9,
             "search_query": search_query,
+            "header_crumbs": [
+                {"name": "Delivery Records", "url": reverse("auth_delivery_component")},
+            ]
         })
         return context
 
@@ -164,6 +177,17 @@ class SKUComponentView(BaseComponentView):
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context.update({
+            "header_crumbs": [
+                {"name": "SKU Analysis", "url": reverse("auth_sku_component")},
+            ]
+        })
+        return context
+    
 
 
 class InsightsComponentView(BaseComponentView):
@@ -172,6 +196,16 @@ class InsightsComponentView(BaseComponentView):
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context.update({
+            "header_crumbs": [
+                {"name": "Sales Insights", "url": reverse("auth_insights_component")},
+            ]
+        })
+        return context
 
 class ProcessDeleteView(View):
     """Handles deletion of selected items for products, categories, or sales records."""

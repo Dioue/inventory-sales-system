@@ -152,7 +152,6 @@ class Command(BaseCommand):
                 order_status=random.choice(['Unpaid', 'Paid'])
             )
 
-            # Generate 3-5 sales items for each sales record
             sales_items = []
             total_amount = Decimal('0.00')
 

@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand
 from faker import Faker
 from django.contrib.auth.models import User
-from ...models import Category, Unit, Supplier, Product, Client, SalesRecord, SalesRecordItem
-from datetime import timedelta
+from ...models import Category, Unit, Supplier, Product, Client, SalesRecord, SalesRecordItem, Delivery
+from datetime import timedelta, timezone as dt_timezone
 from decimal import Decimal
 import random
 import string
@@ -33,7 +33,7 @@ class Command(BaseCommand):
                     return code  # Return the unique code if it does not exist
 
         # Create Categories
-        for _ in range(10):
+        for _ in range(25):
             Category.objects.create(
                 created_by=user,
                 code=generate_category_code(),  # Using the new function to generate the code
@@ -62,10 +62,10 @@ class Command(BaseCommand):
                 created_by=user,
                 name=company_name,
                 contact=contact
-            ) """
+            )
 
 
-        """ # Function to generate a product code based on category code
+        # Function to generate a product code based on category code
         def generate_product_code(category_code):
             while True:
                 # Generate 3-5 digits
@@ -88,7 +88,7 @@ class Command(BaseCommand):
         ]
 
         # Create Products
-        for _ in range(50000):
+        for _ in range(250):
             # Pick a random category
             category = Category.objects.order_by('?').first()
             category_code = category.code  # Get the code of the chosen category
@@ -113,7 +113,7 @@ class Command(BaseCommand):
             )
 
         self.stdout.write(self.style.SUCCESS('Successfully populated the database with random data'))
- """
+
         
         self.stdout.write(self.style.SUCCESS('Creating Clients...'))
         for _ in range(20):
@@ -133,7 +133,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR('No products available to create sales items. Please populate products first.'))
             return
 
-        for _ in range(20):
+        for _ in range(40):
             # Pick a random client
             client = random.choice(clients)
 
@@ -154,7 +154,7 @@ class Command(BaseCommand):
             sales_items = []
             total_amount = Decimal('0.00')
 
-            for _ in range(random.randint(3, 5)):
+            for _ in range(random.randint(1, 25)):
                 product = random.choice(products)
                 quantity = random.randint(1, 10)
                 surcharge = Decimal(round(random.uniform(0, 50), 2))  # Convert to Decimal
@@ -178,4 +178,24 @@ class Command(BaseCommand):
             sales_record.total = round(total_amount, 2)
             sales_record.save()
 
-        self.stdout.write(self.style.SUCCESS('Sales Records and Sales Items created successfully.'))
+        self.stdout.write(self.style.SUCCESS('Sales Records and Sales Items created successfully.')) """
+
+
+        # Create Deliveries
+        self.stdout.write(self.style.SUCCESS('Creating Deliveries...'))
+        sales_records = list(SalesRecord.objects.all())  # Get all sales records
+        for _ in range(350):
+            # Pick a random sales record
+            sales_record = random.choice(sales_records)
+
+            # Generate a delivery
+            delivery_date = fake.date_time_this_year(tzinfo=dt_timezone.utc)
+            claimed_date = delivery_date + timedelta(days=random.randint(1, 30))  # Claim date within 30 days after delivery
+
+            Delivery.objects.create(
+                client_name=sales_record.client.name,  # Assuming Delivery is associated with SalesRecord's client
+                delivery_date=delivery_date,
+                date_claimed=claimed_date,
+            )
+
+        self.stdout.write(self.style.SUCCESS('Deliveries created successfully.'))

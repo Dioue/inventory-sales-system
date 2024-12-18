@@ -155,7 +155,7 @@ class SalesRecord(models.Model):
         # Ensure sale_id starts at 10000 and increments correctly
         if self.pk is None:  # If the record is new
             last_record = SalesRecord.objects.order_by('-sale_id').first()
-            self.sale_id = 10000 if not last_record else last_record.sale_id + 1
+            self.sale_id = 100000 if not last_record else last_record.sale_id + 1
             
         super().save(*args, **kwargs)
 
@@ -188,19 +188,28 @@ class SalesRecordItem(models.Model):
         verbose_name_plural = "Sales Record Items"
 
 
-class Delivery(models.Model):
+class Delivery(SystemGeneratedData):
     delivery_id = models.AutoField(primary_key=True)
     client_name = models.CharField(max_length=255)
     delivery_date = models.DateTimeField(null=True, blank=True)
     date_claimed = models.DateTimeField(null=True, blank=True)
     image = models.ImageField(upload_to='delivery/images/')
-    created_by = models.CharField(max_length=255)
-    date_recorded = models.DateTimeField(auto_now_add=True)
-    date_modified = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        """
+        Custom save method to ensure 'due_date' is calculated based on 'date_issued' and 'net_day'.
+        """
+
+        # Ensure sale_id starts at 10000 and increments correctly
+        if self.pk is None:  # If the record is new
+            last_record = Delivery.objects.order_by('-delivery_id').first()
+            self.delivery_id = 10000 if not last_record else last_record.delivery_id + 1
+            
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Delivery for {self.client_name}"
 
     class Meta:
-        ordering = ['-date_recorded']
+        ordering = ['-delivery_id']
         verbose_name_plural = "Delivery Records"

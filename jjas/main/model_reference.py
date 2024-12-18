@@ -164,21 +164,57 @@ class SalesRecordItem(models.Model):
 
 
 class Delivery(models.Model):
+    """Model to store delivery records, including client information, delivery dates, and status."""
+    
+    # Auto-incremented unique delivery ID
     delivery_id = models.AutoField(primary_key=True)
-    client_name = models.CharField(max_length=255)
-    delivery_date = models.DateTimeField(null=True, blank=True)
-    date_claimed = models.DateTimeField(null=True, blank=True)
-    image = models.ImageField(upload_to='delivery/images/', null=True, blank=True)
-    created_by = models.CharField(max_length=255)
+    
+    # Link to the Client model, assuming each delivery is related to a client
+    client = models.ForeignKey('Client', on_delete=models.SET_NULL, null=True, blank=True, related_name='deliveries')
+    
+    # Delivery and claimed dates
+    delivery_date = models.DateTimeField(null=True, blank=True, help_text="The date the delivery is scheduled.")
+    date_claimed = models.DateTimeField(null=True, blank=True, help_text="The date the delivery was claimed by the client.")
+    
+    # Delivery status choices
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Delivered', 'Delivered'),
+        ('Claimed', 'Claimed'),
+        ('Cancelled', 'Cancelled'),
+    ]
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending', help_text="The current status of the delivery.")
+    
+    # Optional image related to the delivery (e.g., proof of delivery)
+    image = models.ImageField(upload_to='delivery/images/', null=True, blank=True, help_text="Optional image associated with the delivery.")
+    
+    # Created by user (e.g., admin or employee who created the delivery record)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_deliveries')
+    
+    # Timestamps for when the delivery record was created and last modified
     date_recorded = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
+    # Automatically generate the string representation
     def __str__(self):
-        return f"Delivery for {self.client_name}"
+        client_name = self.client.name if self.client else 'Unknown Client'
+        return f"Delivery {self.delivery_id} for {client_name} scheduled on {self.delivery_date}"
 
+    # Meta information for the model
     class Meta:
-        ordering = ['-date_recorded']
+        ordering = ['-date_recorded']  # Display the most recent deliveries first
+        verbose_name = "Delivery Record"
         verbose_name_plural = "Delivery Records"
+        constraints = [
+            # Ensure a delivery can't be claimed before it is scheduled
+            models.CheckConstraint(check=models.Q(date_claimed__gte=models.F('delivery_date')), name='date_claimed_after_delivery_date'),
+        ]
+    
+    # Optional helper method for a formatted display of status and delivery info
+    @property
+    def delivery_status_display(self):
+        return f"Delivery {self.delivery_id} is currently {self.status}"
 
 
 class DailySales(models.Model):

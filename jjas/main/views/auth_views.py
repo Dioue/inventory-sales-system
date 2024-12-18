@@ -9,7 +9,7 @@ from .utils import request_user_info
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from ..models import (
-    Product, Category, SalesRecord, Delivery, Client, Supplier, SalesRecordItem
+    Product, Category, SalesRecord, Delivery, Client, Supplier, SalesRecordItem, BatchOrder, BatchOrderItem
 )
 
 
@@ -48,131 +48,33 @@ class BaseComponentView(LoginRequiredMixin, TemplateView):
             page_obj = paginator.get_page(1)
 
         return queryset, page_obj
-
-
+    
 class SystemDashboardView(BaseComponentView):
-    template_name = 'components/dashboard.html'
+    template_name = 'base/dashboard.html'
 
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-
-class ProductComponentView(BaseComponentView):
-    template_name = 'components/products/product_list.html'
+    
+class InsightsComponentView(BaseComponentView):
+    template_name = 'analytics/sales_insight.html'
 
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        products = Product.objects.all().order_by("product_id")
-        search_query = self.request.GET.get("table-search-product", "")
-        _, page_obj = self.apply_search_and_pagination(products, search_query, ["name"])
-
         context.update({
-            "page_obj": page_obj,
-            "fields": [
-                "Product Name", "Cost", "Selling Price", "Category",
-                "Application", "Side", "Quantity", "Critical Level", "Product Status"
-            ],
-            "fields_count": 10,
-            "search_query": search_query,
             "header_crumbs": [
-                {"name": "Product List", "url": reverse("auth_product_component")},
+                {"name": "Sales Insights", "url": reverse("auth_insights_component")},
             ]
         })
         return context
-
-
-class CategoryComponentView(BaseComponentView):
-    template_name = 'components/products/category_list.html'
-
-    @method_decorator(never_cache)
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        categories = Category.objects.all().order_by("category_id")
-        search_query = self.request.GET.get("table-search-category", "")
-        _, page_obj = self.apply_search_and_pagination(categories, search_query, ["code"])
-
-        context.update({
-            "page_obj": page_obj,
-            "fields": ["Category Name", "Code"],
-            "fields_count": 3,
-            "search_query": search_query,
-            "header_crumbs": [
-                {"name": "Category List", "url": reverse("auth_category_component")},
-            ]
-        })
-        return context
-
-
-class SalesComponentView(BaseComponentView):
-    template_name = 'components/sales/sales_list.html'
-
-    @method_decorator(never_cache)
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        sales_records = SalesRecord.objects.all().order_by("sale_id")
-        search_query = self.request.GET.get("table-search-sales-record", "")
-        _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["sale_id"])
-
-        context.update({
-            "page_obj": page_obj,
-            "fields": [
-                "Sale No", "Client", "Date Issued", "Due Date", "Net Day",
-                "Total", "Order Status"
-            ],
-            "fields_count": 9,
-            "search_query": search_query,
-            "header_crumbs": [
-                {"name": "Sales Record", "url": reverse("auth_sales_component")},
-            ]
-        })
-        return context
-
-class DeliveryComponentView(BaseComponentView):
-    template_name = 'components/sales/delivery_list.html'
-
-    @method_decorator(never_cache)
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        sales_records = Delivery.objects.all().order_by("delivery_id")
-        search_query = self.request.GET.get("table-search-delivery", "")
-        _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["delivery_id"])
-
-        context.update({
-            "page_obj": page_obj,
-            "fields": [
-                "Delivery Id", 
-                "Client Name", 
-                "Delivery Date", 
-                "Date Claimed",
-            ],
-            "fields_count": 9,
-            "search_query": search_query,
-            "header_crumbs": [
-                {"name": "Delivery Records", "url": reverse("auth_delivery_component")},
-            ]
-        })
-        return context
-
 
 class SKUComponentView(BaseComponentView):
-    template_name = 'components/analytics/sku_analysis.html'
+    template_name = 'analytics/sku_analysis.html'
 
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
@@ -189,23 +91,168 @@ class SKUComponentView(BaseComponentView):
         return context
     
 
-
-class InsightsComponentView(BaseComponentView):
-    template_name = 'components/analytics/sales_insight.html'
+class BatchOrderComponentView(BaseComponentView):
+    template_name = 'products/batch_order_list.html'
 
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        batch_order = BatchOrder.objects.all().order_by("id")
+        search_query = self.request.GET.get("table-search-product", "")
+        _, page_obj = self.apply_search_and_pagination(batch_order, search_query, ["id"])
+
         context.update({
+            "page_obj": page_obj,
+            "form_action": reverse('process_delete', args=['category']),
+            "label":{
+                "add": "Make a batch entry",
+            },
+            "fields": [
+                "Batch No", "Supplier", "Date Supplied", "Created by"
+            ],
+            "fields_count": 6,
+            "search_query": search_query,
             "header_crumbs": [
-                {"name": "Sales Insights", "url": reverse("auth_insights_component")},
+                {"name": "Batch Orders", "url": reverse("auth_batch_order_component")},
             ]
         })
         return context
+
+class ProductComponentView(BaseComponentView):
+    template_name = 'products/product_list.html'
+
+    @method_decorator(never_cache)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        products = Product.objects.all().order_by("id")
+        search_query = self.request.GET.get("table-search", "")
+        _, page_obj = self.apply_search_and_pagination(products, search_query, ["name"])
+
+        context.update({
+            "page_obj": page_obj,
+            "form_action": reverse('process_delete', args=['product']),
+            "label":{
+                "add": "Add a product",
+            },
+            "fields": [
+                "Product Name", "Cost", "Selling Price", "Category",
+                "Application", "Side", "Quantity", "Critical Level", "Product Status"
+            ],
+            "fields_count": 11,
+            "search_query": search_query,
+            "header_crumbs": [
+                {"name": "Product List", "url": reverse("auth_product_component")},
+            ]
+        })
+        return context
+
+
+class CategoryComponentView(BaseComponentView):
+    template_name = 'products/category_list.html'
+
+    @method_decorator(never_cache)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        categories = Category.objects.all().order_by("id")
+        search_query = self.request.GET.get("table-search", "")
+        _, page_obj = self.apply_search_and_pagination(categories, search_query, ["code"])
+
+        context.update({
+            "page_obj": page_obj,
+            "form_action": reverse('process_delete', args=['category']),
+            "label":{
+                "add": "Add a category",
+            },
+            "fields": ["Category Name", "Code"],
+            "fields_count": 4,
+            "search_query": search_query,
+            "header_crumbs": [
+                {"name": "Category List", "url": reverse("auth_category_component")},
+            ]
+        })
+        return context
+
+
+class SalesComponentView(BaseComponentView):
+    template_name = 'sales/sales_list.html'
+
+    @method_decorator(never_cache)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        sales_records = SalesRecord.objects.all().order_by("id")
+        search_query = self.request.GET.get("table-search", "")
+        _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["sale_id"])
+
+        context.update({
+            "page_obj": page_obj,
+            "form_action": reverse('process_delete', args=['sales_record']),
+            "label":{
+                "add": "Add a sales transaction",
+            },
+            "fields": [
+                "Sale No", "Client", "Date Issued", "Due Date", "Net Day",
+                "Total", "Order Status"
+            ],
+            "fields_count": 9,
+            "search_query": search_query,
+            "header_crumbs": [
+                {"name": "Sales Record", "url": reverse("auth_sales_component")},
+            ]
+        })
+        return context
+
+class DeliveryComponentView(BaseComponentView):
+    template_name = 'sales/delivery_list.html'
+
+    @method_decorator(never_cache)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        sales_records = Delivery.objects.all().order_by("id")
+        search_query = self.request.GET.get("table-search", "")
+        _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["delivery_id"])
+
+        context.update({
+            "page_obj": page_obj,
+            "form_action": reverse('process_delete', args=['delivery']),
+            "label":{
+                "add": "Add a delivery record",
+            },
+            "fields": [
+                "Delivery Id", 
+                "Client Name", 
+                "Delivery Date", 
+                "Date Claimed",
+            ],
+            "fields_count": 9,
+            "search_query": search_query,
+            "header_crumbs": [
+                {"name": "Delivery Records", "url": reverse("auth_delivery_component")},
+            ]
+        })
+        return context
+
+
+
 
 class ProcessDeleteView(View):
     """Handles deletion of selected items for products, categories, or sales records."""

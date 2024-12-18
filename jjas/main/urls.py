@@ -10,6 +10,7 @@ urlpatterns = [
     path("logout/", views.LogoutView.as_view(), name="logout_view"),
     path("forgot-password/", views.ForgotPasswordView.as_view(), name="forgot_password"),
     path("dashboard", auth_views.SystemDashboardView.as_view(), name= 'system_dashboard'),
+    path('batch-orders/', auth_views.BatchOrderComponentView.as_view(), name='auth_batch_order_component'),
     path('products/', auth_views.ProductComponentView.as_view(), name='auth_product_component'),
     path('category/', auth_views.CategoryComponentView.as_view(), name='auth_category_component'),
     path('sales/', auth_views.SalesComponentView.as_view(), name='auth_sales_component'),

@@ -112,12 +112,13 @@ class Command(BaseCommand):
                 category=category
             )
 
-        self.stdout.write(self.style.SUCCESS('Successfully populated the database with random data'))
+        self.stdout.write(self.style.SUCCESS('Successfully populated the database with random data')) """
 
         
         self.stdout.write(self.style.SUCCESS('Creating Clients...'))
         for _ in range(20):
             Client.objects.create(
+                created_by=user,
                 name=fake.company(),
                 address=fake.address()
             )
@@ -143,6 +144,7 @@ class Command(BaseCommand):
 
             # Create Sales Record
             sales_record = SalesRecord.objects.create(
+                created_by=user,
                 client=client,
                 date_issued=date_issued,
                 net_day=net_day,
@@ -178,7 +180,7 @@ class Command(BaseCommand):
             sales_record.total = round(total_amount, 2)
             sales_record.save()
 
-        self.stdout.write(self.style.SUCCESS('Sales Records and Sales Items created successfully.')) """
+        self.stdout.write(self.style.SUCCESS('Sales Records and Sales Items created successfully.'))
 
 
         # Create Deliveries
@@ -193,7 +195,8 @@ class Command(BaseCommand):
             claimed_date = delivery_date + timedelta(days=random.randint(1, 30))  # Claim date within 30 days after delivery
 
             Delivery.objects.create(
-                client_name=sales_record.client.name,  # Assuming Delivery is associated with SalesRecord's client
+                created_by=user,
+                client=sales_record.client,  # Assuming Delivery is associated with SalesRecord's client
                 delivery_date=delivery_date,
                 date_claimed=claimed_date,
             )

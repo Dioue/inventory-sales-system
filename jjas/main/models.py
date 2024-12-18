@@ -103,7 +103,7 @@ NET_DAY_CHOICES = [
     (90, 'Net 90'),
 ]
 
-class Client(models.Model):
+class Client(SystemGeneratedData):
     """
     A separate model for client details to normalize the database structure.
     """
@@ -118,7 +118,7 @@ class Client(models.Model):
         verbose_name_plural = "Clients"
 
 
-class SalesRecord(models.Model):
+class SalesRecord(SystemGeneratedData):
     """
     Represents a sales record with proper normalization and optimized structure.
     """
@@ -190,7 +190,12 @@ class SalesRecordItem(models.Model):
 
 class Delivery(SystemGeneratedData):
     delivery_id = models.AutoField(primary_key=True)
-    client_name = models.CharField(max_length=255)
+    client = models.ForeignKey(
+        "Client",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="delivery"
+    )
     delivery_date = models.DateTimeField(null=True, blank=True)
     date_claimed = models.DateTimeField(null=True, blank=True)
     image = models.ImageField(upload_to='delivery/images/')

@@ -130,6 +130,48 @@ class SalesComponentView(BaseComponentView):
         })
         return context
 
+class DeliveryComponentView(BaseComponentView):
+    template_name = 'components/sales/delivery_list.html'
+
+    @method_decorator(never_cache)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        sales_records = Delivery.objects.all().order_by("delivery_id")
+        search_query = self.request.GET.get("table-search-delivery", "")
+        _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["delivery_id"])
+
+        context.update({
+            "page_obj": page_obj,
+            "fields": [
+                "Delivery Id", 
+                "Client Name", 
+                "Delivery Date", 
+                "Date Claimed",
+            ],
+            "fields_count": 9,
+            "search_query": search_query,
+        })
+        return context
+
+
+class SKUComponentView(BaseComponentView):
+    template_name = 'components/analytics/sku_analysis.html'
+
+    @method_decorator(never_cache)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+class InsightsComponentView(BaseComponentView):
+    template_name = 'components/analytics/sales_insight.html'
+
+    @method_decorator(never_cache)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 class ProcessDeleteView(View):
     """Handles deletion of selected items for products, categories, or sales records."""
@@ -147,7 +189,8 @@ class ProcessDeleteView(View):
         model_map = {
             "product": Product,
             "category": Category,
-            "sales_record": SalesRecord
+            "sales_record": SalesRecord,
+            "delivery": Delivery
         }
 
         # Identify the model based on a parameter (e.g., passed in the URL or POST data)
@@ -177,27 +220,3 @@ class ProcessDeleteView(View):
         for client_id in clients_to_check:
             if client_id and not SalesRecord.objects.filter(client_id=client_id).exists():
                 Client.objects.filter(pk=client_id).delete()
-
-
-class DeliveryComponentView(BaseComponentView):
-    template_name = 'components/sales/delivery_list.html'
-
-    @method_decorator(never_cache)
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-
-class SKUComponentView(BaseComponentView):
-    template_name = 'components/analytics/sku_analysis.html'
-
-    @method_decorator(never_cache)
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-
-class InsightsComponentView(BaseComponentView):
-    template_name = 'components/analytics/sales_insight.html'
-
-    @method_decorator(never_cache)
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)

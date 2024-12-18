@@ -74,7 +74,7 @@
                     id="table-search-product" 
                     name="table-search-product" 
                     class="block p-2 ps-10 text-sm text-gray-900 border border-gray-400 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                    placeholder="Search for users" 
+                    placeholder="Search" 
                     value="{{ search_query }}">
             </form>
         </div>
@@ -125,7 +125,7 @@
 
 <!-- Product list table -->
 <div class="relative overflow-x-auto border border-gray-400 rounded-lg bg-gray-50 sm:rounded-lg">
-    <form id="multiple-delete-request" method="post" action="{% url 'process_product_delete' %}">
+    <form id="multiple-delete-request" method="post" action="{% url 'process_delete' 'product'%}">
     {% csrf_token %}
     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400" id="product_list_table">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -201,7 +201,7 @@
         {% if page_obj %}
         <span class="text-sm font-normal text-gray-500 dark:text-gray-400">Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
         {% endif %}
-        {% if page_obj.has_next %}
+        {% if page_obj.has_next or page_obj.has_previous %}
             <ul class="inline-flex -space-x-px text-sm">
                 {% if page_obj.has_previous %}
                 <li>

@@ -11,12 +11,15 @@ urlpatterns = [
     path("forgot-password/", views.ForgotPasswordView.as_view(), name="forgot_password"),
     path("dashboard", auth_views.SystemDashboardView.as_view(), name= 'system_dashboard'),
     path('products/', auth_views.ProductComponentView.as_view(), name='auth_product_component'),
-    path('process-actions/delete/products-selected', auth_views.ProcessDeleteView.as_view(), name='process_product_delete'),
     path('category/', auth_views.CategoryComponentView.as_view(), name='auth_category_component'),
-    path('process-actions/delete/category-selected', auth_views.ProcessCategoryDelete.as_view(), name='process_category_delete'),
     path('sales/', auth_views.SalesComponentView.as_view(), name='auth_sales_component'),
     path('delivery/', auth_views.DeliveryComponentView.as_view(), name='auth_delivery_component'),
     path('sku-analysis/', auth_views.SKUComponentView.as_view(), name='auth_sku_component'),
     path('sales-insights/', auth_views.InsightsComponentView.as_view(), name='auth_insights_component'),
+
+
+    # function routes
+    path('delete/<str:model_key>/', auth_views.ProcessDeleteView.as_view(), name='process_delete'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

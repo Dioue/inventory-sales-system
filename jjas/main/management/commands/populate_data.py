@@ -1,9 +1,12 @@
 from django.core.management.base import BaseCommand
 from faker import Faker
 from django.contrib.auth.models import User
-from ...models import Category, Unit, Supplier, Product
+from ...models import Category, Unit, Supplier, Product, Client, SalesRecord, SalesRecordItem
+from datetime import timedelta
+from decimal import Decimal
 import random
 import string
+
 
 class Command(BaseCommand):
     help = 'Populates the database with random data'
@@ -17,6 +20,7 @@ class Command(BaseCommand):
         except User.DoesNotExist:
             self.stdout.write(self.style.ERROR('Superuser (admin) does not exist.'))
             return
+            
 
         """ # Function to generate the category code (For Categories)
         def generate_category_code():
@@ -61,7 +65,7 @@ class Command(BaseCommand):
             ) """
 
 
-        # Function to generate a product code based on category code
+        """ # Function to generate a product code based on category code
         def generate_product_code(category_code):
             while True:
                 # Generate 3-5 digits
@@ -109,3 +113,69 @@ class Command(BaseCommand):
             )
 
         self.stdout.write(self.style.SUCCESS('Successfully populated the database with random data'))
+ """
+        
+        self.stdout.write(self.style.SUCCESS('Creating Clients...'))
+        for _ in range(20):
+            Client.objects.create(
+                name=fake.company(),
+                address=fake.address()
+            )
+
+        self.stdout.write(self.style.SUCCESS('Clients created successfully.'))
+
+        # Create Sales Records and Sales Items
+        self.stdout.write(self.style.SUCCESS('Creating Sales Records and Sales Items...'))
+        clients = list(Client.objects.all())
+        products = list(Product.objects.all())
+
+        if not products:
+            self.stdout.write(self.style.ERROR('No products available to create sales items. Please populate products first.'))
+            return
+
+        for _ in range(20):
+            # Pick a random client
+            client = random.choice(clients)
+
+            # Generate a sales record
+            net_day = random.choice([0, 15, 30, 60, 90])
+            date_issued = fake.date_this_year()
+
+            # Create Sales Record
+            sales_record = SalesRecord.objects.create(
+                client=client,
+                date_issued=date_issued,
+                net_day=net_day,
+                total=0,  # Initial total (will be updated after creating items)
+                order_status=random.choice(['Unpaid', 'Paid'])
+            )
+
+            # Generate 3-5 sales items for each sales record
+            sales_items = []
+            total_amount = Decimal('0.00')
+
+            for _ in range(random.randint(3, 5)):
+                product = random.choice(products)
+                quantity = random.randint(1, 10)
+                surcharge = Decimal(round(random.uniform(0, 50), 2))  # Convert to Decimal
+                amount = (product.selling_price * quantity) + surcharge
+
+                # Create sales record item
+                sales_item = SalesRecordItem(
+                    sales_record=sales_record,
+                    product=product,
+                    quantity=quantity,
+                    surcharge=surcharge,
+                    amount=amount
+                )
+                sales_items.append(sales_item)
+                total_amount += amount
+
+            # Bulk create sales items for efficiency
+            SalesRecordItem.objects.bulk_create(sales_items)
+
+            # Update the sales record total with the accumulated amount
+            sales_record.total = round(total_amount, 2)
+            sales_record.save()
+
+        self.stdout.write(self.style.SUCCESS('Sales Records and Sales Items created successfully.'))

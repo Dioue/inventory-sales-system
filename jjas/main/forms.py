@@ -15,3 +15,4 @@ class ProductForm(forms.ModelForm):
             self.add_error('selling_price', "Selling price must be greater than or equal to purchase cost.")
         
         return cleaned_data
+

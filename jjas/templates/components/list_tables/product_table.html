@@ -56,9 +56,30 @@
                         <td class="px-6 py-4">{{ obj.critical_level|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.status|default:"-" }}</td>
                         <td class="flex items-center px-6 py-4">
-                            <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                            <button type="button" class="font-medium text-blue-600 dark:text-blue-500 hover:underline" >View</button>
                             <span class="mx-2">|</span>
-                            <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                            <button type="button" class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                            data-modal-toggle="view_modal"
+                            data-modal-target="view_modal"
+                            data-id="{{obj.id}}"
+                            data-name="{{ obj.name }}"
+                            data-code="{{ obj.code }}"
+                            data-application="{{ obj.application }}"
+                            data-side="{{ obj.side }}"
+                            data-cost_price="{{ obj.cost_price }}"
+                            data-selling_price="{{ obj.selling_price }}"
+                            data-quantity_left="{{ obj.quantity_left }}"
+                            data-unit="{{ obj.unit.id }}"
+                            data-category="{{ obj.category.id }}"
+                            data-critical_level="{{ obj.critical_level }}"
+                            data-description="{{ obj.description }}"
+                            data-supplier="{{ obj.supplier.id }}"
+                            data-image="{% if obj.image %}{{ request.scheme }}://{{ request.get_host }}{{ obj.image.url }}{% else %}''{% endif %}"
+                            onclick="populateModal(this)">
+                            Edit
+                        </button>
+                        
+                        
                         </td>
                     </tr>
                 {% endfor %}
@@ -75,8 +96,10 @@
     {% include 'components/page_obj_paginator.html' %}
 </div>
 
-
 <!-- Dynamically handles modal recognition per view given context -->
 {% if modal %}
+        {% include 'components/modal_update_product.html' %}
         {% include 'components/modal_create_product.html' %}
 {% endif %}
+
+<script src="{% static 'js/product_edit.js' %}"></script>

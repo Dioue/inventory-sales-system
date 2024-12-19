@@ -37,10 +37,10 @@ class Command(BaseCommand):
             Category.objects.create(
                 created_by=user,
                 code=generate_category_code(),  # Using the new function to generate the code
-                category_name=fake.unique.word()
-            )
+                name=fake.unique.word()
+            ) """
 
-        # Create Units (UoM) with predefined valid values and ensure uniqueness
+        """ # Create Units (UoM) with predefined valid values and ensure uniqueness
         valid_units = ['set', 'piece', 'box']
 
         for unit in valid_units:
@@ -48,9 +48,9 @@ class Command(BaseCommand):
             Unit.objects.create(
                 created_by=user,
                 name=unit
-            )
+            ) """
 
-        # Create Suppliers
+        """ # Create Suppliers
         for _ in range(5):
             # Generate a company name with common formats (Inc., Corp., Ltd, etc.)
             company_name = fake.company() + " " + random.choice(["Inc.", "Corp.", "Ltd", "Limited", "LLC", "Co.", "Group"])
@@ -62,23 +62,27 @@ class Command(BaseCommand):
                 created_by=user,
                 name=company_name,
                 contact=contact
-            )
+            ) """
 
 
-        # Function to generate a product code based on category code
-        def generate_product_code(category_code):
+        # Function to generate a product code based on category code with 3 to 6 digits consisting of 0 and 9
+        def generate_product_code():
             while True:
-                # Generate 3-5 digits
-                digits = ''.join(random.choices(string.digits, k=random.randint(3, 5)))
-                # Combine the two parts with a dash in between
-                product_code = f"{category_code}-{digits}"
+                # Generate one random letter at the beginning and end
+                start_letter = random.choice(string.ascii_uppercase)
+                end_letter = random.choice(string.ascii_uppercase)
+                
+                # Generate 3-6 digits using only '0' and '9'
+                digits = ''.join(random.choices(['0', '9'], k=random.randint(2, 4)))
+
+                # Combine letters and digits to create the product code
+                product_code = f"{start_letter}{digits}{end_letter}"
 
                 # Check if the generated code already exists in the Product model
-                if not Product.objects.filter(name=product_code).exists():
+                if not Product.objects.filter(code=product_code).exists():
                     return product_code  # Return the unique code if it does not exist
 
-
-        # List of car brands and models for the application field
+                # List of car brands and models for the application field
         car_brands_and_models = [
             "Toyota Corolla", "Honda Civic", "Ford Mustang", "Chevrolet Camaro", 
             "Tesla Model 3", "BMW 3 Series", "Audi A4", "Mercedes-Benz C-Class",
@@ -88,34 +92,36 @@ class Command(BaseCommand):
         ]
 
         # Create Products
-        for _ in range(250):
+        for _ in range(30):
             # Pick a random category
             category = Category.objects.order_by('?').first()
             category_code = category.code  # Get the code of the chosen category
 
-            product_status = fake.random_element(elements=('Available', 'Out of Stock', 'Critical'))
-            
+            # Generate product attributes
+            product_status = random.choice(['Available', 'Out of Stock', 'Critical'])
+
             Product.objects.create(
-                created_by=user,
-                name=generate_product_code(category_code),
+                created_by=user,  # Assuming `user` is defined elsewhere
+                name=fake.unique.word().capitalize(),
+                code=generate_product_code(),  # Match with `code` field
                 application=random.choice(car_brands_and_models),
                 side=random.choice(["FRONT", "BACK", "REAR"]),
-                description=fake.text(),
-                image='',
+                description=fake.text(max_nb_chars=100),
+                image=None,  # Default to no image
                 quantity_left=fake.random_int(min=0, max=100),
-                cost_price=fake.random_number(digits=2),
-                selling_price=fake.random_number(digits=3),
+                cost_price=fake.pydecimal(left_digits=3, right_digits=2, positive=True),
+                selling_price=fake.pydecimal(left_digits=4, right_digits=2, positive=True),
                 critical_level=fake.random_int(min=1, max=10),
-                product_status=product_status,
+                status=product_status,
                 unit=Unit.objects.order_by('?').first(),
                 supplier=Supplier.objects.order_by('?').first(),
                 category=category
             )
 
-        self.stdout.write(self.style.SUCCESS('Successfully populated the database with random data')) """
+        print('Successfully populated the database with random data.')
 
         
-        self.stdout.write(self.style.SUCCESS('Creating Clients...'))
+        """ self.stdout.write(self.style.SUCCESS('Creating Clients...'))
         for _ in range(20):
             Client.objects.create(
                 created_by=user,
@@ -200,4 +206,4 @@ class Command(BaseCommand):
                 date_claimed=claimed_date,
             )
 
-        self.stdout.write(self.style.SUCCESS('Deliveries created successfully.'))
+        self.stdout.write(self.style.SUCCESS('Deliveries created successfully.')) """

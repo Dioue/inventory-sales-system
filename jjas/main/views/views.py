@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
 from django.http import HttpRequest, HttpResponse
-from .helper import check_internet_connection as cic
+from .utils import check_internet_connection as cic
 
 
 # Login View

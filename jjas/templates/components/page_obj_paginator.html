@@ -1,0 +1,36 @@
+{% load static %}
+
+<!-- Pagination Controls -->
+<nav class="flex items-center justify-between pt-4 pb-4 pl-5 pr-5" aria-label="Table navigation">
+    {% if tables.page_obj.data %}
+    <span class="text-sm font-normal text-gray-500 dark:text-gray-400">Showing {{ tables.page_obj.data.start_index }} to {{ tables.page_obj.data.end_index }} of {{ tables.page_obj.data.paginator.count }}</span>
+    {% endif %}
+    {% if tables.page_obj.data.has_next or tables.page_obj.data.has_previous %}
+        <ul class="inline-flex -space-x-px text-sm">
+            {% if tables.page_obj.data.has_previous %}
+            <li>
+                <a href="?page={{ tables.page_obj.data.previous_page_number }}" class="px-3 py-1 text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">Previous</a>
+            </li>
+            {% endif %}
+
+            {% with tables.page_obj.data.number|add:"-2" as start %}
+            {% with tables.page_obj.data.number|add:"2" as end %}
+                {% for num in tables.page_obj.data.paginator.page_range %}
+                    {% if num >= start and num <= end %}
+                    <li>
+                        <a href="?page={{ num }}" class="{% if num == page_obj.number %}bg-blue-500 text-white{% else %}text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700{% endif %} px-3 py-1 border">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            {% endwith %}
+            {% endwith %}
+
+
+            {% if tables.page_obj.data.has_next %}
+            <li>
+                <a href="?page={{ tables.page_obj.data.next_page_number }}" class="px-3 py-1 text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</nav>

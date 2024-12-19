@@ -26,6 +26,12 @@ class Category(SystemGeneratedData):
         ordering = ["-date_added"]
         verbose_name_plural = "Categories"
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.pk = Category.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
+            self.pk += 1
+        super().save(*args, **kwargs)
+
 
 # Unit of Measure Model
 class Unit(SystemGeneratedData):
@@ -37,6 +43,12 @@ class Unit(SystemGeneratedData):
     class Meta:
         ordering = ["name"]
         verbose_name_plural = "Units of Measure"
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.pk = Unit.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
+            self.pk += 1
+        super().save(*args, **kwargs)
 
 
 # Supplier Model
@@ -50,6 +62,12 @@ class Supplier(SystemGeneratedData):
     class Meta:
         verbose_name_plural = "Suppliers"
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.pk = Supplier.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
+            self.pk += 1
+        super().save(*args, **kwargs)
+
 
 # Product Status Choices
 class ProductStatus(models.TextChoices):
@@ -61,6 +79,7 @@ class ProductStatus(models.TextChoices):
 # Product Model
 class Product(SystemGeneratedData):
     name = models.CharField(max_length=255, unique=True)
+    code = models.CharField(max_length=10, unique=True)
     application = models.CharField(max_length=60, blank=True, default="")
     side = models.CharField(max_length=60, blank=True, default="")
     description = models.TextField(blank=True, default="")
@@ -83,17 +102,30 @@ class Product(SystemGeneratedData):
         ordering = ["-date_added"]
         verbose_name_plural = "Products"
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.pk = Product.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
+            self.pk += 1
+        super().save(*args, **kwargs)
+
 
 # Batch Order Model
 class BatchOrder(SystemGeneratedData):
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
     supplied_date = models.DateField(null=True, blank=True)
+    batch_total = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return f"Batch {self.id} - {self.supplier.name if self.supplier else 'No Supplier'}"
 
     class Meta:
         verbose_name_plural = "Batch Orders"
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.pk = BatchOrder.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
+            self.pk += 1
+        super().save(*args, **kwargs)
 
 
 # Batch Order Item Model
@@ -108,6 +140,12 @@ class BatchOrderItem(SystemGeneratedData):
     class Meta:
         verbose_name_plural = "Batch Order Items"
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.pk = BatchOrderItem.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
+            self.pk += 1
+        super().save(*args, **kwargs)
+
 
 # Client Model
 class Client(SystemGeneratedData):
@@ -119,6 +157,12 @@ class Client(SystemGeneratedData):
 
     class Meta:
         verbose_name_plural = "Clients"
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.pk = Client.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
+            self.pk += 1
+        super().save(*args, **kwargs)
 
 
 # Sales Record Model
@@ -137,6 +181,9 @@ class SalesRecord(SystemGeneratedData):
 
     def save(self, *args, **kwargs):
         self.due_date = self.date_issued + timedelta(days=self.net_day)
+        if not self.pk:
+            self.pk = SalesRecord.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
+            self.pk += 1
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -158,6 +205,11 @@ class SalesRecordItem(models.Model):
     def save(self, *args, **kwargs):
         if self.product:
             self.amount = (self.product.selling_price * self.quantity) + self.surcharge
+
+        if not self.pk:
+            self.pk = SalesRecordItem.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
+            self.pk += 1
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -180,3 +232,9 @@ class Delivery(SystemGeneratedData):
     class Meta:
         ordering = ["-date_added"]
         verbose_name_plural = "Deliveries"
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.pk = Delivery.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
+            self.pk += 1
+        super().save(*args, **kwargs)

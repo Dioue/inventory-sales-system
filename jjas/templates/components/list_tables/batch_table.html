@@ -1,18 +1,21 @@
+{% load static %}
+
+{% include 'components/list_actions.html' %}
 
 <div class="relative overflow-x-auto border border-gray-400 rounded-lg bg-gray-50 sm:rounded-lg">
-    <form id="multiple-delete-request" method="post" action="{{form_action}}">
+    <form id="multiple-delete-request" method="post" action="{{form_action.delete}}">
     {% csrf_token %}
     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400" id="category_list_table">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
                 <th scope="col" class="p-4">
                     <div class="flex items-center">
-                        <input id="checkbox-all" type="checkbox" onclick="toggleAll(this)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <input id="checkbox-all" type="checkbox" onclick="toggleAll(this)" class="cursor-pointer w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                         <label for="checkbox-all" class="sr-only">checkbox</label>
                     </div>
                 </th>
-                {% if fields %}
-                    {% for f in fields %}
+                {% if tables.page_obj.fields %}
+                    {% for f in tables.page_obj.fields %}
                         <th scope="col" class="px-6 py-3">
                             <span class="flex items-center">
                                 <a href="?sort_by={{ f|lower }}&order=asc" class="text-gray-900 dark:text-white hover:text-blue-600">{{ f }}</a>
@@ -29,34 +32,36 @@
             </tr>
         </thead>
         <tbody>
-            {% if page_obj %}
-                {% for obj in page_obj %}
+            {% if tables.page_obj.data %}
+                {% for obj in tables.page_obj.data %}
                     <tr class="bg-white dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                         <td class="w-4 p-4">
                             <div class="flex items-center">
                                 <input 
                                     name="selected_items" 
-                                    value="{{ obj.category_id }}" 
+                                    value="{{ obj.id }}" 
                                     type="checkbox" 
-                                    id="checkbox-{{ obj.category_id }}" 
+                                    id="checkbox-{{ obj.id }}" 
                                     class="checkbox_helper w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                <label for="checkbox-{{ obj.category_id }}" class="sr-only">checkbox</label>
+                                <label for="checkbox-{{ obj.id }}" class="sr-only">checkbox</label>
                             </div>
                         </td>
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             {{ obj.id|default:"--" }}
                         </th>
-                        {% for data in obj %}
-                        <td class="px-6 py-4">{{ data|default:"-" }}</td>
-                        {% endfor %}
+                        <td class="px-6 py-4">{{ obj.supplier|default:"-" }}</td>
+                        <td class="px-6 py-4">{{ obj.supplied_date|default:"-" }}</td>
+                        <td class="px-6 py-4">{{ obj.created_by|default:"-" }}</td>
                         <td class="flex items-center px-6 py-4">
+                            <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                            <span class="mx-2">|</span>
                             <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                         </td>
                     </tr>
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="{{fields_count}}" class="text-center px-6 py-4 bg-white text-gray-500 dark:text-gray-400">
+                    <td colspan="{{tables.page_obj.fill_count}}" class="text-center px-6 py-4 bg-white text-gray-500 dark:text-gray-400">
                         <h3>No data to show</h3>
                     </td>
                 </tr>
@@ -64,38 +69,13 @@
         </tbody>
     </table>
 </form>
-    <!-- Pagination Controls -->
-    <nav class="flex items-center justify-between pt-4 pb-4 pl-5 pr-5" aria-label="Table navigation">
-        {% if page_obj %}
-        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
-        {% endif %}
-        {% if page_obj.has_next %}
-            <ul class="inline-flex -space-x-px text-sm">
-                {% if page_obj.has_previous %}
-                <li>
-                    <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">Previous</a>
-                </li>
-                {% endif %}
-
-                {% with page_obj.number|add:"-2" as start %}
-                {% with page_obj.number|add:"2" as end %}
-                    {% for num in page_obj.paginator.page_range %}
-                        {% if num >= start and num <= end %}
-                        <li>
-                            <a href="?page={{ num }}" class="{% if num == page_obj.number %}bg-blue-500 text-white{% else %}text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700{% endif %} px-3 py-1 border">{{ num }}</a>
-                        </li>
-                        {% endif %}
-                    {% endfor %}
-                {% endwith %}
-                {% endwith %}
-
-
-                {% if page_obj.has_next %}
-                <li>
-                    <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">Next</a>
-                </li>
-                {% endif %}
-            </ul>
-        {% endif %}
-    </nav>
+    {% include 'components/page_obj_paginator.html' %}
 </div>
+
+
+<!-- Dynamically handles modal recognition per view given context -->
+{% if modal %}
+    {% if modal.create_batch %}
+        {% include 'components/batch_order/modal_create_batch.html' %}
+    {% endif %}
+{% endif %}

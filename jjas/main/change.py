@@ -26,12 +26,6 @@ class Category(SystemGeneratedData):
         ordering = ["-date_added"]
         verbose_name_plural = "Categories"
 
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.pk = Category.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
-            self.pk += 1
-        super().save(*args, **kwargs)
-
 
 # Unit of Measure Model
 class Unit(SystemGeneratedData):
@@ -43,30 +37,18 @@ class Unit(SystemGeneratedData):
     class Meta:
         ordering = ["name"]
         verbose_name_plural = "Units of Measure"
-    
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.pk = Unit.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
-            self.pk += 1
-        super().save(*args, **kwargs)
 
 
 # Supplier Model
 class Supplier(SystemGeneratedData):
     name = models.CharField(max_length=255)
-    contact = models.TextField(null=True, blank=True)
+    contact = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
 
     class Meta:
         verbose_name_plural = "Suppliers"
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.pk = Supplier.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
-            self.pk += 1
-        super().save(*args, **kwargs)
 
 
 # Product Model
@@ -76,14 +58,14 @@ class Product(SystemGeneratedData):
     application = models.CharField(max_length=60, blank=True, default="")
     side = models.CharField(max_length=60, blank=True, default="")
     description = models.TextField(blank=True, default="")
-    image = models.ImageField(upload_to="products/images/", null=True, blank=True)
-    quantity = models.PositiveIntegerField()
+    image = models.ImageField(upload_to="products/images/", default='defaults/no_image.png')
+    quantity = models.PositiveIntegerField(default=0)
     selling_price = models.DecimalField(max_digits=13, decimal_places=2)
-    critical_level = models.PositiveIntegerField()
+    critical_level = models.PositiveIntegerField(default=0)
 
-    unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True)
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, related_name="products")
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, related_name="products")
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="products")
 
     def __str__(self):
         return self.name
@@ -92,18 +74,13 @@ class Product(SystemGeneratedData):
         ordering = ["-date_added"]
         verbose_name_plural = "Products"
 
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.pk = Product.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
-            self.pk += 1
-        super().save(*args, **kwargs)
-
 
 # Batch Order Model
 class BatchOrder(SystemGeneratedData):
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
-    purchase_date = models.DateField(null=True, blank=True)
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name="batch_orders")
+    purchase_date = models.DateField(default=now)
     grand_total = models.DecimalField(max_digits=13, decimal_places=2)
+    
 
     def __str__(self):
         return f"Batch {self.id} - {self.supplier.name if self.supplier else 'No Supplier'}"
@@ -111,32 +88,20 @@ class BatchOrder(SystemGeneratedData):
     class Meta:
         verbose_name_plural = "Batch Orders"
 
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.pk = BatchOrder.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
-            self.pk += 1
-        super().save(*args, **kwargs)
-
 
 # Batch Order Item Model
 class BatchOrderItem(SystemGeneratedData):
     batch = models.ForeignKey(BatchOrder, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name="batch_items")
     cost_price = models.DecimalField(max_digits=13, decimal_places=2)
-    quantity = models.PositiveIntegerField()
-    defectives = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField(default=0)
+    defective = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"Item {self.id} in Batch {self.batch.id}"
 
     class Meta:
         verbose_name_plural = "Batch Order Items"
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.pk = BatchOrderItem.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
-            self.pk += 1
-        super().save(*args, **kwargs)
 
 
 # Client Model
@@ -150,34 +115,23 @@ class Client(SystemGeneratedData):
     class Meta:
         verbose_name_plural = "Clients"
 
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.pk = Client.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
-            self.pk += 1
-        super().save(*args, **kwargs)
-
 
 # Sales Record Model
 class SalesRecord(SystemGeneratedData):
-    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True)
+    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, related_name="sales_records")
     date_issued = models.DateField(default=now)
-    due_date = models.DateField()
+    due_date = models.DateField(default=(now + timedelta(days=30)))
     net_day = models.PositiveIntegerField(default=30)
-    invoice_image = models.ImageField(upload_to="invoices/images/", null=True, blank=True)
+    image = models.ImageField(upload_to="invoices/images/", default="defaults/no_image.png")
     total = models.DecimalField(max_digits=13, decimal_places=2)
-    status = models.CharField(
-        max_length=60, choices=[("Unpaid", "Unpaid"), ("Paid", "Paid")], default="Unpaid"
-    )
-
+    status = models.BooleanField(default=False)
+    
     def save(self, *args, **kwargs):
         self.due_date = self.date_issued + timedelta(days=self.net_day)
-        if not self.pk:
-            self.pk = SalesRecord.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
-            self.pk += 1
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Sale {self.id} - {self.client.name if self.client else 'No Client'}"
+        return self.id
 
     class Meta:
         ordering = ["-date_issued"]
@@ -185,21 +139,16 @@ class SalesRecord(SystemGeneratedData):
 
 
 # Sales Record Item Model
-class SalesRecordItem(models.Model):
+class SalesRecordItem(SystemGeneratedData):
     sales_record = models.ForeignKey(SalesRecord, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
-    quantity = models.PositiveIntegerField()
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name="sales_items")
+    quantity = models.PositiveIntegerField(default=0)
     surcharge = models.DecimalField(max_digits=13, decimal_places=2, default=0.00)
     amount = models.DecimalField(max_digits=13, decimal_places=2)
 
     def save(self, *args, **kwargs):
         if self.product:
             self.amount = (self.product.selling_price * self.quantity) + self.surcharge
-
-        if not self.pk:
-            self.pk = SalesRecordItem.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
-            self.pk += 1
-
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -211,10 +160,10 @@ class SalesRecordItem(models.Model):
 
 # Delivery Model
 class Delivery(SystemGeneratedData):
-    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True)
-    delivery_date = models.DateTimeField(null=True, blank=True)
-    date_claimed = models.DateTimeField(null=True, blank=True)
-    image = models.ImageField(upload_to="deliveries/images/", null=True, blank=True)
+    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, related_name="deliveries")
+    delivery_date = models.DateTimeField(null=False, blank=True)
+    date_claimed = models.DateTimeField(null=False, blank=True)
+    image = models.ImageField(upload_to="deliveries/images/", null=True, blank=True, default='defaults/no_image.png')
 
     def __str__(self):
         return f"Delivery {self.id} for {self.client.name if self.client else 'No Client'}"
@@ -222,9 +171,3 @@ class Delivery(SystemGeneratedData):
     class Meta:
         ordering = ["-date_added"]
         verbose_name_plural = "Deliveries"
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.pk = Delivery.objects.aggregate(max_id=models.Max('id'))['max_id'] or 999
-            self.pk += 1
-        super().save(*args, **kwargs)

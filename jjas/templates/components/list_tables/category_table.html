@@ -18,10 +18,7 @@
                     {% for f in tables.page_obj.fields %}
                         <th scope="col" class="px-6 py-3">
                             <span class="flex items-center">
-                                <a href="?sort_by={{ f|lower }}&order=asc" class="text-gray-900 dark:text-white hover:text-blue-600">{{ f }}</a>
-                                <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4"/>
-                                </svg>
+                                <h6 href="#" class="text-gray-900 dark:text-white hover:text-gray-600 ">{{ f }}</h6>
                             </span>
                         </th>
                     {% endfor %}
@@ -70,11 +67,3 @@
 </form>
     {% include 'components/page_obj_paginator.html' %}
 </div>
-
-
-<!-- Dynamically handles modal recognition per view given context -->
-{% if modal %}
-    {% if modal.create_batch %}
-        {% include 'components/batch_order/modal_create_batch.html' %}
-    {% endif %}
-{% endif %}

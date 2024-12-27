@@ -2,8 +2,9 @@ django
 pillow
 python-dotenv
 psycopg2
-django-unfold
+djangorestframework
 django-compressor
 requests
 faker
+markdown
 django-filter

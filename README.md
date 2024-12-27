@@ -1,4 +1,7 @@
-
+### requirements
+> cd jjas && pip install -r requirements.txt
+> npm install -g tailwindcss
+> npm install flowbite
 
 ### To start tailwind
 

@@ -18,10 +18,7 @@
                     {% for f in tables.page_obj.fields %}
                         <th scope="col" class="px-6 py-3">
                             <span class="flex items-center">
-                                <a href="?sort_by={{ f|lower }}&order=asc" class="text-gray-900 dark:text-white hover:text-blue-600">{{ f }}</a>
-                                <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4"/>
-                                </svg>
+                                <h6 href="#" class="text-gray-900 dark:text-white hover:text-gray-600">{{ f }}</h6>
                             </span>
                         </th>
                     {% endfor %}
@@ -50,8 +47,7 @@
                             {{ obj.name|default:"--" }}
                         </th>
                         <td class="px-6 py-4">{{ obj.code|default:"-" }}</td>
-                        <td class="px-6 py-4">{{ obj.quantity_left|default:"-" }}</td>
-                        <td class="px-6 py-4">{{ obj.cost_price|default:"-" }}</td>
+                        <td class="px-6 py-4">{{ obj.quantity|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.selling_price|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.critical_level|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.status|default:"-" }}</td>
@@ -66,15 +62,13 @@
                             data-code="{{ obj.code }}"
                             data-application="{{ obj.application }}"
                             data-side="{{ obj.side }}"
-                            data-cost_price="{{ obj.cost_price }}"
                             data-selling_price="{{ obj.selling_price }}"
-                            data-quantity_left="{{ obj.quantity_left }}"
+                            data-quantity="{{ obj.quantity }}"
                             data-unit="{{ obj.unit.id }}"
                             data-category="{{ obj.category.id }}"
                             data-critical_level="{{ obj.critical_level }}"
                             data-description="{{ obj.description }}"
                             data-supplier="{{ obj.supplier.id }}"
-                            data-image="{% if obj.image %}{{ request.scheme }}://{{ request.get_host }}{{ obj.image.url }}{% else %}''{% endif %}"
                             onclick="populateModal(this)">
                             Edit
                         </button>
@@ -96,10 +90,5 @@
     {% include 'components/page_obj_paginator.html' %}
 </div>
 
-<!-- Dynamically handles modal recognition per view given context -->
-{% if modal %}
-        {% include 'components/modal_update_product.html' %}
-        {% include 'components/modal_create_product.html' %}
-{% endif %}
-
-<script src="{% static 'js/product_edit.js' %}"></script>
+{% include 'components/modals/product_form.html' %}
+<script src="{% static 'js/modals/product_form.js' %}"></script>

@@ -586,11 +586,13 @@
         {% endif %}
       </ol>
     </nav>
-
     
       {% block system_component %}
-
       {% endblock %}
+
+      <!-- Modal that is shared between components-->
+      {% include 'components/modals/delete_item.html' %}
+      
    </main>
  </div>
 {% endblock %}

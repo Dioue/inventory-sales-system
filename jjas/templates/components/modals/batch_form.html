@@ -45,22 +45,14 @@
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                             </svg>
                         </div>
-                        <input type="text" id="table-search" class="block pt-2 ps-10 text-sm text-gray-900 shadow-md rounded-lg w-full bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search existing products">
+                        <input type="text" id="table-search" class="block pt-2 ps-10 text-sm text-gray-900 shadow-md rounded-lg w-full bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search existing products" oninput="showDropdown()">
+                    </div>
+                    <div id="search-list" class="absolute left-0 right-0 bg-white shadow-md rounded-lg mt-2 hidden max-h-48 overflow-y-auto">
+                        <!-- Suggestions will be added here dynamically -->
                     </div>
                 </div>
-        
-                <button
-                    id="product_create_button" data-modal-target="product_create_modal" data-modal-toggle="product_create_modal" class="inline-flex items-center text-gray-500 bg-emerald-500 text-white border border-white focus:outline-none hover:bg-emerald-600 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-2.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 ml-2 cols-span-1">
-                    <svg class="w-3.5 h-3.5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 21">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-                    </svg>
-                    {{content_label.add_product}}
-                </button>
+                
             </div>
-        
-        
-            
-        
             <div class="relative overflow-x-auto shadow-md sm:rounded-lg mb-5">
                 <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -112,50 +104,20 @@
                         </tr>
                     </tbody>
                 </table>
-        
-                <!-- Pagination Controls -->
-            <nav class="flex items-center justify-between pt-4 pb-4 pl-5 pr-5" aria-label="Table navigation">
-                {% if tables.supplier_obj.data %}
-                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">Showing {{ tables.supplier_obj.data.start_index }} to {{ tables.supplier_obj.data.end_index }} of {{ tables.supplier_obj.data.paginator.count }}</span>
-                {% endif %}
-                {% if tables.supplier_obj.data.has_next %}
-                    <ul class="inline-flex -space-x-px text-sm">
-                        {% if tables.supplier_obj.data.has_previous %}
-                        <li>
-                            <a href="?page={{ tables.supplier_obj.data.previous_page_number }}" class="px-3 py-1 text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">Previous</a>
-                        </li>
-                        {% endif %}
-        
-                        {% with tables.supplier_obj.data.number|add:"-2" as start %}
-                        {% with tables.supplier_obj.data.number|add:"2" as end %}
-                            {% for num in tables.supplier_obj.data.paginator.page_range %}
-                                {% if num >= start and num <= end %}
-                                <li>
-                                    <a href="?page={{ num }}" class="{% if num == supplier_obj.number %}bg-blue-500 text-white{% else %}text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700{% endif %} px-3 py-1 border">{{ num }}</a>
-                                </li>
-                                {% endif %}
-                            {% endfor %}
-                        {% endwith %}
-                        {% endwith %}
-        
-        
-                        {% if tables.supplier_obj.data.has_next %}
-                        <li>
-                            <a href="?page={{ tables.supplier_obj.data.next_page_number }}" class="px-3 py-1 text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">Next</a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                {% endif %}
-            </nav>
+                {% include 'components/page_obj_paginator.html' %}
             </div>
             
-        
-            <button type="submit" class="text-white inline-flex items-center bg-emerald-500 hover:bg-emerald-800 focus:ring-4 focus:outline-none focus:ring-emerald-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:focus:ring-emerald-800">
-                <svg class="mr-1 -ml-1 w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path></svg>
-                Add new product
-            </button>
-            {% include 'components/modal_create_product.html' %}
+            <div class="flex">
+                <button id="btn-submit" type="submit" class="ml-auto text-white inline-flex items-center bg-emerald-500 hover:bg-emerald-800 focus:ring-4 focus:outline-none focus:ring-emerald-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:focus:ring-emerald-800">
+                    <svg class="mr-1 -ml-1 w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    Update
+                </button>
+            </div>
         </form>
         </div>
     </div>
 </div>
+
+<script src="{% static 'js/modals/batch_form.js' %}"></script>

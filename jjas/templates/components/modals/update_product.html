@@ -8,7 +8,7 @@
             <!-- Modal header -->
             <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Update Existing Code
+                    Edit Product
                 </h3>
                 <h6 id="bn" class="ml-1 text-sm font-normal text-gray-500 dark:text-white">
 
@@ -20,50 +20,51 @@
             </div>
             <!-- Modal body -->
             <form action="{% url 'auth_product_component' %}" method="post" enctype="multipart/form-data">
+                <!-- Hidden field for product_id -->
+                <input type="hidden" name="edit_id" id="edit_id" value="">
                 {% csrf_token %}
                 <div class="grid gap-4 mb-4 grid-cols-2 sm:grid-cols-4">
                     <div class="col-span-1">
                         <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name<span class="text-red-400">*</span></label>
-                        <input type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Automotive Part" required="true">
+                        <input type="text" name="name" id="edit_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Automotive Part" required="true">
                     </div>
                     <div class="col-span-1">
                         <label for="code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Code<span class="text-red-400">*</span></label>
-                        <input type="text" name="code" id="code" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="A0000A" required="true">
+                        <input type="text" name="code" id="edit_code" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="A0000A" required="true">
                     </div>
                     <div class="col-span-1">
                         <label for="application" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Application<span class="text-red-400">*</span></label>
-                        <input type="text" name="application" id="application" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="i.e. Toyota, Audi" required="true">
+                        <input type="text" name="application" id="edit_application" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="i.e. Toyota, Audi" required="true">
                     </div>
                     <div class="col-span-1">
                         <label for="side" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Side</label>
-                        <select id="side" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                        <select id="edit_side" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                             <option selected="" disabled>Select a side</option>
-                            <option value="">None</option>
-                            <option value="FR">FR - Front</option>
-                            <option value="RR">RR - Rear</option>
+                            <option value="FRONT">FR - Front</option>
+                            <option value="BACK">RR - Rear</option>
                         </select>
                     </div>
                     <div class="sm:col-span-2">
                         <div class="grid gap-4 grid-cols-4">
                             <div class="col-span-1">
                                 <label for="cost_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Purchase Cost (₱)<span class="text-red-400">*</span></label>
-                                <input type="number" name="cost_price" id="cost_price" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="9999" required="true" min="0" >
+                                <input type="number" name="cost_price" id="edit_cost_price" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="9999" required="true" min="0" >
                             </div>
                             <div class="col-span-1">
                                 <label for="selling_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Selling Price (₱)<span class="text-red-400">*</span></label>
-                                <input type="number" name="selling_price" id="selling_price" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="9999" required="true" min="0" >
+                                <input type="number" name="selling_price" id="edit_selling_price" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="9999" required="true" min="0" >
                             </div>
                             <div class="col-span-1">
                                 <label for="quantity_left" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity<span class="text-red-400">*</span></label>
-                                <input type="number" name="quantity_left" id="quantity_left" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="9999" required="true" min="0" >
+                                <input type="number" name="quantity_left" id="edit_quantity_left" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="9999" required="true" min="0" >
                             </div>
                             <div class="col-span-1">
                                 <label for="unit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Unit<span class="text-red-400">*</span></label>
-                                <select id="unit" name="unit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                                <select id="edit_unit" name="unit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                                     <option selected="" disabled>UoM</option>
                                     {% if tables.unit.data %}
                                         {% for d in tables.unit.data %}
-                                        <option value={{d.id}}>{{d.name}}</option>
+                                        <option value="{{d.id}}">{{d.name}}</option>
                                         {% endfor %}
                                     {% endif %}
                                 </select>
@@ -74,15 +75,14 @@
                         <div class="grid gap-4 grid-cols-2">
                             <div class="col-span-1">
                                 <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category<span class="text-red-400">*</span></label>
-                                <select id="category" name="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ">
+                                <select id="edit_category" name="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ">
                                     <option selected="" disabled>Pick a category</option>
                                     {% if tables.category.data %}
                                         {% for d in tables.category.data %}
-                                            <option value={{d.id}}>{{d.code}} - {{d.name}}</option>
+                                            <option value="{{d.id}}">{{d.code}} - {{d.name}}</option>
                                         {% endfor %}
                                     {% endif %}
                                 </select>
-                                
                             </div>
                             <div class="col-span-1">
                                 <label for="critical_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -91,7 +91,7 @@
                                 <input 
                                     type="number" 
                                     name="critical_level" 
-                                    id="critical_level" 
+                                    id="edit_critical_level" 
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
                                     placeholder="9999" 
                                     value="0" 
@@ -105,37 +105,36 @@
                         <div class="grid gap-4 grid-cols-4">
                             <div class="col-span-1">
                                 <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
-                                <textarea id="description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Write product description here"></textarea>
+                                <textarea id="edit_description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Write product description here"></textarea>
                             </div>
                             <div class="col-span-1">
                                 <label for="supplier" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier<span class="text-red-400">*</span></label>
-                                <select id="supplier" name="supplier" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ">
+                                <select id="edit_supplier" name="supplier" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ">
                                     <option selected="" disabled>Pick a category</option>
                                     {% if tables.supplier.data %}
                                         {% for d in tables.supplier.data %}
-                                            <option value={{d.id}}>{{d.name}}</option>
+                                            <option value="{{d.id}}">{{d.name}}</option>
                                         {% endfor %}
                                     {% endif %}
                                 </select>
                             </div>
                             <div class="col-span-1">
-                                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="default_size">Upload an Image</label>
-                                <input class="block w-full mb-5 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="img_url" name="image" type="file">
-                            </div>
-                            
-                            <div class="col-span-1">
-                                <!-- Display the uploaded image if it exists -->
-                                <img class="h-auto w-8/12 rounded-lg" 
-                                     src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/no_image.jpg' %}{% endif %}" 
-                                     alt="Product Image">
+                                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Image</label>
+                                <input type="file" name="image" class="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                             </div>
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="text-white inline-flex items-center bg-emerald-500 hover:bg-emerald-800 focus:ring-4 focus:outline-none focus:ring-emerald-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:focus:ring-emerald-800">
-                    <svg class="mr-1 -ml-1 w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path></svg>
-                    Update existing product
-                </button>
+
+                <!-- Modal footer -->
+                <div class="flex justify-end pt-4 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                    <button data-modal-toggle="view_modal" type="button" class="text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                        Close
+                    </button>
+                    <button type="submit" class="text-white bg-green-500 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                        Save Changes
+                    </button>
+                </div>
             </form>
         </div>
     </div>

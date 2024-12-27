@@ -1,7 +1,7 @@
 {% extends '../base/navigation.html' %} {% load static %}
 
 {% block title %}
-    <title>JJAS TRADING | Delivery Records</title>
+    <title>JJAS TRADING | Product List</title>
 {% endblock %}
 
 {% block system_component %}
@@ -27,7 +27,6 @@
     </div>
     {% endif %}
 
-    {% include 'components/list_tables/delivery_table.html' %}
+    {% include 'components/list_tables/product_table.html' %}
 
-    {% include 'components/popup_delete_modal.html' %}
 {% endblock %}

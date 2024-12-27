@@ -1,51 +1,16 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, View
-from django.shortcuts import redirect
-from django.contrib import messages
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
-from .utils import request_user_info
+from .models import (BatchOrder, BatchOrderItem, Category, Client, Delivery, Product, SalesRecord, SalesRecordItem, Supplier, Unit)
 from django.utils.decorators import method_decorator
+from django.contrib import messages
+from django.shortcuts import render, redirect, reverse
 from django.views.decorators.cache import never_cache
-from ..models import (
-    Product, Category, SalesRecord, Delivery, Client, Supplier, SalesRecordItem, BatchOrder, BatchOrderItem
-)
+from django.views import View
 
-class BaseComponentView(LoginRequiredMixin, TemplateView):
-    """Base view for components with user info and pagination support."""
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(request_user_info(self.request))  # Add user info to context
-        return context
-
-    def apply_search_and_pagination(self, queryset, search_query, search_fields, page_size=10):
-        """
-        Apply search filter and paginate the queryset.
-
-        Args:
-            queryset: The base queryset.
-            search_query: The search term.
-            search_fields: List of fields to search.
-            page_size: Items per page.
-
-        Returns:
-            A tuple of (paginated_queryset, page_obj).
-        """
-        if search_query:
-            query = Q()
-            for field in search_fields:
-                query |= Q(**{f"{field}__icontains": search_query})
-            queryset = queryset.filter(query)
-
-        paginator = Paginator(queryset, page_size)
-        page_number = self.request.GET.get("page", 1)
-        try:
-            page_obj = paginator.get_page(page_number)
-        except (EmptyPage, PageNotAnInteger):
-            page_obj = paginator.get_page(1)
-
-        return queryset, page_obj
+# utils.py
+def request_user_info(request):
+    return {
+        "username": request.user.username,
+        "email": request.user.email,
+    }
 
 class ProcessDeleteView(View):
     """Handles deletion of selected items for products, categories, or sales records."""

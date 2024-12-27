@@ -84,9 +84,8 @@ class Product(SystemGeneratedData):
     side = models.CharField(max_length=60, blank=True, default="")
     description = models.TextField(blank=True, default="")
     image = models.ImageField(upload_to="products/images/", null=True, blank=True)
-    quantity_left = models.PositiveIntegerField()
-    cost_price = models.DecimalField(max_digits=10, decimal_places=2)
-    selling_price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField()
+    selling_price = models.DecimalField(max_digits=13, decimal_places=2)
     critical_level = models.PositiveIntegerField()
     status = models.CharField(
         max_length=60, choices=ProductStatus.choices, default=ProductStatus.AVAILABLE
@@ -113,7 +112,7 @@ class Product(SystemGeneratedData):
 class BatchOrder(SystemGeneratedData):
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
     supplied_date = models.DateField(null=True, blank=True)
-    batch_total = models.DecimalField(max_digits=10, decimal_places=2)
+    grand_total = models.DecimalField(max_digits=13, decimal_places=2)
 
     def __str__(self):
         return f"Batch {self.id} - {self.supplier.name if self.supplier else 'No Supplier'}"
@@ -132,6 +131,7 @@ class BatchOrder(SystemGeneratedData):
 class BatchOrderItem(SystemGeneratedData):
     batch = models.ForeignKey(BatchOrder, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    cost_price = models.DecimalField(max_digits=13, decimal_places=2)
     expiry_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
@@ -174,7 +174,7 @@ class SalesRecord(SystemGeneratedData):
         choices=[(0, "Net 0"), (15, "Net 15"), (30, "Net 30"), (60, "Net 60"), (90, "Net 90")], default=30
     )
     invoice_image = models.ImageField(upload_to="invoices/images/", null=True, blank=True)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
+    total = models.DecimalField(max_digits=13, decimal_places=2)
     status = models.CharField(
         max_length=60, choices=[("Unpaid", "Unpaid"), ("Paid", "Paid")], default="Unpaid"
     )
@@ -199,8 +199,8 @@ class SalesRecordItem(models.Model):
     sales_record = models.ForeignKey(SalesRecord, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     quantity = models.PositiveIntegerField()
-    surcharge = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    surcharge = models.DecimalField(max_digits=13, decimal_places=2, default=0.00)
+    amount = models.DecimalField(max_digits=13, decimal_places=2)
 
     def save(self, *args, **kwargs):
         if self.product:

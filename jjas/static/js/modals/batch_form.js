@@ -38,10 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target && event.target.classList.contains('product-item')) {
             const productText = event.target.textContent.trim();
             const [productCode, productName] = productText.split(' - ');
-            const productCost = event.target.dataset.sellingPrice; // Get the selling price from the data attribute
+            const productId = event.target.dataset.id;
     
             if (!isProductInTable(productName)) {
-                addProductRow(productName, productCost); // Pass the selling price to addProductRow
+                addProductRow(productName, productId); // Pass the selling price to addProductRow
                 resetDropdown();
             } else {
                 alert('Product already added to the table.');
@@ -83,21 +83,21 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Add a new product row to the table.
      */
-    function addProductRow(productName, productCost) {
+    function addProductRow(productName, productId) {
         const newRow = document.createElement('tr');
         newRow.className = "bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600";
         newRow.innerHTML = `
             <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white product-name">${productName}</td>
             <td class="px-6 py-4">
                 <div class="flex items-center">
-                    <button class="inline-flex items-center justify-center p-1 me-3 text-sm font-medium h-6 w-6 text-gray-500 bg-white border border-gray-300 rounded-full focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button">
+                    <button onclick="batch_quantity_decrease(${productId})" class="inline-flex items-center justify-center p-1 me-3 text-sm font-medium h-6 w-6 text-gray-500 bg-white border border-gray-300 rounded-full focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button">
                         <span class="sr-only">Decrease Quantity</span>
                         <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16"/>
                         </svg>
                     </button>
-                    <input type="number" class="bg-gray-50 w-14 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2.5 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value="1" min="1">
-                    <button class="inline-flex items-center justify-center h-6 w-6 p-1 ms-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-full focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button">
+                    <input id="quantity-${productId}" type="number" min=0 class="bg-gray-50 w-14 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2.5 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value="1" min="1">
+                    <button onclick="batch_quantity_increase(${productId})" class="inline-flex items-center justify-center h-6 w-6 p-1 ms-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-full focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button">
                         <span class="sr-only">Increase Quantity</span>
                         <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
@@ -105,11 +105,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     </button>
                 </div>
             </td>
-            <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">$${productCost}</td>
+            <td class="font-semibold text-gray-900 dark:text-white">
+            <div class="relative">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                    <span>₱</span>
+                </div>
+                <input id="cost-${productId}" type="number" step="0.01" min="0" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-10/12 ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="00.0">
+            </div>
+            </td>
             <td class="px-6 py-4">
                 <a href="#" class="font-medium text-red-600 dark:text-red-500 hover:underline remove-row">Remove</a>
             </td>
         `;
         tableBody.appendChild(newRow);
-    }    
+    }
 });
+
+
+const batch_quantity_decrease = (item_id) => {
+    const quantityInput = document.getElementById(`quantity-${item_id}`);
+    let currentValue = parseInt(quantityInput.value, 10);
+    if (currentValue > 1) { // Ensure the quantity doesn't go below 1
+        quantityInput.value = currentValue - 1;
+    }
+};
+
+const batch_quantity_increase = (item_id) => {
+    const quantityInput = document.getElementById(`quantity-${item_id}`);
+    let currentValue = parseInt(quantityInput.value, 10);
+    quantityInput.value = currentValue + 1;
+};

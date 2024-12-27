@@ -139,7 +139,7 @@ class BatchOrderComponentView(BaseComponentView):
             },
             
             "header_crumbs": [
-                {"name": "Sales Record", "url": reverse("auth_batch_order_component")},
+                {"name": "Batch Orders", "url": reverse("auth_batch_order_component")},
             ],
 
             "modal": {

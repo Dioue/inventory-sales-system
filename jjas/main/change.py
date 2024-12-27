@@ -115,12 +115,14 @@ class Client(SystemGeneratedData):
     class Meta:
         verbose_name_plural = "Clients"
 
+def get_default_due_date():
+    return now() + timedelta(days=30)
 
 # Sales Record Model
 class SalesRecord(SystemGeneratedData):
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, related_name="sales_records")
     date_issued = models.DateField(default=now)
-    due_date = models.DateField(default=(now + timedelta(days=30)))
+    due_date = models.DateField(default=get_default_due_date)
     net_day = models.PositiveIntegerField(default=30)
     image = models.ImageField(upload_to="invoices/images/", default="defaults/no_image.png")
     total = models.DecimalField(max_digits=13, decimal_places=2)

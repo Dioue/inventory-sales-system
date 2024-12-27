@@ -1,62 +1,72 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Fetch product data from the API once
+const fetchBatchData = async () => {
+    try {
+        const response = await fetch(`/api/products/`);
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
+        const products = await response.json();
+        return products;
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        return [];
+    }
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('table-search');
     const dropdown = document.getElementById('product-dropdown');
     const noData = document.getElementById('no-data');
     const tableBody = document.getElementById('batch_table_body');
+    let allProducts = [];
 
-    /**
-     * Fetch products from the API and filter them based on user input.
-     */
-    searchInput.addEventListener('input', async () => {
+    // Fetch all products once when the page loads
+    allProducts = await fetchBatchData();
+
+    // Search functionality
+    searchInput.addEventListener('input', () => {
         const filter = searchInput.value.toLowerCase();
-        console.log(filter)
 
         if (filter.length > 0) {
-            try {
-                const response = await fetch(`/api/products/?search=${encodeURIComponent(filter)}`);
-                if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-
-                const products = await response.json();
-
-                const filteredProducts = products.filter(product => {
-                    const regex = new RegExp(`^${filter}`, 'i');
-                    return regex.test(product.code) || regex.test(product.name);
-                });
-
-                populateDropdown(filteredProducts);
-            } catch (error) {
-                console.error('Error fetching products:', error);
-            }
+            const filteredProducts = allProducts.filter(product => {
+                const regex = new RegExp(`^${filter}`, 'i');
+                return regex.test(product.code) || regex.test(product.name);
+            });
+            populateDropdown(filteredProducts);
         } else {
             resetDropdown();
         }
     });
 
-    /**
-     * Populate the dropdown with product data.
-     */
     function populateDropdown(products) {
-        dropdown.innerHTML = ''; // Clear previous items
-        let hasMatch = false;
-
+        // Remove dynamically added items but keep the "no-data" element
+        const dynamicItems = dropdown.querySelectorAll('li:not(#no-data)');
+        dynamicItems.forEach(item => item.remove());
+    
         if (products.length > 0) {
             products.forEach(product => {
-                const item = document.createElement('div');
-                item.className = 'product-item';
+                const item = document.createElement('li');
+                item.className = 'product-item px-4 py-2 text-sm cursor-pointer hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white';
                 item.dataset.id = product.id;
                 item.textContent = `${product.code} - ${product.name}`;
                 dropdown.appendChild(item);
-                hasMatch = true;
             });
+            dropdown.classList.remove('hidden');
+            noData.classList.add('hidden');
+        } else {
+            dropdown.classList.remove('hidden'); // Show the dropdown to display "no-data"
+            noData.classList.remove('hidden');  // Make sure "no-data" is visible
         }
-
-        noData.classList.toggle('hidden', hasMatch);
-        dropdown.classList.toggle('hidden', !hasMatch);
+    }
+    
+    // Reset dropdown when no matches are found or input is cleared
+    function resetDropdown() {
+        const dynamicItems = dropdown.querySelectorAll('li:not(#no-data)');
+        dynamicItems.forEach(item => item.remove());
+        dropdown.classList.add('hidden');
+        noData.classList.remove('hidden');
     }
 
-    /**
-     * Add product to table on dropdown item click.
-     */
+    // Add product to table on dropdown item click
     dropdown.addEventListener('click', (event) => {
         if (event.target && event.target.classList.contains('product-item')) {
             const productText = event.target.textContent.trim();
@@ -72,9 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /**
-     * Remove product row from table.
-     */
+    // Remove product row from the table
     tableBody.addEventListener('click', (event) => {
         if (event.target && event.target.classList.contains('remove-row')) {
             event.preventDefault();
@@ -82,27 +90,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /**
-     * Reset dropdown visibility and item display states.
-     */
-    function resetDropdown() {
-        dropdown.classList.add('hidden');
-        dropdown.innerHTML = '';
-        noData.classList.add('hidden');
-    }
-
-    /**
-     * Check if a product is already in the table.
-     */
+    // Check if a product is already in the table
     function isProductInTable(productName) {
         return Array.from(tableBody.querySelectorAll('tr')).some(row => {
             return row.querySelector('.product-name')?.textContent === productName;
         });
     }
 
-    /**
-     * Add a new product row to the table.
-     */
+    // Add a new product row to the table
     function addProductRow(productName, productId) {
         const newRow = document.createElement('tr');
         newRow.className = "bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600";
@@ -142,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Decrease batch quantity.
+ * Decrease batch quantity
  */
 const batch_quantity_decrease = (item_id) => {
     const quantityInput = document.getElementById(`quantity-${item_id}`);
@@ -153,7 +148,7 @@ const batch_quantity_decrease = (item_id) => {
 };
 
 /**
- * Increase batch quantity.
+ * Increase batch quantity
  */
 const batch_quantity_increase = (item_id) => {
     const quantityInput = document.getElementById(`quantity-${item_id}`);

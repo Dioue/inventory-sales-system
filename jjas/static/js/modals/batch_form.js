@@ -5,31 +5,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableBody = document.getElementById('batch_table_body');
 
     /**
-     * Filter dropdown items based on search input.
+     * Fetch products from the API and filter them based on user input.
      */
-    searchInput.addEventListener('input', () => {
+    searchInput.addEventListener('input', async () => {
         const filter = searchInput.value.toLowerCase();
-        const items = dropdown.getElementsByClassName('product-item');
-        let hasMatch = false;
+        console.log(filter)
 
         if (filter.length > 0) {
-            dropdown.classList.remove('hidden');
+            try {
+                const response = await fetch(`/api/products/?search=${encodeURIComponent(filter)}`);
+                if (!response.ok) throw new Error(`Error: ${response.statusText}`);
 
-            Array.from(items).forEach(item => {
-                const text = item.textContent || item.innerText;
-                if (text.toLowerCase().includes(filter)) {
-                    item.style.display = "";
-                    hasMatch = true;
-                } else {
-                    item.style.display = "none";
-                }
-            });
+                const products = await response.json();
 
-            noData.classList.toggle('hidden', hasMatch);
+                const filteredProducts = products.filter(product => {
+                    const regex = new RegExp(`^${filter}`, 'i');
+                    return regex.test(product.code) || regex.test(product.name);
+                });
+
+                populateDropdown(filteredProducts);
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            }
         } else {
-            resetDropdown(items);
+            resetDropdown();
         }
     });
+
+    /**
+     * Populate the dropdown with product data.
+     */
+    function populateDropdown(products) {
+        dropdown.innerHTML = ''; // Clear previous items
+        let hasMatch = false;
+
+        if (products.length > 0) {
+            products.forEach(product => {
+                const item = document.createElement('div');
+                item.className = 'product-item';
+                item.dataset.id = product.id;
+                item.textContent = `${product.code} - ${product.name}`;
+                dropdown.appendChild(item);
+                hasMatch = true;
+            });
+        }
+
+        noData.classList.toggle('hidden', hasMatch);
+        dropdown.classList.toggle('hidden', !hasMatch);
+    }
 
     /**
      * Add product to table on dropdown item click.
@@ -39,16 +62,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const productText = event.target.textContent.trim();
             const [productCode, productName] = productText.split(' - ');
             const productId = event.target.dataset.id;
-    
+
             if (!isProductInTable(productName)) {
-                addProductRow(productName, productId); // Pass the selling price to addProductRow
+                addProductRow(productName, productId);
                 resetDropdown();
             } else {
                 alert('Product already added to the table.');
             }
         }
     });
-    
 
     /**
      * Remove product row from table.
@@ -63,11 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Reset dropdown visibility and item display states.
      */
-    function resetDropdown(items) {
+    function resetDropdown() {
         dropdown.classList.add('hidden');
-        Array.from(items || dropdown.getElementsByClassName('product-item')).forEach(item => {
-            item.style.display = "";
-        });
+        dropdown.innerHTML = '';
         noData.classList.add('hidden');
     }
 
@@ -106,12 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </td>
             <td class="font-semibold text-gray-900 dark:text-white">
-            <div class="relative">
-                <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                    <span>₱</span>
+                <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                        <span>₱</span>
+                    </div>
+                    <input id="cost-${productId}" type="number" step="0.01" min="0" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-10/12 ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="00.00">
                 </div>
-                <input id="cost-${productId}" type="number" step="0.01" min="0" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-10/12 ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="00.0">
-            </div>
             </td>
             <td class="px-6 py-4">
                 <a href="#" class="font-medium text-red-600 dark:text-red-500 hover:underline remove-row">Remove</a>
@@ -121,15 +141,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-
+/**
+ * Decrease batch quantity.
+ */
 const batch_quantity_decrease = (item_id) => {
     const quantityInput = document.getElementById(`quantity-${item_id}`);
     let currentValue = parseInt(quantityInput.value, 10);
-    if (currentValue > 1) { // Ensure the quantity doesn't go below 1
+    if (currentValue > 1) {
         quantityInput.value = currentValue - 1;
     }
 };
 
+/**
+ * Increase batch quantity.
+ */
 const batch_quantity_increase = (item_id) => {
     const quantityInput = document.getElementById(`quantity-${item_id}`);
     let currentValue = parseInt(quantityInput.value, 10);

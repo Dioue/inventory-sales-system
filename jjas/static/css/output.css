@@ -1427,6 +1427,10 @@ input:checked + .toggle-bg {
   max-height: 100%;
 }
 
+.max-h-60 {
+  max-height: 15rem;
+}
+
 .w-1\/2 {
   width: 50%;
 }

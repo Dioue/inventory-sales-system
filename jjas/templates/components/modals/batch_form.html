@@ -48,15 +48,12 @@
                         </div>
                         <input type="text" id="table-search" class="block pt-2 ps-10 text-sm text-gray-900 shadow-md rounded-lg w-full bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search existing products">
                     </div>
-                    <ul id="product-dropdown" class="absolute z-10 hidden w-full bg-white border border-gray-300 rounded-lg shadow-md dark:bg-gray-700 dark:border-gray-600">
-                        {% for product in tables.products.data %}
-                        <li class="product-item px-4 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
-                            data-selling-price="{{ product.selling_price }}" data-id="{{ product.id }}">
-                            {{ product.code }} - {{ product.name }}
+                    <ul id="product-dropdown" class="absolute z-10 hidden w-full bg-white border border-gray-300 rounded-lg shadow-md dark:bg-gray-700 dark:border-gray-600 max-h-60 overflow-y-auto">
+                        <!-- Dynamic content will be injected here -->
+                        <li id="no-data" class="px-4 py-2 text-sm text-gray-900 dark:text-white hidden">No product data to show. 
+                            <a href="{% url 'auth_product_component' %}" class="text-blue-600 underline">Add product</a>
                         </li>
-                        {% endfor %}
-                        <li id="no-data" class="px-4 py-2 text-sm text-gray-900 dark:text-white hidden">No product data to show. <a href="{% url 'auth_product_component' %}" class="text-blue-600 underline">add product</a></li>
-                    </ul>
+                    </ul>                    
                 </div>
                 
             </div>

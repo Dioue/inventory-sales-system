@@ -1,9 +1,11 @@
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Product
 from .serializers import ProductSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets
 
 class ProductViewSet(viewsets.ModelViewSet):
     """
@@ -12,7 +14,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
-
+    parser_classes = (MultiPartParser, FormParser)  # Add support for file uploads
+    
     def list(self, request, *args, **kwargs):
         """
         Handles GET requests to list all products.
@@ -20,6 +23,22 @@ class ProductViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        """
+        Handles POST requests to create a new product.
+        """
+        # Deserialize the incoming data
+        serializer = self.get_serializer(data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()  # Save the new product
+
+            # Return a success response with the created product data
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            # Return an error response if the data is invalid
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, *args, **kwargs):
         """

@@ -1,51 +1,40 @@
-const editModal = async (productId) =>{
-    const apiUrl = `/api/products/${productId}/`;
-    try {
-        
-        const response = await fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
-        });
-        
-        if (response.ok) {
-            const product = await response.json();
+document.addEventListener('DOMContentLoaded', function () {
+    const productForm = document.querySelector('#product_create_form');  // Your product create form
+    const submitButton = document.querySelector('#product_submit_form'); // Submit button
 
-            document.getElementById('edit_name').value = product.name || '';
-            document.getElementById('edit_code').value = product.code || '';
-            document.getElementById('edit_application').value = product.application || '';
-            document.getElementById('edit_side').value = product.side || '';
-            document.getElementById('edit_cost_price').value = product.cost_price || 0;
-            document.getElementById('edit_selling_price').value = product.selling_price || 0;
-            document.getElementById('edit_quantity_left').value = product.quantity_left || 0;
-            document.getElementById('edit_unit').value = product.unit || '';
-            document.getElementById('edit_category').value = product.category || '';
-            document.getElementById('edit_critical_level').value = product.critical_level || 0;
-            document.getElementById('edit_description').value = product.description || '';
-            document.getElementById('edit_supplier').value = product.supplier || '';
+    // Get the CSRF token from the page
+    const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
 
-            const modal = document.getElementById('view_modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+    productForm.addEventListener('submit', async function(event) {
+        event.preventDefault(); // Prevent the default form submission
 
-        } else {
-            alert('Failed to retrieve the product.');
-            console.error('Error:', await response.text());
+        // Gather form data
+        const formData = new FormData(productForm);
+
+        // Append CSRF token to the form data
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        // Send the form data to the backend asynchronously
+        try {
+            const response = await fetch("{% url 'api:product-list' %}", {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                // Handle the successful creation of the product (e.g., display a success message)
+                const responseData = await response.json();
+                console.log('Product created successfully:', responseData);
+                
+                // Optionally close the modal after successful submission
+                document.getElementById('product_create').classList.add('hidden');
+            } else {
+                // Handle errors (e.g., invalid data, server issues)
+                const errorData = await response.json();
+                console.error('Error creating product:', errorData);
+            }
+        } catch (error) {
+            console.error('Network error:', error);
         }
-
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while fetching the product.');
-    }
-}
-
-// Close edit modal function
-document.querySelectorAll('[data-modal-toggle="view_modal"]').forEach((button) => {
-    button.addEventListener('click', () => {
-        const modal = document.getElementById('view_modal');
-        modal.classList.remove('flex');
-        modal.classList.add('hidden');
     });
 });

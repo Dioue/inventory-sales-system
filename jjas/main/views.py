@@ -114,7 +114,7 @@ class BatchOrderComponentView(BaseComponentView):
         category = Category.objects.all().order_by('id')
 
         _last_batch_order_id = (batch_order.last().id + 999) if batch_order.exists() else 1000
-
+        _last_product_id = (products.last().id + 999) if products.exists() else 1000
 
         # search input id dynamically generated
         page_obj_search_id = "_batch_order"
@@ -147,7 +147,7 @@ class BatchOrderComponentView(BaseComponentView):
                     "last_fetch_batch_id": _last_batch_order_id
                 },
                 "product_form":{
-                    
+                    "last_fetch_batch_id": _last_product_id
                 }
             },
 

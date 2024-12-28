@@ -141,6 +141,8 @@ class BatchOrderComponentView(BaseComponentView):
                 {"name": "Batch Orders", "url": reverse("auth_batch_order_component")},
             ],
             
+            "list_action_modal": "batch_form",
+            
             "modal": {
                 "batch_form":
                 {
@@ -306,7 +308,7 @@ class ProductComponentView(BaseComponentView):
         supplier = Supplier.objects.all().order_by('id')
         unit = Unit.objects.all().order_by('id')
         category = Category.objects.all().order_by('id')
-        _last_batch_product_id = products.last().id if products.exists() else 1000
+        _last_product_id = products.last().id if products.exists() else 1000
         
         page_obj_search_id = "_product"
         search_query = self.request.GET.get(page_obj_search_id, "")
@@ -327,14 +329,10 @@ class ProductComponentView(BaseComponentView):
                 {"name": "Product List", "url": reverse("auth_product_component")},
             ],
 
+            "list_action_modal": "product_form",
             "modal": {
-                "create_product":
-                {
-                    "button_trigger_id": "product_create",
-                    "header": {
-                        "name": "Add product detail",
-                        "item_id": _last_batch_product_id
-                    },
+                "product_form":{
+                    "last_fetch_batch_id": _last_product_id
                 }
             },
 

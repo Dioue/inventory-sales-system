@@ -29,10 +29,14 @@
 
     <div class="flex items-center flex-column flex-wrap md:flex-row space-y-4 md:space-y-0">
         <button
-        {% if modal.batch_form %}
+        {% if list_action_modal == 'batch_form'%}
             id="batch_create_btn"
             data-modal-target="batch_create"
             data-modal-toggle="batch_create"
+        {% elif list_action_modal == 'product_form' %}
+            id="product_create_btn"
+            data-modal-target="product_create"
+            data-modal-toggle="product_create"
         {% endif %}
         class="inline-flex items-center text-gray-500 bg-green-500 text-white border border-white focus:outline-none hover:bg-green-600 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-2.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 ml-2">
             <svg class="w-3.5 h-3.5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 21">

@@ -29,12 +29,12 @@
 
     <div class="flex items-center flex-column flex-wrap md:flex-row space-y-4 md:space-y-0">
         <button
-        {% if modal.create_batch %}
-            id={{modal.create_batch.button_trigger_id}} data-modal-target="crud_create" data-modal-toggle="crud_create"
-        {% elif modal.create_product %}
-            id={{modal.create_product.button_trigger_id}} data-modal-target="product_create_modal" data-modal-toggle="product_create_modal"
+        {% if modal.batch_form %}
+            id="batch_create_btn"
+            data-modal-target="batch_create"
+            data-modal-toggle="batch_create"
         {% endif %}
-        class="inline-flex items-center text-gray-500 bg-emerald-500 text-white border border-white focus:outline-none hover:bg-emerald-600 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-2.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 ml-2">
+        class="inline-flex items-center text-gray-500 bg-green-500 text-white border border-white focus:outline-none hover:bg-green-600 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-2.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 ml-2">
             <svg class="w-3.5 h-3.5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 21">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
             </svg>

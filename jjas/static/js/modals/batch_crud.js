@@ -1,3 +1,6 @@
+
+
+/* Batch Data fetching in API for search input */
 // Fetch product data from the API once
 const fetchBatchData = async () => {
     try {

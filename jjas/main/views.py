@@ -113,8 +113,7 @@ class BatchOrderComponentView(BaseComponentView):
         unit = Unit.objects.all().order_by('id')
         category = Category.objects.all().order_by('id')
 
-        _last_batch_order_id = batch_order.last().id if batch_order.exists() else 1000
-        _last_batch_product_id = products.last().id if products.exists() else 1000
+        _last_batch_order_id = (batch_order.last().id + 999) if batch_order.exists() else 1000
 
 
         # search input id dynamically generated
@@ -141,23 +140,14 @@ class BatchOrderComponentView(BaseComponentView):
             "header_crumbs": [
                 {"name": "Batch Orders", "url": reverse("auth_batch_order_component")},
             ],
-
+            
             "modal": {
-                "create_batch":
+                "batch_form":
                 {
-                    "button_trigger_id": "batch_create",
-                    "header": {
-                        "name": "Batch Entry",
-                        "item_id": _last_batch_order_id
-                    },
+                    "last_fetch_batch_id": _last_batch_order_id
                 },
-                "create_product":
-                {
-                    "button_trigger_id": "product_create",
-                    "header": {
-                        "name": "Add product detail",
-                        "item_id": _last_batch_product_id
-                    },
+                "product_form":{
+                    
                 }
             },
 

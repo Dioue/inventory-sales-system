@@ -16,3 +16,6 @@ class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)  # Add support for file uploads
     
+    def perform_create(self, serializer):
+        # Pass the current user to the save method
+        serializer.save(created_by=self.request.user)

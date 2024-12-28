@@ -13,7 +13,6 @@ class SystemGeneratedData(models.Model):
     class Meta:
         abstract = True
 
-
 # Category Model
 class Category(SystemGeneratedData):
     code = models.CharField(max_length=255, unique=True)
@@ -60,8 +59,8 @@ class Product(SystemGeneratedData):
     description = models.TextField(blank=True, default="")
     image = models.ImageField(upload_to="products/images/", default='defaults/no_image.png')
     quantity = models.PositiveIntegerField(default=0)
-    cost_price = models.DecimalField(max_digits=13, decimal_places=2)
-    selling_price = models.DecimalField(max_digits=13, decimal_places=2)
+    cost_price = models.DecimalField(max_digits=13, decimal_places=2, blank=True, default=0)
+    selling_price = models.DecimalField(max_digits=13, decimal_places=2, blank=True, default=0)
     critical_level = models.PositiveIntegerField(default=0)
 
     unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, related_name="products")

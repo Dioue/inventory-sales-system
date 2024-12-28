@@ -1,11 +1,10 @@
 
 document.getElementById('create-product-btn').addEventListener('click', function(event) {
-    // Prevent the default action of toggling the modal if inputs are empty
     const form = document.getElementById('product_create_form');
 
     if (!form.checkValidity()) {
         alert('Please fill in all the fields before submitting.');
-        event.preventDefault(); // Prevent the modal toggle if not all fields are filled
+        event.preventDefault();
     } else {
         const modal = document.getElementById('confirm_create')
         modal.click();
@@ -15,34 +14,31 @@ document.getElementById('create-product-btn').addEventListener('click', function
 
 
 document.getElementById('confirm_product_submit').addEventListener('click', async function(event) {
-    // Prevent the default action of toggling the modal if inputs are empty
     const form = document.getElementById('product_create_form');
     const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+    
+    
 
-    event.preventDefault(); // Prevent the default form submission
-
-    // Gather form data
+    event.preventDefault();
     const formData = new FormData(form);
 
-    // Send the form data to the backend asynchronously
     try {
         const response = await fetch("/api/products/", {
             method: 'POST',
             headers: {
-                'X-CSRFToken': csrfToken,  // Include CSRF token in the headers
+                'X-CSRFToken': csrfToken,
             },
-            body: formData,  // Form data that includes the product details
+            body: formData,
         });
 
         if (response.ok) {
-            // Handle the successful creation of the product (e.g., display a success message)
-            const responseData = await response.json();
-            console.log('Product created successfully:', responseData);
             
-            // Optionally close the modal after successful submission
-            document.getElementById('product_create').classList.add('hidden');
+            const responseData = await response.json();
+            console.log('Product created successfully', responseData)
+            popGeneric('Product created successfully', responseData)
+            
+            
         } else {
-            // Handle errors (e.g., invalid data, server issues)
             const errorData = await response.json();
             console.error('Error creating product:', errorData);
         }
@@ -50,3 +46,30 @@ document.getElementById('confirm_product_submit').addEventListener('click', asyn
         console.error('Network error:', error);
     }
 });
+
+
+
+const popGeneric = (header, message) => {
+    const _header = document.getElementById('popup_generic_header')
+    const _message = document.getElementById('popup_generic_message')
+    const _btn = document.getElementById('popup_generic_btn')
+    const _dismiss = document.getElementById('popup_generic_dismiss')
+    const _add = document.getElementById('popup_generic_add')
+
+    _header.innerText = header
+    _message.innerText = message
+    _btn.click()
+    
+    _add.addEventListener('click', ()=> {
+        const form = document.getElementById('product_create_form');
+        const product_id = document.getElementById('product_create_id');
+
+        form.reset();
+        document.getElementById('popup_generic').classList.add('hidden');
+    })
+
+    _dismiss.addEventListener('click', ()=> {
+        document.getElementById('popup_generic').classList.add('hidden');
+    })
+
+}

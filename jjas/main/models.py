@@ -60,6 +60,7 @@ class Product(SystemGeneratedData):
     description = models.TextField(blank=True, default="")
     image = models.ImageField(upload_to="products/images/", default='defaults/no_image.png')
     quantity = models.PositiveIntegerField(default=0)
+    cost_price = models.DecimalField(max_digits=13, decimal_places=2)
     selling_price = models.DecimalField(max_digits=13, decimal_places=2)
     critical_level = models.PositiveIntegerField(default=0)
 

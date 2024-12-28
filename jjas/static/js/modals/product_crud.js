@@ -12,15 +12,15 @@ document.getElementById('create-product-btn').addEventListener('click', function
 });
 
 
-
 document.getElementById('confirm_product_submit').addEventListener('click', async function(event) {
     const form = document.getElementById('product_create_form');
     const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
-    
-    
-
     event.preventDefault();
+
+
+    const userId = document.getElementById('user-id').value;
     const formData = new FormData(form);
+    formData.set('created_by', userId)
 
     try {
         const response = await fetch("/api/products/", {
@@ -48,7 +48,6 @@ document.getElementById('confirm_product_submit').addEventListener('click', asyn
 });
 
 
-
 const popGeneric = (header, message) => {
     const _header = document.getElementById('popup_generic_header')
     const _message = document.getElementById('popup_generic_message')
@@ -72,4 +71,12 @@ const popGeneric = (header, message) => {
         document.getElementById('popup_generic').classList.add('hidden');
     })
 
+}
+
+const toTitleCase = (str) =>{
+    return str
+        .toLowerCase() // Convert the string to lowercase first
+        .split(' ') // Split the string into an array of words
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+        .join(' '); // Join the array back into a string
 }

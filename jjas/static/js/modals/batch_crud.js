@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const item = document.createElement('li');
                 item.className = 'product-item px-4 py-2 text-sm cursor-pointer hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white';
                 item.dataset.id = product.id;
-                item.dataset.quantity = product.quantity
                 item.textContent = `${product.code} - ${product.name}`;
                 dropdown.appendChild(item);
             });
@@ -78,7 +77,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const productText = event.target.textContent.trim();
             const [productCode, name] = productText.split(' - ');
             const id = event.target.dataset.id;
-            const quantity = event.target.dataset.quantity;
 
             if (!isProductInTable(name)) {
                 const newRow = document.createElement('tr');
@@ -107,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                 <span>₱</span>
                             </div>
-                            <input id="cost-${productId}" type="number" step="0.01" min="0" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-10/12 ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="00.00">
+                            <input id="cost-${id}" type="number" step="0.01" min="0" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-10/12 ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="00.00">
                         </div>
                     </td>
                     <td class="px-6 py-4">

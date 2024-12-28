@@ -27,5 +27,5 @@ urlpatterns = [
     path('delete/<str:model_key>/', ProcessDeleteView.as_view(), name='process_delete'),
 
     # API calls
-    path('api/', include(router.urls)),  # Include all API routes under 'api/'
+    path('api/', include(router.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

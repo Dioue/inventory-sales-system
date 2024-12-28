@@ -22,8 +22,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tableBody = document.getElementById('batch_table_body');
     let allProducts = [];
 
-    // Fetch all products once when the page loads
-    allProducts = await fetchBatchData();
+    searchInput.addEventListener('click', async () => {
+        // Fetch all products once when the page loads
+        allProducts = await fetchBatchData();
+    });
 
     // Search functionality
     searchInput.addEventListener('input', () => {

@@ -24,11 +24,11 @@
 
             </div>
 
-            <form action="#" id="product_create_form">
+            <form id="product_create_form">
                 {% csrf_token %}
                 <div class="grid gap-4 mb-4 grid-cols-2">
                     <div class="col-span-1">
-                        <label id="product-label-name" for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name<span class="text-red-400">*</span></label>
+                        <label id="product-label-name" for="product_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name<span class="text-red-400">*</span></label>
                         <input id="product-input-name" type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Automotive Part" required="true">
                     </div>
                     <div class="col-span-1">
@@ -42,7 +42,7 @@
                     <div class="grid gap-4 mb-4 grid-cols-2">
                         <div class="col-span-1">
                             <label id="product-label-side" for="side" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Side</label>
-                            <select id="product-select-side" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                            <select id="product-select-side" name="side" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                                 <option selected="" disabled>Select a side</option>
                                 <option value="">None</option>
                                 <option value="FR">FR - Front</option>
@@ -106,7 +106,7 @@
                 <div class="grid gap-4 mb-4 grid-cols-4">
                     <div class="col-span-2">
                         <label id="product-label-description"  for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
-                        <textarea id="product-textarea-description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Write product description here"></textarea>
+                        <textarea id="product-textarea-description" name="description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Write product description here"></textarea>
                     </div>
                     <div class="col-span-1">
                         <label id="product-label-supplier" for="supplier" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier<span class="text-red-400">*</span></label>
@@ -126,12 +126,13 @@
                 </div>
 
                 <div class="flex">
-                    <button id="product_submit_btn" type="submit" class="ml-auto text-white inline-flex items-center text-white bg-green-500 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                    <button id="create-product-btn" type="button" class="ml-auto text-white inline-flex items-center text-white bg-green-500 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
                         <svg class="mr-1 -ml-1 w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
                         </svg>
                         Create product
                     </button>
+                    <button type="button" id="confirm_create" class="hidden" data-modal-toggle="confirm_product_create" data-modal-target="confirm_product_create"></button>
                 </div>
                 
             </form>
@@ -139,4 +140,5 @@
     </div>
 </div>
 
-{% include 'components/modals/product_message_popup.html' %}
+{% include 'components/modals/confirm_product_create.html' %}
+<script src="{% static 'js/modals/product_crud.js' %}"></script>

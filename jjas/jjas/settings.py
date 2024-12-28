@@ -153,3 +153,6 @@ LOGIN_URL = 'login_view'
 # Media files (images, documents)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Set the maximum file size (e.g., 10 MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB

@@ -109,7 +109,7 @@ class BatchOrderComponentView(BaseComponentView):
         # Load all database query sets needed
         batch_order = BatchOrder.objects.all().order_by("id")
         supplier = Supplier.objects.all().order_by('id')
-        products = Product.objects.all().order_by('id')
+        products = Product.objects.select_related("unit", "category", "supplier").order_by("id")
         unit = Unit.objects.all().order_by('id')
         category = Category.objects.all().order_by('id')
 
@@ -124,7 +124,6 @@ class BatchOrderComponentView(BaseComponentView):
         # tables obj
         _, page_obj = self.apply_search_and_pagination(batch_order, search_query, ["id"])
         _, supplier_obj = self.apply_search_and_pagination(supplier, '', ['id'])
-        _, products_obj = self.apply_search_and_pagination(products, '', ['id'])
 
         context.update({
             "content_label":{
@@ -169,7 +168,7 @@ class BatchOrderComponentView(BaseComponentView):
                     "data": supplier_obj,
                 },
                 "products": {
-                    "data": products_obj
+                    "data": products
                 },
                 "unit":{
                     "data": unit

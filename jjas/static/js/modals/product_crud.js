@@ -38,15 +38,15 @@ document.getElementById('confirm_product_submit').addEventListener('click', asyn
             const errorData = await response.json();
             console.error('Error creating product:', errorData);
 
-           // Format the error message
             let formattedMessage = '';
             for (const [field, messages] of Object.entries(errorData)) {
                 if (messages.length > 0) {
-                    formattedMessage += `<strong>${field}:</strong><br>`; // Add the field name
-                    formattedMessage += `${messages[0]}<br><br>`;  // Show only the first error message and add a line break
+                    // Capitalize the first letter of each word in the first message
+                    const formattedError = messages[0].replace(/(^\w{1}|\.\s*\w{1})/gi, match => match.toUpperCase());
+                    formattedMessage += `${formattedError}<br>`; // Add the formatted message and a line break
                 }
             }
-
+            
             // Call your function to show the formatted error message
             showAlertError('Unsuccessful product entry', formattedMessage);
         }

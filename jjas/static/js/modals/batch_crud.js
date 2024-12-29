@@ -52,6 +52,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const item = document.createElement('li');
                 item.className = 'product-item px-4 py-2 text-sm cursor-pointer hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white';
                 item.dataset.id = product.id;
+                item.dataset.unit = product.unit.name;
+                item.dataset.cost = product.cost_price;
+                item.dataset.selling = product.selling_price;
                 item.textContent = `${product.code} - ${product.name}`;
                 dropdown.appendChild(item);
             });
@@ -77,24 +80,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             const productText = event.target.textContent.trim();
             const [productCode, name] = productText.split(' - ');
             const id = event.target.dataset.id;
+            const unit = event.target.dataset.unit;
+            const cost = event.target.dataset.cost;
+            const selling = event.target.dataset.selling;
 
             if (!isProductInTable(name)) {
                 const newRow = document.createElement('tr');
                 newRow.className = "bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600";
                 newRow.innerHTML = `
                     <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white product-name">${name}</td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center">
-                            <button onclick="batch_quantity_decrease(${id})" class="inline-flex items-center justify-center p-1 me-3 text-sm font-medium h-6 w-6 text-gray-500 bg-white border border-gray-300 rounded-full focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button">
-                                <span class="sr-only">Decrease Quantity</span>
-                                <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
+                    <td class="px-0 py-4">
+                        <div class="relative flex items-center w-10/12 max-w-[11rem]">
+                            <button type="button" id="decrement-quantity" onclick="batch_function_decrease('quantity', ${id})" class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none">
+                                <svg class="w-3 h-3 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16"/>
                                 </svg>
                             </button>
-                            <input id="quantity-${id}" type="number" min=0 class="bg-gray-50 w-14 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2.5 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value="1" min="1">
-                            <button onclick="batch_quantity_increase(${id})" class="inline-flex items-center justify-center h-6 w-6 p-1 ms-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-full focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button">
-                                <span class="sr-only">Increase Quantity</span>
-                                <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                            <input type="text" id="quantity-${id}" oninput="sanitizeToOne(this)" aria-describedby="helper-text-explanation" class="bg-gray-50 border-x-0 border-gray-300 h-11 font-medium text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-8/12 pb-6 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" value="1" min="0" max="9999" required />
+                            <div class="absolute bottom-1 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 flex items-center text-xs text-gray-600 space-x-1 rtl:space-x-reverse">
+                                <span>${unit}</span>
+                            </div>
+                            <button type="button" id="increment-quantity" onclick="batch_function_increase('quantity', ${id})" class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none">
+                                <svg class="w-3 h-3 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
                                 </svg>
                             </button>
@@ -105,7 +112,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                 <span>₱</span>
                             </div>
-                            <input id="cost-${id}" type="number" step="0.01" min="0" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-10/12 ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="00.00">
+                            <input id="cost-${id}" type="number" step="0.01" min="0" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-10/12 ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="00.00"  style="text-align: right;">
+                        </div>
+                    </td>
+                    <td class="px-0 py-4">
+                        <div class="relative flex items-center w-10/12 max-w-[11rem]">
+                            <button type="button" id="decrement-defective" onclick="batch_function_decrease('defective', ${id})" class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none">
+                                <svg class="w-3 h-3 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16"/>
+                                </svg>
+                            </button>
+                            <input type="text" id="defective-${id}" oninput="sanitizeToZero(this)" aria-describedby="helper-text-explanation" class="bg-gray-50 border-x-0 border-gray-300 h-11 font-medium text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-8/12 pb-6 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" value="0" min="0" max="999" required />
+                            <div class="absolute bottom-1 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 flex items-center text-xs text-gray-600 space-x-1 rtl:space-x-reverse">
+                                <span>${unit}</span>
+                            </div>
+                            <button type="button" id="increment-defective" onclick="batch_function_increase('defective', ${id})" class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none">
+                                <svg class="w-3 h-3 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+                                </svg>
+                            </button>
                         </div>
                     </td>
                     <td class="px-6 py-4">
@@ -137,22 +162,65 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 });
 
+
+/* Input delegation starts here */
+
+function sanitizeToOne(inputElement) {  
+
+    if (inputElement.value.trim() === '' || isNaN(inputElement.value) || parseInt(inputElement.value) < 1 || parseInt(inputElement.value) > 9) {
+        inputElement.value = 1;
+    } else {
+        const value = parseInt(inputElement.value);
+        if (value < 1 || value > 9) {
+            inputElement.value = 1;
+        }
+    }
+    inputElement.value = inputElement.value.replace(/\s/g, '');
+}
+
+function sanitizeToZero(inputElement) {  
+    if (inputElement.value.trim() === '' || isNaN(inputElement.value) || parseInt(inputElement.value) < 1 || parseInt(inputElement.value) > 9) {
+        inputElement.value = 0;
+    } else {
+        const value = parseInt(inputElement.value);
+        if (value < 1 || value > 9) {
+            inputElement.value = 0;
+        }
+    }
+    inputElement.value = inputElement.value.replace(/\s/g, '');
+}
+
 /**
  * Decrease batch quantity
  */
-const batch_quantity_decrease = (item_id) => {
-    const quantityInput = document.getElementById(`quantity-${item_id}`);
-    let currentValue = parseInt(quantityInput.value, 10);
-    if (currentValue > 1) {
-        quantityInput.value = currentValue - 1;
+const batch_function_decrease = (item_name, item_id) => {
+    const input = document.getElementById(`${item_name}-${item_id}`);
+    let currentValue = parseInt(input.value, 10);
+    
+    
+    if (item_name === 'quantity' && currentValue > 1) {
+        input.value = currentValue - 1;
+    } else if (currentValue > 0 && item_name ==='defective') {
+        input.value = currentValue - 1;
     }
 };
 
 /**
  * Increase batch quantity
  */
-const batch_quantity_increase = (item_id) => {
-    const quantityInput = document.getElementById(`quantity-${item_id}`);
-    let currentValue = parseInt(quantityInput.value, 10);
-    quantityInput.value = currentValue + 1;
+const batch_function_increase = (item_name, item_id) => {
+    
+    const input = document.getElementById(`${item_name}-${item_id}`);
+    let currentValue = parseInt(input.value, 10);
+    
+
+    if(item_name === 'defective'){
+        const quantityInput = document.getElementById(`quantity-${item_id}`)
+        const defectiveInput = document.getElementById(`defective-${item_id}`)
+        const val = parseInt(defectiveInput.value, 10);
+        const maxVal = parseInt(quantityInput.value, 10);
+        input.value = (val < maxVal) ? currentValue + 1 : currentValue;
+    } else {
+        input.value = currentValue + 1;
+    }   
 };

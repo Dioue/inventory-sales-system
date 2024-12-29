@@ -11,7 +11,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     """
     A viewset for viewing, creating, updating, and deleting Product instances.
     """
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related("unit", "category", "supplier").all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)  # Add support for file uploads

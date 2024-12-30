@@ -16,11 +16,8 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name']
 
-class ProductSerializer(serializers.ModelSerializer):
-    unit = UnitSerializer(read_only=True)  # Include nested unit data
-    supplier = SupplierSerializer(read_only=True)  # Include nested supplier data
-    category = CategorySerializer(read_only=True)  # Include nested category data
 
+class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'  # Adjust fields based on your requirements
@@ -28,14 +25,37 @@ class ProductSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """
         Ensure selling_price is greater than cost_price.
+        Also validate that category, supplier, and unit are valid.
         """
         cost_price = data.get('cost_price')
         selling_price = data.get('selling_price')
+        category = data.get('category')
+        category_id = category.id if category else None
 
+        supplier = data.get('supplier')
+        supplier_id = supplier.id if supplier else None
+
+        unit = data.get('unit')
+        unit_id = unit.id if unit else None
+
+
+        # Validate that selling price is greater than cost price
         if cost_price is not None and selling_price is not None:
             if cost_price >= selling_price:
                 raise serializers.ValidationError(
                     {"selling_price": "Selling price should be greater than cost price."}
                 )
+
+        # Validate category existence
+        if category is None or not Category.objects.filter(id=category_id).exists():
+            raise serializers.ValidationError({"category": "Invalid or missing category."})
+        
+        # Validate supplier existence
+        if supplier is None or not Supplier.objects.filter(id=supplier_id).exists():
+            raise serializers.ValidationError({"supplier": "Invalid or missing supplier."})
+        
+        # Validate unit existence
+        if unit is None or not Unit.objects.filter(id=unit_id).exists():
+            raise serializers.ValidationError({"unit": "Invalid or missing unit."})
 
         return data

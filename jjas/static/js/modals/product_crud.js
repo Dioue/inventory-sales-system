@@ -26,6 +26,7 @@ document.getElementById('confirm_product_submit').addEventListener('click', asyn
             body: formData,
         });
 
+
         if (response.ok) {
             const responseData = await response.json();
             console.log('Product created successfully', responseData);

@@ -184,8 +184,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-/* Input delegation starts here */
-
 // This update the field id='quantity-${id}' to match [quantity] x [cost]
 function updateTotal(id) {
 
@@ -197,9 +195,11 @@ function updateTotal(id) {
     const cost = parseFloat(costInput.value) || 0;
 
     const total = quantity * cost;
+    // Format the total with commas
+    const formattedTotal = total.toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
 
     // Update the total element
-    totalElement.textContent = `₱ ${total.toFixed(2)}`;
+    totalElement.textContent = formattedTotal;
 }
 
 

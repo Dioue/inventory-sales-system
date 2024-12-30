@@ -43,8 +43,9 @@ document.getElementById('confirm_product_submit').addEventListener('click', asyn
             let formattedMessage = Object.entries(errorData)
                 .map(([field, messages]) => {
                     if (messages.length > 0) {
-                        return messages[0]
-                            .replace(/(^\w{1}|\.\s*\w{1})/gi, match => match.toUpperCase());
+                        
+                        return `${field}: ${messages[0]
+                            .replace(/(^\w{1}|\.\s*\w{1})/gi, match => match.toUpperCase())}`;
                     }
                 })
                 .join('<br>');

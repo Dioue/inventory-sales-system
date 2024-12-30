@@ -18,6 +18,10 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    unit = serializers.PrimaryKeyRelatedField(queryset=Unit.objects.all())
+    supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all())
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+
     class Meta:
         model = Product
         fields = '__all__'  # Adjust fields based on your requirements

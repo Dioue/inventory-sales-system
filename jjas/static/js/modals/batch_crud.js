@@ -15,15 +15,31 @@ const fetchBatchData = async () => {
     }
 };
 
+let allUnits = [];  // To store all units fetched from the API
+
+// Fetch all units once when the page loads
+const fetchUnits = async () => {
+    try {
+        const response = await fetch(`/api/units/`);
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+        allUnits = await response.json();
+    } catch (error) {
+        console.error('Error fetching units:', error);
+    }
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('table-search');
     const dropdown = document.getElementById('product-dropdown');
     const noData = document.getElementById('no-data');
     const tableBody = document.getElementById('batch_table_body');
     let allProducts = [];
+    
+    await fetchUnits();
+    
 
     searchInput.addEventListener('click', async () => {
-        // Fetch all products once when the page loads
+        // Fetch all api once when the page loads
         allProducts = await fetchBatchData();
     });
 
@@ -48,14 +64,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         dynamicItems.forEach(item => item.remove());
     
         if (products.length > 0) {
-            products.forEach(product => {
+            products.forEach(async product => {
                 const item = document.createElement('li');
                 item.className = 'product-item px-4 py-2 text-sm cursor-pointer hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white';
                 item.dataset.id = product.id;
-                item.dataset.unit = product.unit?.name ?? 'No unit';
                 item.dataset.cost = product.cost_price;
                 item.dataset.selling = product.selling_price;
                 item.textContent = `${product.code} - ${product.name}`;
+                
+
+                let unitName = 'No unit'; 
+
+                if (product.unit) {
+                    const unit = allUnits.find(unit => unit.id === product.unit);
+
+                    if (unit) {
+                        unitName = unit.name;
+                    }
+                }
+
+                item.dataset.unit = unitName;
+
                 dropdown.appendChild(item);
             });
             dropdown.classList.remove('hidden');
@@ -141,6 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 placeholder="0.00" 
                                 style="text-align: right;" 
                                 onkeydown="if(event.key === 'e' || event.key === 'E' || event.key === '+' || event.key === '-') event.preventDefault();"
+                                value = "${cost}"
                             >
                         </div>
                     </td>
@@ -149,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             id="total-${id}" 
                             class="font-bold text-gray-700 overflow-hidden whitespace-nowrap text-ellipsis" 
                             style="width: 6rem; height: 1.5rem; display: inline-block; text-align: right;"
-                        > ₱ 0.00
+                        > ₱ ${cost}
                         </p>
                     </td>
 

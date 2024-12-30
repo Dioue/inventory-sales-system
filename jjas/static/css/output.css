@@ -1747,6 +1747,10 @@ input:checked + .toggle-bg {
   white-space: nowrap;
 }
 
+.text-ellipsis {
+  text-overflow: ellipsis;
+}
+
 .whitespace-nowrap {
   white-space: nowrap;
 }
@@ -2096,6 +2100,11 @@ input:checked + .toggle-bg {
   padding-bottom: 2rem;
 }
 
+.px-10 {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
 .pb-4 {
   padding-bottom: 1rem;
 }
@@ -2148,12 +2157,20 @@ input:checked + .toggle-bg {
   padding-top: 1rem;
 }
 
+.ps-4 {
+  padding-inline-start: 1rem;
+}
+
 .text-left {
   text-align: left;
 }
 
 .text-center {
   text-align: center;
+}
+
+.text-end {
+  text-align: end;
 }
 
 .text-2xl {

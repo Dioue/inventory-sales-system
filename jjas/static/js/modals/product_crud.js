@@ -1,18 +1,16 @@
-
-document.getElementById('create-product-btn').addEventListener('click', function(event) {
+document.getElementById('create-product-btn').addEventListener('click', function (event) {
     const form = document.getElementById('product_create_form');
 
     if (!form.checkValidity()) {
         alert('Please correctly fill in all the fields before submitting.');
         event.preventDefault();
     } else {
-        const modal = document.getElementById('confirm_create')
+        const modal = document.getElementById('confirm_create');
         modal.click();
     }
 });
 
-
-document.getElementById('confirm_product_submit').addEventListener('click', async function(event) {
+document.getElementById('confirm_product_submit').addEventListener('click', async function (event) {
     const form = document.getElementById('product_create_form');
     const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
     event.preventDefault();
@@ -29,99 +27,87 @@ document.getElementById('confirm_product_submit').addEventListener('click', asyn
         });
 
         if (response.ok) {
-            
             const responseData = await response.json();
-            console.log('Product created successfully', responseData)
-            showAlertInfo('Product created successfully', 'Would you like to create another product entry?')
-            
+            console.log('Product created successfully', responseData);
+            showAlert(
+                'info',
+                'Product created successfully',
+                'Would you like to create another product entry?',
+                true
+            );
         } else {
             const errorData = await response.json();
             console.error('Error creating product:', errorData);
 
-            let formattedMessage = '';
-            for (const [field, messages] of Object.entries(errorData)) {
-                if (messages.length > 0) {
-                    // Capitalize the first letter of each word in the first message
-                    const formattedError = messages[0].replace(/(^\w{1}|\.\s*\w{1})/gi, match => match.toUpperCase());
-                    formattedMessage += `${formattedError}<br>`; // Add the formatted message and a line break
-                }
-            }
-            
-            // Call your function to show the formatted error message
-            showAlertError('Unsuccessful product entry', formattedMessage);
+            let formattedMessage = Object.entries(errorData)
+                .map(([field, messages]) => {
+                    if (messages.length > 0) {
+                        return messages[0]
+                            .replace(/(^\w{1}|\.\s*\w{1})/gi, match => match.toUpperCase());
+                    }
+                })
+                .join('<br>');
+
+            showAlert('error', 'Unsuccessful product entry', formattedMessage);
         }
     } catch (error) {
         console.error('Network error:', error);
+        showAlert('error', 'Network Error', 'Please try again later.');
     }
 });
 
+const showAlert = (() => {
+    const alert = document.getElementById('alert');
+    const alertHeader = document.getElementById('alert-header');
+    const alertText = document.getElementById('alert-text');
+    const alertIconPath = document.getElementById('alert-icon-path');
+    const alertAdd = document.getElementById('alert-add');
+    const alertDismiss = document.getElementById('alert-dismiss');
 
-const showAlertInfo = (header, message) => {
-    const _alert_info = document.getElementById('alert-info');
-    const _header = document.getElementById('alert-info-header');
-    const _text = document.getElementById('alert-info-text');
-    const _add = document.getElementById('alert-info-add');
-    const _dismiss = document.getElementById('alert-info-dismiss');
-
-    // Ensure the alert is visible and no opacity transition is in progress
-    _alert_info.classList.remove('hidden');
-    _alert_info.classList.remove('opacity-0'); // Remove any opacity class to ensure visibility
-
-    // Update the content of the alert
-    _header.innerText = header;
-    _text.innerHTML = message;
-
-    // Remove event listeners to prevent duplicates
-    _add.removeEventListener('click', resetForm);
-    _dismiss.removeEventListener('click', closeAlert);
-
-    // Add event listeners
-    _add.addEventListener('click', resetForm);
-    _dismiss.addEventListener('click', closeAlert);
-
-    function resetForm() {
+    const resetForm = () => {
         document.getElementById('product_create_form').reset();
-        _alert_info.classList.add('hidden'); // Hide the alert after action
-    }
+        closeAlert();
+    };
 
-    function closeAlert() {
-        // Hide the alert and apply opacity-0 for transition
-        _alert_info.classList.add('opacity-0');
-        
-        // Wait for transition to finish before fully hiding the element
+    const closeAlert = () => {
+        alert.classList.add('opacity-0');
         setTimeout(() => {
-            _alert_info.classList.add('hidden'); // Finally hide the element
-        }, 300); // Adjust the timeout to match your transition duration (300ms for example)
-    }
-};
+            alert.classList.add('hidden');
+        }, 300); // Match this with your CSS transition duration
+    };
 
-const showAlertError = (header, message) => {
-    const _alert_error = document.getElementById('alert-error');
-    const _header = document.getElementById('alert-error-header');
-    const _text = document.getElementById('alert-error-text');
-    const _dismiss = document.getElementById('alert-error-dismiss');
+    alertAdd.addEventListener('click', resetForm);
+    alertDismiss.addEventListener('click', closeAlert);
 
-    // Ensure the alert is visible and no opacity transition is in progress
-    _alert_error.classList.remove('hidden');
-    _alert_error.classList.remove('opacity-0'); // Remove any opacity class to ensure visibility
+    return (type, header, message, hasAction = false) => {
+        alert.className = `p-4 mb-4 border rounded-lg hidden opacity-0 ${
+            type === 'info'
+                ? 'text-blue-800 border-blue-300 bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800'
+                : 'text-red-800 border-red-300 bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800'
+        }`;
 
-    // Update the content of the alert
-    _header.innerText = header;
-    _text.innerHTML = message;
+        alertIconPath.setAttribute(
+            'd',
+            type === 'info'
+                ? 'M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 1 1v4h1a1 1 0 1 1 0 2Z'
+                : 'M10 1.5A8.5 8.5 0 1 0 18.5 10 8.5 8.5 0 0 0 10 1.5ZM9 13h2V11H9Zm0-4h2V5H9Z'
+        );
 
-    // Remove event listeners to prevent duplicates
-    _dismiss.removeEventListener('click', closeAlert);
+        alertDismiss.className = `${
+            type === 'info' ?
+            'text-blue-800 bg-transparent border border-blue-700 font-medium rounded-lg text-xs px-3 py-1.5 text-center' 
+            : 'text-red-800 bg-transparent border border-red-700 font-medium rounded-lg text-xs px-3 py-1.5 text-center'}`;
 
-    // Add event listener
-    _dismiss.addEventListener('click', closeAlert);
+        alertHeader.innerText = header;
+        alertText.innerHTML = message;
 
-    function closeAlert() {
-        // Hide the alert and apply opacity-0 for transition
-        _alert_error.classList.add('opacity-0');
-        
-        // Wait for transition to finish before fully hiding the element
-        setTimeout(() => {
-            _alert_error.classList.add('hidden'); // Finally hide the element
-        }, 300); // Adjust the timeout to match your transition duration (300ms for example)
-    }
-};
+        if (hasAction) {
+            alertAdd.classList.remove('hidden');
+        } else {
+            alertAdd.classList.add('hidden');
+        }
+
+        alert.classList.remove('hidden');
+        alert.classList.remove('opacity-0');
+    };
+})();

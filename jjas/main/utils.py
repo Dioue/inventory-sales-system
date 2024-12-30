@@ -12,8 +12,9 @@ def request_user_info(request):
         "email": request.user.email,
     }
 
+
 class ProcessDeleteView(View):
-    """Handles deletion of selected items for products, categories, or sales records."""
+    """Handles deletion of selected items for products, categories, sales records, batch orders, and batch order items."""
 
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
@@ -29,7 +30,9 @@ class ProcessDeleteView(View):
             "product": Product,
             "category": Category,
             "sales_record": SalesRecord,
-            "delivery": Delivery
+            "delivery": Delivery,
+            "batch_order": BatchOrder,
+            "batch_order_item": BatchOrderItem
         }
 
         # Identify the model based on a parameter (e.g., passed in the URL or POST data)
@@ -39,10 +42,14 @@ class ProcessDeleteView(View):
         if model:
             if model_key == "sales_record":
                 self._delete_sales_records(selected_items)
+            elif model_key == "batch_order":
+                self._delete_batch_orders(selected_items)
+            elif model_key == "batch_order_item":
+                self._delete_batch_order_items(selected_items)
             else:
                 model.objects.filter(pk__in=selected_items).delete()
 
-            messages.success(request, f"Selected {model_key.replace('_', ' ')}(s) deleted successfully.")
+            messages.success(request, f"Selected {model_key.replace('_', ' ')} item(s) deleted successfully.")
         else:
             messages.error(request, "Invalid model specified for deletion.")
 
@@ -59,3 +66,15 @@ class ProcessDeleteView(View):
         for client_id in clients_to_check:
             if client_id and not SalesRecord.objects.filter(client_id=client_id).exists():
                 Client.objects.filter(pk=client_id).delete()
+
+    def _delete_batch_orders(self, selected_items):
+        """Handle deletion of batch orders and related data."""
+        batch_orders = BatchOrder.objects.filter(pk__in=selected_items)
+        batch_order_items = BatchOrderItem.objects.filter(batch__in=batch_orders)
+
+        batch_order_items.delete()  # Delete all items related to the batch orders
+        batch_orders.delete()  # Delete the batch orders themselves
+
+    def _delete_batch_order_items(self, selected_items):
+        """Handle deletion of batch order items."""
+        BatchOrderItem.objects.filter(pk__in=selected_items).delete()

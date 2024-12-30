@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Unit, Supplier, Category
+from .models import Product, Unit, Supplier, Category, BatchOrder, BatchOrderItem
 
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,3 +63,23 @@ class ProductSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"unit": "Invalid or missing unit."})
 
         return data
+    
+
+class BatchOrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BatchOrderItem
+        fields = ['product', 'cost_price', 'quantity', 'defective']
+
+class BatchOrderSerializer(serializers.ModelSerializer):
+    items = BatchOrderItemSerializer(many=True)
+
+    class Meta:
+        model = BatchOrder
+        fields = ['id', 'supplier', 'purchase_date', 'grand_total', 'items']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        batch_order = BatchOrder.objects.create(**validated_data)
+        for item_data in items_data:
+            BatchOrderItem.objects.create(batch=batch_order, **item_data)
+        return batch_order

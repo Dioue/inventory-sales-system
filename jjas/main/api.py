@@ -1,6 +1,3 @@
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -8,6 +5,8 @@ from .models import Product, Unit
 from .serializers import ProductSerializer
 from rest_framework import viewsets
 from .serializers import UnitSerializer
+from .models import BatchOrder
+from .serializers import BatchOrderSerializer
 
 class CustomUserThrottle(UserRateThrottle):
     rate = '30/m'  # Allow 5 requests per minute per user
@@ -32,3 +31,15 @@ class UnitViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Unit.objects.all()  # Get all units
     serializer_class = UnitSerializer
     permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
+
+
+class BatchOrderViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and creating BatchOrder instances.
+    """
+    queryset = BatchOrder.objects.prefetch_related('items').all()
+    serializer_class = BatchOrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save()

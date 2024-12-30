@@ -31,7 +31,7 @@ const updateSelectedCount = () => {
     if (selectedCount === 0 && !isSelectAllChecked) {
         buttonId.classList.add('cursor-not-allowed');
         buttonId.disabled = true;
-        message.innerHTML = 'Please select a product to delete.';
+        message.innerHTML = 'Please select an item to delete.';
     }
     // If multiple items or "select all" is checked, enable the button and update the message
     else if (selectedCount > 1 || isSelectAllChecked) {

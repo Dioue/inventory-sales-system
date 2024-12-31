@@ -133,7 +133,7 @@ class BatchOrderComponentView(BaseComponentView):
             },
 
             "form_action": {
-                "delete": reverse('process_delete', args=['category'])
+                "delete": reverse('process_delete', args=['batch_order'])
             },
             
             "header_crumbs": [

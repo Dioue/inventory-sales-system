@@ -62,6 +62,7 @@ class Product(SystemGeneratedData):
     cost_price = models.DecimalField(max_digits=13, decimal_places=2, blank=True, default=0)
     selling_price = models.DecimalField(max_digits=13, decimal_places=2, blank=True, default=0)
     critical_level = models.PositiveIntegerField(default=0)
+    status = models.CharField(max_length=60, blank=True, default="")
 
     unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, related_name="products")
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, related_name="products")

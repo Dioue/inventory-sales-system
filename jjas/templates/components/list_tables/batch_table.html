@@ -15,10 +15,20 @@
                     </div>
                 </th>
                 {% if tables.page_obj.fields %}
-                    {% for f in tables.page_obj.fields %}
+                    {% for field in tables.page_obj.fields %}
                         <th scope="col" class="px-6 py-3">
                             <span class="flex items-center">
-                                <h6 href="#" class="text-gray-900 dark:text-white hover:text-gray-600">{{ f }}</h6>
+                                <a href="?order_by={{ field.key }}&direction={% if request.GET.direction == 'asc' and request.GET.order_by == field.key %}desc{% else %}asc{% endif %}" 
+                                class="text-gray-900 dark:text-white hover:text-gray-600">
+                                    {{ field.name }}
+                                    {% if request.GET.order_by == field.key %}
+                                        {% if request.GET.direction == "asc" %}
+                                            ↑
+                                        {% else %}
+                                            ↓
+                                        {% endif %}
+                                    {% endif %}
+                                </a>
                             </span>
                         </th>
                     {% endfor %}
@@ -44,11 +54,11 @@
                             </div>
                         </td>
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            {{ obj.id|default:"--" }}
+                            BN-{{ obj.id|default:"--" }}
                         </th>
                         <td class="px-6 py-4">{{ obj.supplier|default:"-" }}</td>
-                        <td class="px-6 py-4">{{ obj.supplied_date|default:"-" }}</td>
-                        <td class="px-6 py-4">{{ obj.created_by|default:"-" }}</td>
+                        <td class="px-6 py-4">{{ obj.purchase_date|default:"-" }}</td>
+                        <td class="px-6 py-4">{{ obj.created_by|default:"system" }}</td>
                         <td class="flex items-center px-6 py-4">
                             <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
                             <span class="mx-2">|</span>

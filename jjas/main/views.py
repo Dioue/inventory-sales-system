@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
-from .utils import request_user_info
+from .utils import request_user_info, apply_search_and_pagination
 from .models import (BatchOrder, BatchOrderItem, Category, Client, Delivery, Product, SalesRecord, SalesRecordItem, Supplier, Unit)
 
 # Login View
@@ -104,10 +104,12 @@ class BatchOrderComponentView(BaseComponentView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-
-        # Load all database query sets needed
-        batch_order = BatchOrder.objects.all().order_by("id")
+        
+        order_by_field = self.request.GET.get("order_by", "id")
+        order_direction = self.request.GET.get("direction", "asc")
+        order_prefix = "-" if order_direction == "desc" else ""
+        
+        batch_order = BatchOrder.objects.all().order_by(f"{order_prefix}{order_by_field}")
         supplier = Supplier.objects.all().order_by('id')
         products = Product.objects.select_related("unit", "category", "supplier").order_by("id")
         unit = Unit.objects.all().order_by('id')
@@ -120,47 +122,40 @@ class BatchOrderComponentView(BaseComponentView):
         page_obj_search_id = "_batch_order"
         search_query = self.request.GET.get(page_obj_search_id, "")
         
-
         # tables obj
         _, page_obj = self.apply_search_and_pagination(batch_order, search_query, ["id"])
         _, supplier_obj = self.apply_search_and_pagination(supplier, '', ['id'])
 
         context.update({
-            "content_label":{
+            "content_label": {
                 "add": "Make a batch entry",
                 "add_product": "Add new product",
                 "search_query": search_query,
             },
-
             "form_action": {
                 "delete": reverse('process_delete', args=['batch_order'])
             },
-            
             "header_crumbs": [
                 {"name": "Batch Orders", "url": reverse("auth_batch_order_component")},
             ],
-            
             "list_action_modal": "batch_form",
-            
             "modal": {
-                "batch_form":
-                {
+                "batch_form": {
                     "last_fetch_batch_id": _last_batch_order_id
                 },
-                "product_form":{
+                "product_form": {
                     "last_fetch_batch_id": _last_product_id
                 }
             },
-
             "tables": {
                 "page_obj": {
                     "data": page_obj,
                     "fields": [
-                        "Batch No",
-                        "Supplier",
-                        "Date Supplied",
-                        "Created by"
-                        ],
+                        {"name": "Batch No", "key": "id"},
+                        {"name": "Supplier", "key": "supplier_id"},  # Use actual field names
+                        {"name": "Purchase Date", "key": "purchase_date"},
+                        {"name": "Created by", "key": "created_by"},
+                    ],
                     "fill_count": 6,
                     "search_id": page_obj_search_id
                 },
@@ -170,17 +165,17 @@ class BatchOrderComponentView(BaseComponentView):
                 "products": {
                     "data": products
                 },
-                "unit":{
+                "unit": {
                     "data": unit
                 },
-                "category":{
+                "category": {
                     "data": category
                 }
             },
-            
         })
 
         return context
+
 
 class CategoryComponentView(BaseComponentView):
     template_name = 'pages/category_list.html'
@@ -192,7 +187,13 @@ class CategoryComponentView(BaseComponentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        categories = Category.objects.all().order_by("id")
+
+        order_by_field = self.request.GET.get("order_by", "id")
+        order_direction = self.request.GET.get("direction", "asc")
+        order_prefix = "-" if order_direction == "desc" else ""
+
+
+        categories = Category.objects.all().order_by(f"{order_prefix}{order_by_field}")
         page_obj_search_id = "_category"
         search_query = self.request.GET.get(page_obj_search_id, "")
         _, page_obj = self.apply_search_and_pagination(categories, search_query, ["code"])
@@ -201,7 +202,11 @@ class CategoryComponentView(BaseComponentView):
             "tables": {
                 "page_obj": {
                     "data": page_obj,
-                    "fields": ["Category Name", "Code", "Created by"],
+                    "fields": [
+                    {"name": "Category Name", "key": "name"},
+                    {"name": "Code", "key": "code"},
+                    {"name": "Created by", "key": "created_by"},
+                ],
                     "fill_count": 4,
                     "search_id": page_obj_search_id
                 },
@@ -240,7 +245,11 @@ class DeliveryComponentView(BaseComponentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        sales_records = Delivery.objects.all().order_by("id")
+        order_by_field = self.request.GET.get("order_by", "id")
+        order_direction = self.request.GET.get("direction", "asc")
+        order_prefix = "-" if order_direction == "desc" else ""
+
+        sales_records = Delivery.objects.all().order_by(f"{order_prefix}{order_by_field}")
         page_obj_search_id = "_delivery"
         search_query = self.request.GET.get(page_obj_search_id, "")
         _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["delivery_id"])
@@ -250,11 +259,11 @@ class DeliveryComponentView(BaseComponentView):
                 "page_obj": {
                     "data": page_obj,
                     "fields": [
-                        "Delivery Id", 
-                        "Client Name", 
-                        "Delivery Date", 
-                        "Date Claimed",
-                        ],
+                    {"name": "Delivery ID", "key": "delivery_id"},
+                    {"name": "Client Name", "key": "client__name"},
+                    {"name": "Delivery Date", "key": "delivery_date"},
+                    {"name": "Date Claimed", "key": "date_claimed"},
+                ],
                     "fill_count": 9,
                     "search_id": page_obj_search_id
                 },
@@ -303,7 +312,11 @@ class ProductComponentView(BaseComponentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        products = Product.objects.all().order_by("id")
+        order_by_field = self.request.GET.get("order_by", "id")
+        order_direction = self.request.GET.get("direction", "asc")
+        order_prefix = "-" if order_direction == "desc" else ""
+
+        products = Product.objects.all().order_by(f"{order_prefix}{order_by_field}")
         supplier = Supplier.objects.all().order_by('id')
         unit = Unit.objects.all().order_by('id')
         category = Category.objects.all().order_by('id')
@@ -340,14 +353,13 @@ class ProductComponentView(BaseComponentView):
                     "header": "product",
                     "data": page_obj,
                     "fields": [
-                        "Product Name",
-                        "Code",
-                        "Quantity",
-                        "Selling Price", 
-                        "Critical Level", 
-                        "Product Status"
-                        ],
-                    
+                        {"name": "Product Name", "key": "name"},
+                        {"name": "Code", "key": "code"},
+                        {"name": "Quantity", "key": "quantity"},
+                        {"name": "Selling Price", "key": "selling_price"},
+                        {"name": "Critical Level", "key": "critical_level"},
+                        {"name": "Product Status", "key": "status"}
+                    ],
                     "fill_count": 11,
                     "search_id": page_obj_search_id
                 }, 
@@ -376,7 +388,11 @@ class SalesComponentView(BaseComponentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        sales_records = SalesRecord.objects.all().order_by("id")
+        order_by_field = self.request.GET.get("order_by", "id")
+        order_direction = self.request.GET.get("direction", "asc")
+        order_prefix = "-" if order_direction == "desc" else ""
+
+        sales_records = SalesRecord.objects.all().order_by(f"{order_prefix}{order_by_field}")
         page_obj_search_id = "_sales"
         search_query = self.request.GET.get(page_obj_search_id, "")
         _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["sale_id"])
@@ -386,14 +402,14 @@ class SalesComponentView(BaseComponentView):
                 "page_obj": {
                     "data": page_obj,
                     "fields": [
-                        "Sale No",
-                        "Client",
-                        "Date Issued",
-                        "Due Date",
-                        "Net Day",
-                        "Total",
-                        "Order Status"
-                        ],
+                    {"name": "Sale No", "key": "sale_id"},
+                    {"name": "Client", "key": "client__name"},
+                    {"name": "Date Issued", "key": "date_issued"},
+                    {"name": "Due Date", "key": "due_date"},
+                    {"name": "Net Day", "key": "net_day"},
+                    {"name": "Total", "key": "total"},
+                    {"name": "Order Status", "key": "order_status"},
+                ],
                     "fill_count": 9,
                     "search_id": page_obj_search_id
                 },

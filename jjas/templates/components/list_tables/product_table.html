@@ -15,10 +15,20 @@
                     </div>
                 </th>
                 {% if tables.page_obj.fields %}
-                    {% for f in tables.page_obj.fields %}
+                    {% for field in tables.page_obj.fields %}
                         <th scope="col" class="px-6 py-3">
                             <span class="flex items-center">
-                                <h6 href="#" class="text-gray-900 dark:text-white hover:text-gray-600">{{ f }}</h6>
+                                <a href="?order_by={{ field.key }}&direction={% if request.GET.direction == 'asc' and request.GET.order_by == field.key %}desc{% else %}asc{% endif %}" 
+                                class="text-gray-900 dark:text-white hover:text-gray-600">
+                                    {{ field.name }}
+                                    {% if request.GET.order_by == field.key %}
+                                        {% if request.GET.direction == "asc" %}
+                                            ↑
+                                        {% else %}
+                                            ↓
+                                        {% endif %}
+                                    {% endif %}
+                                </a>
                             </span>
                         </th>
                     {% endfor %}

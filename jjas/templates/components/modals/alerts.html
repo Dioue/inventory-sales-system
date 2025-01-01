@@ -1,0 +1,18 @@
+<div id="alert" class="hidden p-4 mb-4 border rounded-lg bg-blue-50 dark:bg-gray-800" role="alert" role="alert" aria-live="polite">
+    <div class="flex items-center">
+        <svg id="alert-icon" class="flex-shrink-0 w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path id="alert-icon-path" d=""></path>
+        </svg>
+        <span class="sr-only" id="alert-sr"></span>
+        <h3 id="alert-header" class="text-lg font-medium"></h3>
+    </div>
+    <div id="alert-text" class="mt-2 mb-4 text-sm"></div>
+    <div class="flex">
+        <button id="alert-add" type="button" class="hidden text-blue-800 border border-blue-700 font-medium rounded-lg text-xs px-3 py-1.5 me-2 inline-flex items-center">
+            Add another product
+        </button>
+        <button id="alert-dismiss" type="button" class="text-blue-800 bg-transparent border border-blue-700 font-medium rounded-lg text-xs px-3 py-1.5 text-center" data-dismiss-target="#alert" aria-label="Close">
+            Dismiss
+        </button>
+    </div>
+</div>

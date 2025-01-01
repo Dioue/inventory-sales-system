@@ -1,0 +1,141 @@
+{% load static %}
+
+
+<div id="product_create_modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
+    <div class="relative p-4 w-8/12 h-full md:h-auto">
+
+        <!-- Modal content -->
+        <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+            
+            <!-- Modal header -->
+            <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
+                
+                <h3 id="header-name" class="text-lg font-semibold text-gray-900 dark:text-white">
+                    {{modal.create_product.header.name}}
+                </h3>
+                <h6 id="header-id" class="ml-1 text-sm font-normal text-gray-500 dark:text-white">
+                    BN: {{modal.create_product.header.item_id}}
+                </h6>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="product_create_modal">
+                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+
+            </div>
+
+            <form action="#"
+            >
+                {% csrf_token %}
+                <div class="grid gap-4 mb-4 grid-cols-2 sm:grid-cols-4">
+                    <div class="col-span-1">
+                        <label id="product-label-name" for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name<span class="text-red-400">*</span></label>
+                        <input id="product-input-name" type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Automotive Part" required="true">
+                    </div>
+                    <div class="col-span-1">
+                        <label id="product-label-code" for="code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Code<span class="text-red-400">*</span></label>
+                        <input id="product-input-code" type="text" name="code" id="code" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="A0000A" required="true">
+                    </div>
+                    <div class="col-span-1">
+                        <label id="product-label-application" for="application" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Application<span class="text-red-400">*</span></label>
+                        <input id="product-input-application" type="text" name="application" id="application" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="i.e. Toyota, Audi" required="true">
+                    </div>
+                    <div class="col-span-1">
+                        <label id="product-label-side" for="side" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Side</label>
+                        <select id="product-select-side" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                            <option selected="" disabled>Select a side</option>
+                            <option value="">None</option>
+                            <option value="FR">FR - Front</option>
+                            <option value="RR">RR - Rear</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <div class="grid gap-4 grid-cols-4">
+                            <div class="col-span-2">
+                                <label id="product-label-selling_price" for="selling_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Selling Price (₱)<span class="text-red-400">*</span></label>
+                                <input id="product-input-selling_price" type="number" name="selling_price" id="selling_price" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="9999" required="true" min="0" >
+                            </div>
+                            <div class="col-span-1">
+                                <label id="product-label-quantity" for="quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity<span class="text-red-400">*</span></label>
+                                <input id="product-input-quantity" type="number" name="quantity" id="quantity" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="9999" required="true" min="0" >
+                            </div>
+                            <div class="col-span-1">
+                                <label id="product-label-unit" for="unit" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Unit<span class="text-red-400">*</span></label>
+                                <select id="product-select-unit"  name="unit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                                    <option selected="" disabled>UoM</option>
+                                    {% if tables.unit.data %}
+                                        {% for d in tables.unit.data %}
+                                        <option value={{d.id}}>{{d.name}}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <div class="grid gap-4 grid-cols-2">
+                            <div class="col-span-1">
+                                <label id="product-label-category"  for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category<span class="text-red-400">*</span></label>
+                                <select id="product-select-category"  name="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ">
+                                    <option selected="" disabled>Pick a category</option>
+                                    {% if tables.category.data %}
+                                        {% for d in tables.category.data %}
+                                            <option value={{d.id}}>{{d.code}} - {{d.name}}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                                
+                            </div>
+                            <div class="col-span-1">
+                                <label id="product-label-critical_level"  for="critical_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    Critical Level
+                                </label>
+                                <input 
+                                    type="number" 
+                                    name="critical_level" 
+                                    id="product-input-critical_level" 
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
+                                    placeholder="9999" 
+                                    value="0" 
+                                    min="0" 
+                                    required
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-4">
+                        <div class="grid gap-4 grid-cols-4">
+                            <div class="col-span-1">
+                                <label id="product-label-description"  for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+                                <textarea id="product-textarea-description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Write product description here"></textarea>
+                            </div>
+                            <div class="col-span-1">
+                                <label id="product-label-supplier" for="supplier" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier<span class="text-red-400">*</span></label>
+                                <select id="product-select-supplier" name="supplier" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ">
+                                    <option selected="" disabled>Pick a category</option>
+                                    {% if tables.supplier.data %}
+                                        {% for d in tables.supplier.data %}
+                                            <option value={{d.id}}>{{d.name}}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-span-2">
+                                <label id="product-label-image" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="default_size">Upload an Image</label>
+                                <input id="product-file-image" class="block w-full mb-5 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="default_size" name="image" type="file">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex">
+                    <button id="btn-submit" type="submit" class="ml-auto text-white inline-flex items-center bg-emerald-500 hover:bg-emerald-800 focus:ring-4 focus:outline-none focus:ring-emerald-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:focus:ring-emerald-800">
+                        <svg class="mr-1 -ml-1 w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        Update product
+                    </button>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+</div>

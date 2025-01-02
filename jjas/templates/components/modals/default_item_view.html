@@ -23,22 +23,21 @@
               </div>
               <!-- Modal body -->
               <div class="p-4 md:p-5 space-y-4">
-
-                <div class="grid gap-4 mb-4 grid-cols-2 text-gray-800">
-                    <p class="text-base leading-relaxed">
-                        Supplier Name: <span id="view_sn"></span>
+                <div class="grid gap-4 mb-4 grid-cols-2 text-black">
+                    <p class="text-base leading-relaxed col-span-1">
+                        Batch Number: <span id="view_batch_id" class="text-sm text-gray-600"></span>
+                    </p>
+                    <p class="text-base leading-relaxed col-span-1">
+                        Purchase Total: <span id="view_gt" class="text-sm text-gray-600"></span>
                     </p>
                     <p class="text-base leading-relaxed">
-                        Purchase Date: Date <span id="view_pd"></span>
+                        Supplier Name: <span id="view_sn" class="text-sm text-gray-600"></span>
+                    </p>
+                    <p class="text-base leading-relaxed">
+                        Purchase Date: <span id="view_pd" class="text-sm text-gray-600"></span>
                     </p>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4 ml-2">
-                    <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400 col-span-1">
-                        details
-                    </p>
-                </div>
-
+                {% include 'components/list_tables/batch_view.html' %}
               </div>
 
 

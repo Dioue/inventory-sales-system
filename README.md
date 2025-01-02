@@ -2,6 +2,7 @@
 > cd jjas && pip install -r requirements.txt
 > npm install -g tailwindcss
 > npm install flowbite
+> npm install simple-datatables --save
 
 ### To start tailwind
 

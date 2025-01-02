@@ -6,7 +6,9 @@ module.exports = {
     './node_modules/flowbite/**/*.js'
   ],
   plugins: [
-    require('flowbite/plugin') // Add Flowbite as a plugin
+    require('flowbite/plugin')({
+      datatables: true,
+  }),
   ],
   theme: {
     extend: {

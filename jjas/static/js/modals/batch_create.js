@@ -2,108 +2,114 @@
 /* THis is the POST request */
 
 document.getElementById('confirm_batch_submit').addEventListener('click', async function(event) {
-    const modalElement = document.getElementById('confirm_batch_create');
-    const modal = new Modal(modalElement);
-    modal.hide(); // Close the modal
-
     event.preventDefault(); // Prevent default form submission
+
+    // Close modal
+    const modal = new Modal(document.getElementById('confirm_batch_create'));
+    modal.hide();
+
+    // Get CSRF token
     const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
 
-    const supplier_name = document.getElementById('supplier-input').value;
+    // Get and validate supplier name and purchase date
+    const supplierName = document.getElementById('supplier-input').value;
     const purchaseDate = document.getElementById('purchase_date').value;
-    if (!supplier_name) {
-        alert('Please select a supplier.');
+
+    if (!supplierName || !purchaseDate) {
+        alert('Please select a supplier and provide a purchase date.');
         return;
     }
 
-    if (!purchaseDate) {
-        alert('Please provide a purchase date.');
-        return;
-    }
-
-    const dateObj = new Date(purchaseDate);
-    if (isNaN(dateObj)) {
+    const formattedDate = formatDate(purchaseDate);
+    if (!formattedDate) {
         alert('Please provide a valid purchase date.');
         return;
     }
 
-    const formattedDate = dateObj.toISOString().split('T')[0];
-
-    const rows = document.querySelectorAll('#batch_table_body tr'); // Get all rows with batch data
-    const items = [];
-
-    if (rows.length === 0) {
+    // Get batch items
+    const items = getBatchItems();
+    if (items.length === 0) {
         alert('Please add at least one product to the batch.');
         return;
     }
 
-    // Loop through each row and collect product details
-    let hasError = false;
-    rows.forEach(row => {
-        const productName = row.querySelector('.product-name').textContent.trim();
-        const quantity = parseInt(row.querySelector('[id^="quantity-"]').value, 10);
-        const costPrice = parseFloat(row.querySelector('[id^="cost-"]').value);
-        const defective = parseInt(row.querySelector('[id^="defective-"]').value, 10);
-        const productId = row.dataset.id; // Assuming product ID is stored in a data attribute
-        const crit = row.dataset.crit
-        
-        if (!productId || isNaN(quantity) || isNaN(costPrice) || isNaN(defective) || quantity <= 0 || costPrice <= 0) {
-            alert(`Please ensure all fields are correctly filled for product: ${productName}`);
-            hasError = true;
-            return;
-        }
+    // Calculate grand total
+    const grandTotal = items.reduce((sum, item) => sum + item.cost_price * item.quantity, 0);
 
-        items.push({
-            product: productId, // Use "product" as per serializer
-            quantity: quantity,
-            defective: defective,
-            cost_price: costPrice,
-        });
+    // Create content for the request
+    const batchContent = {
+        supplier: supplierName,
+        purchase_date: formattedDate,
+        grand_total: grandTotal,
+        items: items
+    };
 
-        
-    });
-
-    if (hasError) return;
-
+    // Submit the batch
     try {
-        const g_total = items.reduce((sum, item) => sum + item.cost_price * item.quantity, 0)
-
-        const _content = {
-            "supplier": supplier_name,
-            "purchase_date": formattedDate,
-            "grand_total": g_total,
-            "items": items
-        }
-
-
-        // Send the asynchronous POST request to create the BatchOrder and BatchOrderItems
-        const response = await fetch('/api/batch-orders/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken // Handle CSRF token for Django
-            },
-            body: JSON.stringify(_content)
-        });
-
-        const data = await response.json();
+        const response = await submitBatch(batchContent, csrfToken);
         if (response.ok) {
-            // Successfully created the batch
             alert('Batch Order created successfully!');
-            document.getElementById('batch_table_body').innerHTML = '';
-            document.getElementById('supplier').innerText = '';
-            document.getElementById('purchase_date').value = '';
+            resetForm();
         } else {
-            // Handle errors from Django
-            alert(`Error creating batch: ${data}`);
+            const errorData = await response.json();
+            alert(`Error creating batch: ${errorData}`);
         }
     } catch (error) {
         console.error('Error submitting batch:', error);
         alert('An error occurred while submitting the batch.');
     }
-
-    
 });
+
+function formatDate(purchaseDate) {
+    const dateObj = new Date(purchaseDate);
+    return isNaN(dateObj) ? null : dateObj.toISOString().split('T')[0];
+}
+
+function getBatchItems() {
+    const rows = document.querySelectorAll('#batch_table_body tr');
+    const items = [];
+
+    rows.forEach(row => {
+        const productName = row.querySelector('.product-name').textContent.trim();
+        const productId = row.dataset.id;
+        const quantity = parseInt(row.querySelector('[id^="quantity-"]').value, 10);
+        const costPrice = parseFloat(row.querySelector('[id^="cost-"]').value);
+        const defective = parseInt(row.querySelector('[id^="defective-"]').value, 10);
+
+        if (!productId || isNaN(quantity) || isNaN(costPrice) || isNaN(defective) || quantity <= 0 || costPrice <= 0) {
+            alert(`Please ensure all fields are correctly filled for product: ${productName}`);
+            return; // Stop further processing if validation fails
+        }
+
+        items.push({
+            product: productId,
+            quantity: quantity,
+            defective: defective,
+            cost_price: costPrice,
+        });
+    });
+
+    return items;
+}
+
+async function submitBatch(batchContent, csrfToken) {
+    const response = await fetch('/api/batch-orders/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify(batchContent)
+    });
+    return response;
+}
+
+function resetForm() {
+    document.getElementById('batch_table_body').innerHTML = '';
+    document.getElementById('supplier-input').value = '';
+    document.getElementById('purchase_date').value = '';
+    updateGrand()
+}
 
 
 
@@ -322,6 +328,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 tableBody.appendChild(newRow);
                 updateGrand();
                 resetDropdown();
+                
             } else {
                 alert('Product already added to the table.');
                 resetDropdown();

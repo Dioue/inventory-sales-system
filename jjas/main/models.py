@@ -64,13 +64,13 @@ class Product(SystemGeneratedData):
 
 # Batch Order Model
 class BatchOrder(SystemGeneratedData):
-    supplier = models.CharField(max_length=255, unique=True, blank=True, default="")
+    supplier = models.CharField(max_length=255, blank=True, default="")
     purchase_date = models.DateField(default=now)
     grand_total = models.DecimalField(max_digits=13, decimal_places=2)
     
 
     def __str__(self):
-        return f"Batch {self.id} - {self.supplier.name if self.supplier else 'No Supplier'}"
+        return f"Batch {self.id} - {self.supplier if self.supplier else 'No Supplier'}"
 
     class Meta:
         verbose_name_plural = "Batch Orders"

@@ -10,7 +10,7 @@ from django.views.generic import TemplateView, View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from .utils import request_user_info, apply_search_and_pagination
-from .models import (BatchOrder, BatchOrderItem, Category, Client, Delivery, Product, SalesRecord, SalesRecordItem, Supplier, Unit)
+from .models import (BatchOrder, BatchOrderItem, Category, Client, Delivery, Product, SalesRecord, SalesRecordItem, Unit)
 
 # Login View
 @method_decorator(never_cache, name="dispatch")
@@ -98,8 +98,7 @@ class BatchOrderComponentView(BaseComponentView):
         order_prefix = "-" if order_direction == "desc" else ""
         
         batch_order = BatchOrder.objects.all().order_by(f"{order_prefix}{order_by_field}")
-        supplier = Supplier.objects.all().order_by('id')
-        products = Product.objects.select_related("unit", "category", "supplier").order_by("id")
+        products = Product.objects.select_related("unit", "category").order_by("id")
         unit = Unit.objects.all().order_by('id')
         category = Category.objects.all().order_by('id')
 
@@ -112,7 +111,6 @@ class BatchOrderComponentView(BaseComponentView):
         
         # tables obj
         _, page_obj = self.apply_search_and_pagination(batch_order, search_query, ["id"])
-        _, supplier_obj = self.apply_search_and_pagination(supplier, '', ['id'])
 
         context.update({
             "content_label": {
@@ -140,15 +138,12 @@ class BatchOrderComponentView(BaseComponentView):
                     "data": page_obj,
                     "fields": [
                         {"name": "Batch No", "key": "id"},
-                        {"name": "Supplier", "key": "supplier_id"},  # Use actual field names
+                        {"name": "Supplier", "key": "supplier"},  # Use actual field names
                         {"name": "Purchase Date", "key": "purchase_date"},
                         {"name": "Created by", "key": "created_by"},
                     ],
                     "fill_count": 6,
                     "search_id": page_obj_search_id
-                },
-                "supplier": {
-                    "data": supplier_obj,
                 },
                 "products": {
                     "data": products
@@ -305,7 +300,6 @@ class ProductComponentView(BaseComponentView):
         order_prefix = "-" if order_direction == "desc" else ""
 
         products = Product.objects.all().order_by(f"{order_prefix}{order_by_field}")
-        supplier = Supplier.objects.all().order_by('id')
         unit = Unit.objects.all().order_by('id')
         category = Category.objects.all().order_by('id')
         _last_product_id = products.last().id if products.exists() else 1000
@@ -351,9 +345,6 @@ class ProductComponentView(BaseComponentView):
                     "fill_count": 11,
                     "search_id": page_obj_search_id
                 }, 
-                "supplier": {
-                    "data": supplier,
-                },
                 "unit":{
                     "data": unit
                 },

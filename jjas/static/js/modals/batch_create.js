@@ -9,10 +9,9 @@ document.getElementById('confirm_batch_submit').addEventListener('click', async 
     event.preventDefault(); // Prevent default form submission
     const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
 
-    const supplierId = document.getElementById('supplier').value;
+    const supplier_name = document.getElementById('supplier-input').value;
     const purchaseDate = document.getElementById('purchase_date').value;
-
-    if (!supplierId) {
+    if (!supplier_name) {
         alert('Please select a supplier.');
         return;
     }
@@ -47,9 +46,7 @@ document.getElementById('confirm_batch_submit').addEventListener('click', async 
         const defective = parseInt(row.querySelector('[id^="defective-"]').value, 10);
         const productId = row.dataset.id; // Assuming product ID is stored in a data attribute
         const crit = row.dataset.crit
-
-        console.log(productName, quantity, costPrice, defective, productId, crit)
-
+        
         if (!productId || isNaN(quantity) || isNaN(costPrice) || isNaN(defective) || quantity <= 0 || costPrice <= 0) {
             alert(`Please ensure all fields are correctly filled for product: ${productName}`);
             hasError = true;
@@ -70,6 +67,15 @@ document.getElementById('confirm_batch_submit').addEventListener('click', async 
 
     try {
         const g_total = items.reduce((sum, item) => sum + item.cost_price * item.quantity, 0)
+
+        const _content = {
+            "supplier": supplier_name,
+            "purchase_date": formattedDate,
+            "grand_total": g_total,
+            "items": items
+        }
+
+
         // Send the asynchronous POST request to create the BatchOrder and BatchOrderItems
         const response = await fetch('/api/batch-orders/', {
             method: 'POST',
@@ -77,12 +83,7 @@ document.getElementById('confirm_batch_submit').addEventListener('click', async 
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken // Handle CSRF token for Django
             },
-            body: JSON.stringify({
-                supplier: supplierId, // Match serializer field names
-                purchase_date: formattedDate,
-                grand_total: g_total,
-                items: items,
-            })
+            body: JSON.stringify(_content)
         });
 
         const data = await response.json();
@@ -90,7 +91,7 @@ document.getElementById('confirm_batch_submit').addEventListener('click', async 
             // Successfully created the batch
             alert('Batch Order created successfully!');
             document.getElementById('batch_table_body').innerHTML = '';
-            document.getElementById('supplier').selectedIndex = 0;
+            document.getElementById('supplier').innerText = '';
             document.getElementById('purchase_date').value = '';
         } else {
             // Handle errors from Django
@@ -241,7 +242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const id = event.target.dataset.id;
             const unit = event.target.dataset.unit;
             const cost = event.target.dataset.cost;
-            const crit = event.target.dataset.critical_level;
+            const crit = event.target.dataset.crit;
 
             if (!isProductInTable(name)) {
                 const newRow = document.createElement('tr');

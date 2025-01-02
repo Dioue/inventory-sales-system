@@ -11,7 +11,7 @@ class CustomUserThrottle(UserRateThrottle):
     rate = '30/m'
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.select_related("unit", "category", "supplier").all()
+    queryset = Product.objects.select_related("unit", "category").all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)

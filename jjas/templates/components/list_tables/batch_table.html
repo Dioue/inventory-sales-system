@@ -60,9 +60,9 @@
                         <td class="px-6 py-4">{{ obj.purchase_date|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.created_by|default:"system" }}</td>
                         <td class="flex items-center px-6 py-4">
-                            <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                            <button type="button" data-id="{{obj.id}}" class="batch_view font-medium text-blue-600 dark:text-blue-500 hover:underline">Details</button>
                             <span class="mx-2">|</span>
-                            <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                            <button type="button" data-id="{{obj.id}}" class="batch_edit font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</button>
                         </td>
                     </tr>
                 {% endfor %}
@@ -82,3 +82,6 @@
 {% include 'components/modals/batch_orders/batch_create.html' %}
 {% include 'components/modals/batch_orders/batch_update.html' %}
 {% include 'components/modals/products/product_create.html' %}
+{% include 'components/modals/default_item_view.html' %}
+
+<script src="{% static 'js/modals/batch_view_edit.js' %}"></script>

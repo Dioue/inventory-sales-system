@@ -142,7 +142,7 @@ const fetchCategory = async () => {
         if (!response.ok) throw new Error(`Error: ${response.statusText}`);
         allCategory = await response.json();
     } catch (error) {
-        console.error('Error fetching units:', error);
+        console.error('Error fetching category:', error);
     }
 };
 
@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <td class="px-6 py-4">
                         <p 
                             id="total-${id}" 
-                            class="font-bold text-gray-700 overflow-hidden whitespace-nowrap text-ellipsis" 
+                            class="total_price font-bold text-gray-700 overflow-hidden whitespace-nowrap text-ellipsis" 
                             style="width: 6rem; height: 1.5rem; display: inline-block; text-align: right;"
                         > ₱ ${cost}
                         </p>
@@ -319,6 +319,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </td>
                 `;
                 tableBody.appendChild(newRow);
+                updateGrand();
                 resetDropdown();
             } else {
                 alert('Product already added to the table.');
@@ -352,6 +353,7 @@ function updateTotal(id) {
     const costInput = document.getElementById(`cost-${id}`);
     const totalElement = document.getElementById(`total-${id}`);
     
+
     const quantity = parseFloat(quantityInput.value) || 0;
     const cost = parseFloat(costInput.value) || 0;
 
@@ -361,6 +363,24 @@ function updateTotal(id) {
 
     // Update the total element
     totalElement.textContent = formattedTotal;
+
+    updateGrand()
+}
+
+function updateGrand() {
+    const grand_price = document.querySelector('.batch_grand_price');
+    const total_price = document.querySelectorAll('.total_price');
+
+    // Update total grand price
+    let grand_total = 0;
+    total_price.forEach(el => {
+        const price_text = el.innerText.replace(/[^\d.]/g, ''); // Remove non-numeric characters except '.'
+        const price = parseFloat(price_text) || 0;
+        grand_total += price;
+    });
+
+    const formattedGrand = grand_total.toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
+    grand_price.innerText = formattedGrand;
 }
 
 

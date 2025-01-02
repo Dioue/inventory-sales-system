@@ -37,19 +37,6 @@ class Unit(SystemGeneratedData):
         ordering = ["name"]
         verbose_name_plural = "Units of Measure"
 
-
-# Supplier Model
-class Supplier(SystemGeneratedData):
-    name = models.CharField(max_length=255)
-    contact = models.TextField(blank=True, default='')
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name_plural = "Suppliers"
-
-
 # Product Model
 class Product(SystemGeneratedData):
     name = models.CharField(max_length=255, unique=True)
@@ -65,7 +52,6 @@ class Product(SystemGeneratedData):
     status = models.CharField(max_length=60, blank=True, default="")
 
     unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, related_name="products")
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, related_name="products")
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="products")
 
     def __str__(self):
@@ -78,7 +64,7 @@ class Product(SystemGeneratedData):
 
 # Batch Order Model
 class BatchOrder(SystemGeneratedData):
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name="batch_orders")
+    supplier = models.CharField(max_length=255, unique=True, blank=True, default="")
     purchase_date = models.DateField(default=now)
     grand_total = models.DecimalField(max_digits=13, decimal_places=2)
     

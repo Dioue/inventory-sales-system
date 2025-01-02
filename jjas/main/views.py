@@ -68,18 +68,6 @@ class BaseComponentView(LoginRequiredMixin, TemplateView):
         return context
 
     def apply_search_and_pagination(self, queryset, search_query, search_fields, page_size=10):
-        """
-        Apply search filter and paginate the queryset.
-
-        Args:
-            queryset: The base queryset.
-            search_query: The search term.
-            search_fields: List of fields to search.
-            page_size: Items per page.
-
-        Returns:
-            A tuple of (paginated_queryset, page_obj).
-        """
         if search_query:
             query = Q()
             for field in search_fields:
@@ -115,8 +103,8 @@ class BatchOrderComponentView(BaseComponentView):
         unit = Unit.objects.all().order_by('id')
         category = Category.objects.all().order_by('id')
 
-        _last_batch_order_id = batch_order.last().id if batch_order.exists() else '00'
-        _last_product_id = products.last().id if products.exists() else '00'
+        _last_batch_order_id = (batch_order.last().id + 1) if batch_order.exists() else '00'
+        _last_product_id = (products.last().id + 1) if products.exists() else '00'
 
         # search input id dynamically generated
         page_obj_search_id = "_batch_order"

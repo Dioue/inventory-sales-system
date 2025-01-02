@@ -4,9 +4,9 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from .api import ProductViewSet, UnitViewSet, BatchOrderViewSet, CategoryViewSet
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 
-router = DefaultRouter()
+router = SimpleRouter()
 router.register(r'products', ProductViewSet, basename='product')
 router.register(r'units', UnitViewSet)
 router.register(r'batch-orders', BatchOrderViewSet, basename='batchorder')

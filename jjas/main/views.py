@@ -402,7 +402,7 @@ class SalesComponentView(BaseComponentView):
                 "page_obj": {
                     "data": page_obj,
                     "fields": [
-                    {"name": "Sale No", "key": "sale_id"},
+                    {"name": "Sale No", "key": "id"},
                     {"name": "Client", "key": "client__name"},
                     {"name": "Date Issued", "key": "date_issued"},
                     {"name": "Due Date", "key": "due_date"},

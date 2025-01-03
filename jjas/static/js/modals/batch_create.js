@@ -5,7 +5,7 @@ document.getElementById('confirm_batch_submit').addEventListener('click', async 
     event.preventDefault(); // Prevent default form submission
 
     // Close modal
-    const modal = new Modal(document.getElementById('confirm_batch_create'));
+    const modal = new Modal(document.getElementById('confirm_batch_popup'));
     modal.hide();
 
     // Get CSRF token
@@ -342,6 +342,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             event.preventDefault();
             event.target.closest('tr').remove();
         }
+
+        updateGrand();
     });
 
     // Check if a product is already in the table
@@ -394,18 +396,23 @@ function updateGrand() {
 
 /* Sanitation of inputs because the UI used is a type='text'. Like why????  */
 function sanitizeToOne(inputElement) {  
+    const value = inputElement.value;
 
-    if (isNaN(inputElement.value)) {
+    if (isNaN(value)) {
         inputElement.value = 1;
     } else {
-        inputElement.value = inputElement.value.replace(/\s/g, '');
-    } 
-    const id = inputElement.id.split('-')[1]
-    updateTotal(id)
+        inputElement.value = value.includes('.') 
+            ? value.replace(/\./g, '')
+            : value.replace(/\s/g, ''); 
+    }
+
+    const id = inputElement.id.split('-')[1];
+    updateTotal(id);
 }
 
+
 const setToOneOnExit = (inputElement) => {
-    if (inputElement.value.trim() === '') {
+    if (inputElement.value.trim() === '' || inputElement.value.includes('.')) {
         inputElement.value = 1;  // Set to 1 if invalid
     }
     const id = inputElement.id.split('-')[1]
@@ -417,12 +424,14 @@ function sanitizeToZero(inputElement) {
     const parseValue = parseInt(inputElement.value) || 0;
     const qP = parseInt(quantityInput.value) || 0;
 
-    if (isNaN(inputElement.value)) {
+    if (isNaN(inputElement.value) || inputElement.value.includes('.')) {
         inputElement.value = 0;
     } else if (parseValue > qP) {
         inputElement.value = quantityInput.value
     } else {
-        inputElement.value = inputElement.value.replace(/\s/g, '');
+        inputElement.value = value.includes('.') 
+            ? value.replace(/\./g, '')
+            : value.replace(/\s/g, ''); 
     }
 
     const id = inputElement.id.split('-')[1]
@@ -471,7 +480,7 @@ const batch_function_increase = (item_name, item_id) => {
 
 /* For batch confirmation */
 document.getElementById('batch-create-btn').addEventListener('click', function (event) {
-        const modalElement = document.getElementById('confirm_batch_create');
+        const modalElement = document.getElementById('confirm_batch_popup');
         const modal = new Modal(modalElement);
         modal.show();
 
@@ -480,7 +489,7 @@ document.getElementById('batch-create-btn').addEventListener('click', function (
 
 document.querySelectorAll('.confirm-batch-hide').forEach((element) => {
     element.addEventListener('click', function () {
-        const modalElement = document.getElementById('confirm_batch_create');
+        const modalElement = document.getElementById('confirm_batch_popup');
         const modal = new Modal(modalElement);
         modal.hide(); // Close the modal
     });

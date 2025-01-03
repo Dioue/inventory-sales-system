@@ -28,7 +28,7 @@ class UnitViewSet(viewsets.ReadOnlyModelViewSet):
         serializer.save(created_by=self.request.user)
 
 
-class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]

@@ -79,32 +79,64 @@ class BatchOrderSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
-
         batch_order = BatchOrder.objects.create(**validated_data)
 
         for item_data in items_data:
             BatchOrderItem.objects.create(batch=batch_order, **item_data)
 
-        for item_data in items_data:
-            prod = item_data['product']
-            quantity = item_data['quantity']
-            defective = item_data['defective']
-            cost_price = item_data['cost_price']
-
-            product = Product.objects.get(id=prod.id)
-            updated_quantity = quantity - defective
-            crit_level = product.critical_level
-
-            product.quantity = product.quantity + updated_quantity
-
-            if product.quantity == 0:
-                status = 'Out of Stock'
-            elif product.quantity  < crit_level:
-                status = 'Low on Stock'
-            else:
-                status = 'Available'
-
-            product.status = status
-            product.save()
-
+        self.update_product_quantities(items_data, increment=True)
         return batch_order
+
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop('items')
+
+        # Update batch order fields
+        instance.supplier = validated_data.get('supplier', instance.supplier)
+        instance.purchase_date = validated_data.get('purchase_date', instance.purchase_date)
+        instance.grand_total = validated_data.get('grand_total', instance.grand_total)
+        instance.save()
+
+        # Handle nested items (product IDs only in payload)
+        existing_items = {item.product.id: item for item in instance.items.all()}
+        new_items = []
+
+        for item_data in items_data:
+            product_id = item_data['product']  # Expecting product ID, not product object
+            if product_id in existing_items:
+                # Update existing item
+                existing_item = existing_items.pop(product_id)
+                existing_item.cost_price = item_data.get('cost_price', existing_item.cost_price)
+                existing_item.quantity = item_data.get('quantity', existing_item.quantity)
+                existing_item.defective = item_data.get('defective', existing_item.defective)
+                existing_item.save()
+            else:
+                # Create new item
+                item_data['batch'] = instance  # Associate item with batch
+                new_items.append(BatchOrderItem(**item_data))
+
+        # Delete remaining items not included in the update
+        for remaining_item in existing_items.values():
+            remaining_item.delete()
+
+        # Create new items
+        BatchOrderItem.objects.bulk_create(new_items)
+
+        # Update product quantities based on new data
+        self.update_product_quantities(items_data, increment=True)
+        return instance
+
+    def update_product_quantities(self, items_data, increment=False):
+        for item_data in items_data:
+            product = Product.objects.get(id=item_data['product'])  # Fetch product by ID
+            quantity_change = item_data['quantity'] - item_data['defective']
+            product.quantity = product.quantity + quantity_change if increment else product.quantity - quantity_change
+
+            # Update product status
+            if product.quantity == 0:
+                product.status = 'Out of Stock'
+            elif product.quantity < product.critical_level:
+                product.status = 'Low on Stock'
+            else:
+                product.status = 'Available'
+
+            product.save()

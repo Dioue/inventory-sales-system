@@ -16,6 +16,7 @@ let products = null;
 let dataTableInstance = null;
 let update_units = [];
 let update_category = [];
+let gp = 0;
 
 
 // Function to fetch product details
@@ -433,6 +434,7 @@ function updateGrandBU() {
 
     const formattedGrand = grand_total.toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
     grand_price.innerText = formattedGrand;
+    gp = grand_total
 }
 
 
@@ -529,11 +531,10 @@ async function batchPut() {
         const rows = document.querySelectorAll('#batch-tbody-update tr');
 
         rows.forEach(row => {
-            const productId = row.dataset.productId;
+            const productId = row.dataset.id;
             const quantity = row.querySelector('[id^="quantity-"]').value;
             const costPrice = row.querySelector('[id^="cost-"]').value;
             const defective = row.querySelector('[id^="defective-"]').value;
-
             items.push({
                 product: productId,
                 quantity: parseInt(quantity) || 0,
@@ -552,8 +553,11 @@ async function batchPut() {
         const payload = {
             supplier,
             purchase_date: formattedDate,
+            grand_total: gp,
             items,
         };
+
+        console.log('Payload:', JSON.stringify(payload));
 
         // Send the PUT request
         const response = await fetch(`/api/batch-orders/${batchId}/`, {

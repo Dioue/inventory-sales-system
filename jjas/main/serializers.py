@@ -89,7 +89,6 @@ class BatchOrderSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         items_data = validated_data.pop('items')
-
         # Update batch order fields
         instance.supplier = validated_data.get('supplier', instance.supplier)
         instance.purchase_date = validated_data.get('purchase_date', instance.purchase_date)
@@ -127,7 +126,7 @@ class BatchOrderSerializer(serializers.ModelSerializer):
 
     def update_product_quantities(self, items_data, increment=False):
         for item_data in items_data:
-            product = Product.objects.get(id=item_data['product'])  # Fetch product by ID
+            product = Product.objects.get(id=item_data['product'].id)  # Fetch product by ID
             quantity_change = item_data['quantity'] - item_data['defective']
             product.quantity = product.quantity + quantity_change if increment else product.quantity - quantity_change
 

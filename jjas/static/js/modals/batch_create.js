@@ -93,6 +93,7 @@ function getBatchItems() {
 }
 
 async function submitBatch(batchContent, csrfToken) {
+    console.log("payload: " + batchContent)
     const response = await fetch('/api/batch-orders/', {
         method: 'POST',
         headers: {

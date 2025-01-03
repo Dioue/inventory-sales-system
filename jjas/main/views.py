@@ -302,7 +302,7 @@ class ProductComponentView(BaseComponentView):
         products = Product.objects.all().order_by(f"{order_prefix}{order_by_field}")
         unit = Unit.objects.all().order_by('id')
         category = Category.objects.all().order_by('id')
-        _last_product_id = products.last().id if products.exists() else 1000
+        _last_product_id = (products.last().id + 1) if products.exists() else 1000
         
         page_obj_search_id = "_product"
         search_query = self.request.GET.get(page_obj_search_id, "")

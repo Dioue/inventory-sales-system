@@ -125,8 +125,9 @@ document.getElementById('create-product-btn').addEventListener('click', function
 });
 
 
-document.querySelectorAll('confirm_product_cancel_btn').forEach((element) => {
+document.querySelectorAll('.confirm_product_cancel_btn').forEach((element) => {
     element.addEventListener('click', function () {
+        
         const modalElement = document.getElementById('confirm_product_create');
         const modal = new Modal(modalElement);
         modal.hide(); // Close the modal

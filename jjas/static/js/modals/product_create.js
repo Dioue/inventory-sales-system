@@ -39,7 +39,7 @@ document.getElementById('confirm_product_submit').addEventListener('click', asyn
                 })
                 .join('<br>');
 
-            showAlert('error', 'Unsuccessful product entry', formattedMessage);
+            generic_alert(`Unsuccessful product entry. Cause:\n${formattedMessage}`);
         }
     } catch (error) {
         console.error('Network error:', error);

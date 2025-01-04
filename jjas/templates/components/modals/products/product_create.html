@@ -12,7 +12,7 @@
             <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b border-black sm:mb-5 dark:border-gray-600">
                 
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Product Creation Form
+                    Product Form
                 </h3>
                 <h6 class="ml-1 text-sm font-normal text-gray-500 dark:text-white">
                     PN-{{modal.product_form.last_fetch_batch_id}}
@@ -98,7 +98,7 @@
                         <label id="product-label-description"  for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
                         <textarea id="product-textarea-description" name="description" rows="4" class="block p-2.5 w-full shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 max-h-20" placeholder="Write product description here" oninput="toSentenceCase(this)" maxlength="255"></textarea>
                     </div>
-                    <div class="col-span-1">
+                    <div class="col-span-2">
                         <label id="product-label-critical_level"  for="critical_level" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                             Critical Level
                         </label>
@@ -114,10 +114,6 @@
                             required
                             onkeydown="if(event.key === 'e' || event.key === 'E' || event.key === '+' || event.key === '-') event.preventDefault();"
                             oninput="validateNumberInput(this)">
-                    </div>
-                    <div class="col-span-3">
-                        <label id="product-label-image" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="default_size">Upload an Image</label>
-                        <input id="product-file-image" class="block w-full mb-5 text-sm text-gray-900 border border-black rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" name="image" type="file">
                     </div>
                 </div>
                 <div class="flex">

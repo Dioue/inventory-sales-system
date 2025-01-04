@@ -30,11 +30,8 @@ class ProductSerializer(serializers.ModelSerializer):
         category = data.get('category')
         category_id = category.id if category else None
 
-        supplier = data.get('supplier')
-
         unit = data.get('unit')
         unit_id = unit.id if unit else None
-
 
         # Validate that selling price is greater than cost price
         if cost_price is not None and selling_price is not None:
@@ -50,10 +47,10 @@ class ProductSerializer(serializers.ModelSerializer):
         # Validate unit existence
         if unit is None or not Unit.objects.filter(id=unit_id).exists():
             raise serializers.ValidationError({"unit": "Invalid or missing unit."})
-        
-        quantity = data.get('quantity_in_stock')
+
+        quantity = data.get('quantity')
         critical_level = data.get('critical_level')
-        
+
         if quantity is not None and critical_level is not None:
             if quantity == 0:
                 data['status'] = 'Out of Stock'
@@ -63,6 +60,36 @@ class ProductSerializer(serializers.ModelSerializer):
                 data['status'] = 'Available'
 
         return data
+
+    def update(self, instance, validated_data):
+        """
+        Update a Product instance with validated data.
+        """
+        # Update basic fields
+        instance.name = validated_data.get('name', instance.name)
+        instance.cost_price = validated_data.get('cost_price', instance.cost_price)
+        instance.selling_price = validated_data.get('selling_price', instance.selling_price)
+        instance.unit = validated_data.get('unit', instance.unit)
+        instance.category = validated_data.get('category', instance.category)
+        instance.quantity = validated_data.get('quantity', instance.quantity)
+        instance.critical_level = validated_data.get('critical_level', instance.critical_level)
+
+        # Update other fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        # Update stock status based on quantity and critical level
+        if instance.quantity == 0:
+            instance.status = 'Out of Stock'
+        elif instance.quantity < instance.critical_level:
+            instance.status = 'Low on Stock'
+        else:
+            instance.status = 'Available'
+
+        # Save the updated instance
+        instance.save()
+        return instance
+
     
 
 class BatchOrderItemSerializer(serializers.ModelSerializer):

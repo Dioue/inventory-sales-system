@@ -9,3 +9,4 @@ faker
 markdown
 django-filter
 drf-extensions
+django-unfold

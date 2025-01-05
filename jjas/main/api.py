@@ -1,8 +1,8 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Product, Unit, Category
-from .serializers import ProductSerializer, UnitSerializer, CategorySerializer
+from .models import Product, Unit, Category, SalesRecord, Delivery
+from .serializers import ProductSerializer, UnitSerializer, CategorySerializer, SalesRecordSerializer, DeliverySerializer
 from rest_framework import viewsets
 from .models import BatchOrder
 from .serializers import BatchOrderSerializer
@@ -18,6 +18,10 @@ class ProductViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+class SalesViewSet(viewsets.ModelViewSet):
+    queryset = SalesRecord.objects.prefetch_related('items').all()
+
 
 class UnitViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Unit.objects.all()
@@ -44,3 +48,21 @@ class BatchOrderViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+class SalesRecordViewSet(viewsets.ModelViewSet):
+    queryset = SalesRecord.objects.prefetch_related('items').all()
+    serializer_class = SalesRecordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Customize creation logic, if necessary
+        serializer.save()
+
+class DeliveryViewSet(viewsets.ModelViewSet):
+    queryset = Delivery.objects.select_related('sale').all()
+    serializer_class = DeliverySerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Customize creation logic, if necessary
+        serializer.save()

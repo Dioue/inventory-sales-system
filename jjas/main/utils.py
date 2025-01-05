@@ -1,4 +1,4 @@
-from .models import (BatchOrder, BatchOrderItem, Category, Client, Delivery, Product, SalesRecord, SalesRecordItem, Unit)
+from .models import (BatchOrder, BatchOrderItem, Category, Delivery, Product, SalesRecord, SalesRecordItem, Unit)
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.shortcuts import render, redirect, reverse

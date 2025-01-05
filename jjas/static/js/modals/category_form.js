@@ -54,8 +54,8 @@ const catCode = document.getElementById('category-code');
 
 modalCreateBtn.addEventListener('click', async () => {
     const cat = await fetchAllCategory();
-    const maxId = Math.max(...cat.map(category => category.id), 0);
-    formId.innerText = `CN-${maxId + 1}`;
+    const maxId = Math.max(...cat.map(category => category.id), 0) + 1;
+    formId.innerText = `CN-${(maxId).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}`;
     catName.value = '';
     catCode.value = '';
 

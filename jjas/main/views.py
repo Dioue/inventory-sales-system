@@ -10,7 +10,7 @@ from django.views.generic import TemplateView, View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from .utils import request_user_info, apply_search_and_pagination
-from .models import (BatchOrder, BatchOrderItem, Category, Client, Delivery, Product, SalesRecord, SalesRecordItem, Unit)
+from .models import (BatchOrder, BatchOrderItem, Category, Delivery, Product, SalesRecord, SalesRecordItem, Unit)
 
 # Login View
 @method_decorator(never_cache, name="dispatch")
@@ -138,6 +138,7 @@ class BatchOrderComponentView(BaseComponentView):
                     "data": page_obj,
                     "fields": [
                         {"name": "Batch No", "key": "id"},
+                        {"name": "Grand Total", "id": "grand_total"},
                         {"name": "Supplier", "key": "supplier"},  # Use actual field names
                         {"name": "Purchase Date", "key": "purchase_date"},
                         {"name": "Created by", "key": "created_by"},
@@ -233,6 +234,9 @@ class DeliveryComponentView(BaseComponentView):
         order_prefix = "-" if order_direction == "desc" else ""
 
         sales_records = Delivery.objects.all().order_by(f"{order_prefix}{order_by_field}")
+        unit = Unit.objects.all().order_by('id')
+        category = Category.objects.all().order_by('id')
+        sales_records = SalesRecord.objects.all().order_by('id')
         page_obj_search_id = "_delivery"
         search_query = self.request.GET.get(page_obj_search_id, "")
         _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["delivery_id"])
@@ -250,6 +254,9 @@ class DeliveryComponentView(BaseComponentView):
                     "fill_count": 9,
                     "search_id": page_obj_search_id
                 },
+                "units": unit,
+                "category": category,
+                "sales_record": sales_records
             },
 
             "form_action": {

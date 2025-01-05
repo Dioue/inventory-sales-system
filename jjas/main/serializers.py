@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Unit, Category, BatchOrder, BatchOrderItem
+from .models import Product, Unit, Category, BatchOrder, BatchOrderItem, SalesRecord, SalesRecordItem, Delivery
 
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:
@@ -166,3 +166,27 @@ class BatchOrderSerializer(serializers.ModelSerializer):
                 product.status = 'Available'
 
             product.save()
+
+
+class SalesRecordItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.ReadOnlyField(source="product.name")
+
+    class Meta:
+        model = SalesRecordItem
+        fields = ['id', 'sales_record', 'product', 'product_name', 'quantity', 'surcharge', 'amount']
+        read_only_fields = ['amount']
+
+class SalesRecordSerializer(serializers.ModelSerializer):
+    items = SalesRecordItemSerializer(many=True)
+
+    class Meta:
+        model = SalesRecord
+        fields = [
+            'id', 'client', 'client_address', 'date_issued', 'due_date',
+            'net_day', 'image', 'total', 'status', 'items'
+        ]
+
+class DeliverySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Delivery
+        fields = ['id', 'sale', 'sale_id', 'delivery_date', 'date_claimed', 'image', 'client']

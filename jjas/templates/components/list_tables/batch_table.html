@@ -1,4 +1,4 @@
-{% load static %}
+{% load static %} {% load humanize %}
 
 {% include 'components/list_actions.html' %}
 
@@ -56,6 +56,7 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             BN-{{ obj.id|default:"--" }}
                         </th>
+                        <td class="px-6 py-4">₱ {{ obj.grand_total|intcomma|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.supplier|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.purchase_date|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.created_by|default:"system" }}</td>

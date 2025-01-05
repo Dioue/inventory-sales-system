@@ -91,23 +91,13 @@ class BatchOrderItem(SystemGeneratedData):
         verbose_name_plural = "Batch Order Items"
 
 
-# Client Model
-class Client(SystemGeneratedData):
-    name = models.CharField(max_length=255, unique=True)
-    address = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name_plural = "Clients"
-
 def get_default_due_date():
     return now() + timedelta(days=30)
 
 # Sales Record Model
 class SalesRecord(SystemGeneratedData):
-    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, related_name="sales_records")
+    client = models.CharField(max_length=255)
+    client_address = models.CharField(max_length=255)
     date_issued = models.DateField(default=now)
     due_date = models.DateField(default=get_default_due_date)
     net_day = models.PositiveIntegerField(default=30)
@@ -116,11 +106,13 @@ class SalesRecord(SystemGeneratedData):
     status = models.BooleanField(default=False)
     
     def save(self, *args, **kwargs):
-        self.due_date = self.date_issued + timedelta(days=self.net_day)
+        if not self.pk or self.has_changed("date_issued") or self.has_changed("net_day"):
+            self.due_date = self.date_issued + timedelta(days=self.net_day)
         super().save(*args, **kwargs)
 
+    
     def __str__(self):
-        return self.id
+        return f"Sale {self.id} | {self.client}"
 
     class Meta:
         ordering = ["-date_issued"]
@@ -133,26 +125,27 @@ class SalesRecordItem(SystemGeneratedData):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name="sales_items")
     quantity = models.PositiveIntegerField(default=0)
     surcharge = models.DecimalField(max_digits=13, decimal_places=2, default=0.00)
-    amount = models.DecimalField(max_digits=13, decimal_places=2)
+    total = models.DecimalField(max_digits=13, decimal_places=2)
+
+    def calculate_total(self):
+        return (self.product.selling_price * self.quantity) + self.surcharge
 
     def save(self, *args, **kwargs):
         if self.product:
-            self.amount = (self.product.selling_price * self.quantity) + self.surcharge
+            self.total = self.calculate_total()
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return f"Item {self.id} in Sale {self.sales_record.id}"
 
-    class Meta:
-        verbose_name_plural = "Sales Record Items"
+        def __str__(self):
+            return f"Item {self.id} in Sale {self.sales_record.id}"
 
 
 # Delivery Model
 class Delivery(SystemGeneratedData):
-    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, related_name="deliveries")
-    delivery_date = models.DateTimeField(null=False, blank=True, default=now)
-    date_claimed = models.DateTimeField(null=False, blank=True, default=now)
-    image = models.ImageField(upload_to="deliveries/images/", null=True, blank=True, default='defaults/no_image.png')
+    sale = models.ForeignKey(SalesRecord, on_delete=models.SET_NULL, null=True, related_name="deliveries")
+    delivery_date = models.DateTimeField(null=True)
+    date_claimed = models.DateTimeField(null=True)
+    image = models.ImageField(upload_to="deliveries/images/",default='defaults/no_image.png')
 
     def __str__(self):
         return f"Delivery {self.id} for {self.client.name if self.client else 'No Client'}"

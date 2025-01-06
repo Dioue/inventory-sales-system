@@ -1,7 +1,7 @@
 
 {% load static %}
 <div id="sales-form" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
-    <div class="relative p-4 w-full max-w-4xl h-full md:h-auto">
+    <div class="relative p-4 w-full max-w-6xl h-full md:h-auto">
         <!-- Modal content -->
         <div class="relative p-4 bg-white rounded-lg border-2 dark:bg-gray-800 sm:p-5">
             <!-- Modal header -->
@@ -18,37 +18,19 @@
             </div>
             <!-- Modal body -->
             <form id="sales-form-control"></form>
-            <div class="grid gap-4 mb-4 grid-cols-4">
-                <div class="col-span-2">
+            <div class="grid gap-4 mb-4 grid-cols-10">
+                <div class="col-span-3">
                     <label for="sales-form-client" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Client Name<span class="text-red-400">*</span></label>
                     <input id="sales-form-client" type="text" name="client" 
                     class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                     placeholder="Enter client name" required="true" maxlength="60" oninput="toTitleCase(this)">
                 </div>
-                <div class="relative max-w-sm col-span-2">
+                <div class="relative max-w-sm col-span-3">
                     <label for="sales-form-issued" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date issued<span class="text-red-400">*</span></label>
                     <input id="sales-form-issued" name="date_issued" datepicker datepicker-autohide type="text" datepicker-min-date="01/01/2022" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select a date">
                 </div>
-                <div class="bg-white dark:bg-gray-900 col-span-2 relative">
-                    <label for="sales-form-search" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Add product to the sales</label>
-                    <div class="relative mt-1">
-                        <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                            </svg>
-                        </div>
-                        <input type="text" id="sales-form-search" class="block pt-2 ps-10 text-sm text-gray-900 shadow-md rounded-lg w-full bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search existing products">
-                    </div>
-                    <ul id="product-dropdown" class="absolute z-10 w-full hidden bg-white border border-gray-300 rounded-lg shadow-md dark:bg-gray-700 dark:border-gray-600 max-h-60 overflow-y-auto">
-                        <!-- Dynamic content will be injected here -->
-                        <li id="no-data" class="px-4 py-2 text-sm text-gray-900 dark:text-white hidden">No product data to show. 
-                            <button 
-                            class="text-blue-600 underline">Add product</button>
-                        </li>
-                    </ul>                    
-                </div>
-                <div class="col-span-2 flex direction-row">
-                    <div class="col-span-1 mr-4">
+                <div class="col-span-4 flex direction-row">
+                    <div class="col-span-2 mr-4">
                         <label for="sales-form-net" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Net day<span class="text-red-400">*</span></label>
                         <select id="sales-form-net"  name="net_day" class="shadow-md rounded-lg bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             <option selected="" disabled>Select a net day</option>
@@ -58,7 +40,7 @@
                                 <option value="90" sele>90 days</option>
                         </select>
                     </div>
-                    <div class="col-span-1">
+                    <div class="col-span-2">
                         <label for="sales-form-status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Payment status<span class="text-red-400">*</span></label>
                         <select id="sales-form-status"  name="status" class="shadow-md rounded-lg bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             <option selected="" disabled>Select payment status</option>
@@ -66,6 +48,22 @@
                             <option value="true">Paid</option>
                         </select>
                     </div>
+                </div>
+                <div class="bg-white dark:bg-gray-900 col-span-3 relative">
+                    <label for="sales-form-search" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Add product to the sales</label>
+                    <div class="relative mt-1">
+                        <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                            </svg>
+                        </div>
+                        <input type="text" id="sales-form-search" class="block pt-2 ps-10 text-sm text-gray-900 shadow-md rounded-lg w-full bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search existing products">
+                    </div>
+                    <ul id="sales-form-dropdown" class="absolute z-10 w-full hidden bg-white border border-gray-300 rounded-lg shadow-md dark:bg-gray-700 dark:border-gray-600 max-h-60 overflow-y-auto">
+                        <!-- Dynamic content will be injected here -->
+                        <li id="no-data" class="px-4 py-2 text-sm text-gray-900 dark:text-white hidden">No product data to show. 
+                        </li>
+                    </ul>                    
                 </div>
             </div>
             <div class="relative overflow-x-auto shadow-md sm:rounded-lg mb-5">
@@ -76,15 +74,18 @@
                                 Product
                             </th>
                             <th scope="col" class="px-6 py-3">
+                                Cost Price (₱)
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                Selling Price (₱)
+                            </th>
+                            <th scope="col" class="px-6 py-3">
                                 Quantity
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Defective Count
+                                Surcharge (%)
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Cost Price
-                            </th>
-                            <th scope="col" class="px-15 py-3">
                                 Total Price
                             </th>
                             <th scope="col" class="px-6 py-3">

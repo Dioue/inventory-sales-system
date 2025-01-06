@@ -25,9 +25,9 @@
             <div class="p-4 md:p-5 space-y-4">
                 <div class="grid grid-cols-4 gap-4 mb-4">
                     <div class="col-span-2">
-                        <label for="delivery-form-delivery" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Unit of Measurement<span class="text-red-400">*</span></label>
+                        <label for="delivery-form-delivery" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sales Record<span class="text-red-400">*</span></label>
                         <select id="delivery-form-delivery"  name="sale" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                            <option selected="" disabled>Select delivery record</option>
+                            <option selected="" disabled>Select a sale record</option>
                             {% if tables.delivery_record %}
                                 {% for d in tables.delivery_record%}
                                 <option value={{d.id}}>{{d.id}} - {{d.client}}</option>

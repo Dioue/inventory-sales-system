@@ -18,14 +18,15 @@
             </div>
             <!-- Modal body -->
             <form id="sales-form-control"></form>
+            {% csrf_token %}
             <div class="grid gap-4 mb-4 grid-cols-10">
-                <div class="col-span-3">
+                <div class="col-span-4">
                     <label for="sales-form-client" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Client Name<span class="text-red-400">*</span></label>
                     <input id="sales-form-client" type="text" name="client" 
                     class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                     placeholder="Enter client name" required="true" maxlength="60" oninput="toTitleCase(this)">
                 </div>
-                <div class="relative max-w-sm col-span-3">
+                <div class="relative max-w-sm col-span-2">
                     <label for="sales-form-issued" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date issued<span class="text-red-400">*</span></label>
                     <input id="sales-form-issued" name="date_issued" datepicker datepicker-autohide type="text" datepicker-min-date="01/01/2022" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select a date">
                 </div>
@@ -49,21 +50,55 @@
                         </select>
                     </div>
                 </div>
-                <div class="bg-white dark:bg-gray-900 col-span-3 relative">
-                    <label for="sales-form-search" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Add product to the sales</label>
-                    <div class="relative mt-1">
-                        <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                            </svg>
+                <div class="col-span-4">
+                    <label for="sales-form-address-line-1" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address line 1<span class="text-red-400">*</span></label>
+                    <input id="sales-form-address-line-1" type="text" name="address_line_1" 
+                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                    placeholder="e.g., house or building number, street name" required="true" maxlength="120">
+                </div>
+                <div class="col-span-4">
+                    <label for="sales-form-address-line-2" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address line 2<span class="font-italic text-gray-600 text-xs"> (Optional)</span></label>
+                    <input id="sales-form-address-line-2" type="text" name="address_line_2" 
+                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                    placeholder="e.g., apartment, suite, or floor numbers, or a PO Box number" required="true" maxlength="120">
+                </div>
+                <div class="col-span-3">
+                    <label for="sales-form-city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">City<span class="text-red-400">*</span></label>
+                    <input id="sales-form-city" type="text" name="city" 
+                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                    placeholder="e.g., Carmona City" required="true" maxlength="60" oninput="toTitleCase(this)">
+                </div>
+                <div class="col-span-3">
+                    <label for="sales-form-province" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Province<span class="text-red-400">*</span></label>
+                    <input id="sales-form-province" type="text" name="province" 
+                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                    placeholder="e.g., Cavite" required="true" maxlength="60" oninput="toTitleCase(this)">
+                </div>
+                <div class="col-span-2">
+                    <label for="sales-form-zip" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Zip Code<span class="text-red-400">*</span></label>
+                    <input id="sales-form-zip" type="text" name="zip_code" 
+                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                    placeholder="e.g., 4116" required="true" maxlength="4" oninput="sanitizeZipCode(this)">
+                </div>
+                <div class="bg-white dark:bg-gray-900 col-span-10 relative border-t border-black mt-5 pt-2">
+                    <div class="grid grid-cols-10 gap-4 mb-2">
+                        <div class="col-span-3">
+                            <label for="sales-form-search" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Add product to the sales</label>
+                            <div class="relative mt-1">
+                                <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                    </svg>
+                                </div>
+                                <input type="text" id="sales-form-search" class="block pt-2 ps-10 text-sm text-gray-900 shadow-md rounded-lg w-full bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search existing products">
+                            </div>
+                            <ul id="sales-form-dropdown" class="absolute z-10 w-4/12 hidden bg-white border border-gray-300 rounded-lg shadow-md dark:bg-gray-700 dark:border-gray-600 max-h-60 overflow-y-auto">
+                                <!-- Dynamic content will be injected here -->
+                                <li id="no-data" class="px-4 py-2 text-sm text-gray-900 dark:text-white hidden">No product data to show. 
+                                </li>
+                            </ul>
                         </div>
-                        <input type="text" id="sales-form-search" class="block pt-2 ps-10 text-sm text-gray-900 shadow-md rounded-lg w-full bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search existing products">
-                    </div>
-                    <ul id="sales-form-dropdown" class="absolute z-10 w-full hidden bg-white border border-gray-300 rounded-lg shadow-md dark:bg-gray-700 dark:border-gray-600 max-h-60 overflow-y-auto">
-                        <!-- Dynamic content will be injected here -->
-                        <li id="no-data" class="px-4 py-2 text-sm text-gray-900 dark:text-white hidden">No product data to show. 
-                        </li>
-                    </ul>                    
+                    </div>                    
                 </div>
             </div>
             <div class="relative overflow-x-auto shadow-md sm:rounded-lg mb-5">
@@ -107,7 +142,7 @@
                     <svg class="mr-1 -ml-1 w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
                     </svg>
-                    Create Sales Entry
+                    Update Sales Entry
                 </button>   
             </div>
         </form>
@@ -115,4 +150,5 @@
     </div>
 </div>
 
+{% include 'components/modals/sales/confirm_popup.html' %}
 <script src="{% static 'js/input_functions.js' %}"></script>

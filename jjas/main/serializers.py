@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import Product, Unit, Category, BatchOrder, BatchOrderItem, SalesRecord, SalesRecordItem, Delivery
+from .models import Product, Unit, Category, BatchOrder, BatchOrderItem, SalesRecord, SalesRecordItem, Delivery, Client, DailySales, WeeklySales, MonthlySales, SalesRecord
+from datetime import timedelta, datetime
+from decimal import Decimal
+
 
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:
@@ -167,24 +170,141 @@ class BatchOrderSerializer(serializers.ModelSerializer):
 
             product.save()
 
+class DailySalesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DailySales
+        fields = ['id', 'date', 'total_sales']
+        read_only_fields = ['total_sales']
+
+
+class WeeklySalesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WeeklySales
+        fields = ['id', 'start_date', 'end_date', 'total_sales']
+        read_only_fields = ['total_sales']
+
+
+class MonthlySalesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MonthlySales
+        fields = ['id', 'year', 'month', 'total_sales']
+        read_only_fields = ['total_sales']
+
+class ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = [
+            'id', 'name', 'address_line_1', 'address_line_2',
+            'city', 'province', 'zip_code'
+        ]
+
 
 class SalesRecordItemSerializer(serializers.ModelSerializer):
     product_name = serializers.ReadOnlyField(source="product.name")
 
     class Meta:
         model = SalesRecordItem
-        fields = ['id', 'sales_record', 'product', 'product_name', 'quantity', 'surcharge', 'amount']
-        read_only_fields = ['amount']
+        fields = ['id', 'product', 'product_name', 'quantity', 'surcharge', 'total']
+        read_only_fields = ['total']
+
 
 class SalesRecordSerializer(serializers.ModelSerializer):
     items = SalesRecordItemSerializer(many=True)
+    client = ClientSerializer()
 
     class Meta:
         model = SalesRecord
         fields = [
-            'id', 'client', 'client_address', 'date_issued', 'due_date',
-            'net_day', 'image', 'total', 'status', 'items'
+            'id', 'client', 'date_issued', 'due_date', 'net_day',
+            'image', 'total', 'status', 'items',
         ]
+
+    def create(self, validated_data):
+        # Extract and handle the nested client data
+        client_data = validated_data.pop('client')
+        items_data = validated_data.pop('items')
+
+        # Handle client creation or updating
+        client, created = Client.objects.get_or_create(
+            name=client_data['name'],
+            defaults=client_data
+        )
+        if not created:
+            # Update the existing client if not newly created
+            for key, value in client_data.items():
+                setattr(client, key, value)
+            client.save()
+
+        # Create the sales record
+        sales_record = SalesRecord.objects.create(client=client, **validated_data)
+
+        # Create the sales record items and associate them with the created sales record
+        for item_data in items_data:
+            SalesRecordItem.objects.create(sales_record=sales_record, **item_data)
+
+        # Update sales aggregates (Daily, Weekly, Monthly)
+        self.update_sales_aggregates(sales_record)
+
+        return sales_record
+
+    def update(self, instance, validated_data):
+        # Extract and handle the nested client data
+        client_data = validated_data.pop('client')
+        items_data = validated_data.pop('items')
+
+        # Update client
+        client = instance.client
+        for field, value in client_data.items():
+            setattr(client, field, value)
+        client.save()
+
+        # Update sales record fields
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.save()
+
+        # Update or create sales record items
+        instance.items.all().delete()
+        for item_data in items_data:
+            SalesRecordItem.objects.create(sales_record=instance, **item_data)
+
+        # Update sales aggregates
+        self.update_sales_aggregates(instance)
+
+        return instance
+
+    def update_sales_aggregates(self, sales_record):
+        """Update daily, weekly, and monthly sales aggregates."""
+        date = sales_record.date_issued
+        total = sales_record.total
+
+        # Update Daily Sales
+        daily_sales, _ = DailySales.objects.get_or_create(date=date)
+        daily_sales.total_sales = Decimal(daily_sales.total_sales)
+        daily_sales.total_sales += total
+        daily_sales.save()
+
+        # Update Weekly Sales
+        start_of_week = date - timedelta(days=date.weekday())
+        end_of_week = start_of_week + timedelta(days=6)
+        weekly_sales, _ = WeeklySales.objects.get_or_create(
+            start_date=start_of_week,
+            end_date=end_of_week,
+        )
+        weekly_sales.total_sales = Decimal(weekly_sales.total_sales)  # Convert total to Decimal
+        weekly_sales.total_sales += total
+        weekly_sales.save()
+
+        # Update Monthly Sales
+        monthly_sales, _ = MonthlySales.objects.get_or_create(
+            year=date.year,
+            month=date.month,
+        )
+        monthly_sales.total_sales = Decimal(monthly_sales.total_sales)
+        monthly_sales.total_sales += total
+        monthly_sales.save()
+
+
 
 class DeliverySerializer(serializers.ModelSerializer):
     class Meta:

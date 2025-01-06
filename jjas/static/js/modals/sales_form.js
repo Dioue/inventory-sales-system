@@ -1,4 +1,5 @@
 const createBtn = document.querySelector('.item-create-btn');
+const updateBtn = document.querySelectorAll('.sales-update-btn');
 const salesForm = document.querySelector('#sales-form');
 const salesFormHide = document.querySelector('.sales-form-hide');
 const formControl = document.querySelector('#sales-form-control');
@@ -6,20 +7,34 @@ const formSearch = document.querySelector('#sales-form-search');
 const formSearchDropdown = document.querySelector('#sales-form-dropdown');
 const formTbody = document.querySelector('#sales-form-tbody');
 const formNoData = document.getElementById('no-data');
+const submitBtn = document.querySelector('#sales-form-submit');
+const confirmModal = document.querySelector('#confirm-sales');
+const confirmBtn = document.querySelector('#confirm-submit');
+const confirmHide = document.querySelectorAll('.confirm-sales-hide');
 const modalOptions = {'backdrop': 'static'};
+const salesFormGrand = document.querySelector('.sales-form-grand-total');
+const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
 let allProducts = null;
 let allUnits = null;
 let allCategory = null;
 
 // Global form control
 const formId = document.querySelector('#sales-form-id');
-
-
+const formClient = document.querySelector("#sales-form-client");
+const formIssued = document.querySelector('#sales-form-issued');
+const formNet = document.querySelector("#sales-form-net");
+const formPayment = document.querySelector('#sales-form-status');
+const formAdressOne = document.querySelector('#sales-form-address-line-1');
+const formAdressTwo = document.querySelector('#sales-form-address-line-2');
+const formCity = document.querySelector('#sales-form-city');
+const formProvince = document.querySelector('#sales-form-province');
+const formZip = document.querySelector('#sales-form-zip');
 
 // API Fetch
-const fetchSales = async () => {
+const fetchSales = async (id = null) => {
     try {
-        const response = await fetch(`/api/sales-records/`);
+        const url = id === null ? `/api/sales-records/` : `/api/sales-records/${id}/`;
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Failed to fetch sales: ${response.statusText}`);
         }
@@ -31,9 +46,10 @@ const fetchSales = async () => {
     }
 }
 
-const fetchProducts = async () => {
+const fetchProducts = async (id = null) => {
     try {
-        const response = await fetch(`/api/products/`);
+        const url = id === null ? `/api/products/` : `/api/products/${id}/`;
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Failed to fetch product: ${response.statusText}`);
         }
@@ -42,6 +58,7 @@ const fetchProducts = async () => {
         console.error(`Error fetching product: `, error);
         throw error;
     }
+
 }
 
 const fetchUnits = async () => {
@@ -52,6 +69,7 @@ const fetchUnits = async () => {
     } catch (error) {
         console.error('Error fetching units:', error);
     }
+
 };
 
 const fetchCategory = async () => {
@@ -84,13 +102,109 @@ createBtn.addEventListener('click', async () => {
     // form data injection to DOM
     formId.innerText = `SN-${(maxId).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}`;
 
+    // reset form
+    hitTheQuan()
+
+    const handleSubmit = async () => {
+        new Modal(confirmModal, modalOptions).show();
+        const handleConfirmClick = async () => {
+            await salesAPI('POST');
+            new Modal(confirmModal, modalOptions).hide();
+        };
+    
+        confirmBtn.addEventListener('click', handleConfirmClick, { once: true });
+    
+        confirmHide.forEach(el => {
+            el.addEventListener('click', () => {
+                confirmBtn.removeEventListener('click', handleConfirmClick);
+                new Modal(confirmModal, modalOptions).hide();
+            }, {once: true})
+        })
+    };
+
     const handleModalHide = () => {
         new Modal(salesForm, modalOptions).hide();
         salesFormHide.removeEventListener('click', handleModalHide);
     };
+
+    submitBtn.addEventListener('click', handleSubmit);
     salesFormHide.addEventListener('click', handleModalHide, { once: true });
     new Modal(salesForm, modalOptions).show();
 })
+
+updateBtn.forEach(el => {
+    el.addEventListener('click', async (event) => {
+        try {
+            const allProducts = await fetchProducts();
+            const sale = await fetchSales(event.target.dataset.id);
+            const dateParts = sale.date_issued.split('-');
+            const formattedDate = `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}`;
+            
+
+            // reset the form
+            hitTheQuan();
+            formId.innerText = `SN-${sale.id}`;
+            formClient.value = sale.client.name;
+            formIssued.value = formattedDate;
+            formNet.value = sale.net_day;
+            formPayment.value = sale.status;
+            formAdressOne.value = sale.client.address_line_1;
+            formAdressTwo.value = sale.client.address_line_2;
+            formCity.value = sale.client.city;
+            formProvince.value = sale.client.province;
+            formZip.value = sale.client.zip_code;
+
+            sale.items.forEach(item => {
+                const prod = allProducts.find(prod => prod.id === item.product)
+                appendToTBody(item.product, item.product_name, prod.cost_price, prod.selling_price, item.quantity, item.surcharge)
+            })
+
+            const handleSubmit = async () => {
+                new Modal(confirmModal, modalOptions).show();
+                const handleConfirmClick = async () => {
+                    await salesAPI('PUT', sale.id);
+                    new Modal(confirmModal, modalOptions).hide();
+                };
+            
+                confirmBtn.addEventListener('click', handleConfirmClick, { once: true });
+            
+                confirmHide.forEach(el => {
+                    el.addEventListener('click', () => {
+                        confirmBtn.removeEventListener('click', handleConfirmClick);
+                        new Modal(confirmModal, modalOptions).hide();
+                    }, {once: true})
+                })
+            };
+            
+            const handleModalHide = () => {
+                new Modal(salesForm, modalOptions).hide();
+                submitBtn.removeEventListener('click', handleSubmit);
+                salesFormHide.removeEventListener('click', handleModalHide);
+            };
+        
+            submitBtn.addEventListener('click', handleSubmit);
+            salesFormHide.addEventListener('click', handleModalHide, { once: true });
+            new Modal(salesForm, modalOptions).show();
+        } catch (error) {
+            console.error('Error fetching sale data:', error);
+        }
+    });
+});
+
+
+//Form reset
+const hitTheQuan = () => {
+    formClient.value = '';
+    formIssued.value = '';
+    formNet.value = '';
+    formPayment.value = '';
+    formAdressOne.value = '';
+    formAdressTwo.value = '';
+    formCity.value = '';
+    formProvince.value = ''; 
+    formZip.value ='';
+    formTbody.innerHTML = '';
+}
 
 // Search controllers
 formSearch.addEventListener('input', async() => {
@@ -165,25 +279,25 @@ formSearchDropdown.addEventListener('click', (event) =>{
         if(event.target.dataset.quantity > 0){
             const prodId = event.target.dataset.id;
             const prodName = event.target.dataset.name;
-            const prodUnit = event.target.dataset.unit;
             const prodCost = event.target.dataset.cost;
             const prodSelling = event.target.dataset.selling;
             const prodQuantity = event.target.dataset.quantity;
-            const prodCrit = event.target.dataset.crit;
             if(!isProductInTable(prodName)){
-                appendToTBody(prodId, prodName, prodUnit, prodCost, prodSelling, prodQuantity, prodCrit);
+                appendToTBody(prodId, prodName, prodCost, prodSelling, prodQuantity);
             }
-        
-            // Remove product row from the table
-            formTbody.addEventListener('click', (event) => {
-                if (event.target && event.target.classList.contains('remove-row')) {
-                    event.preventDefault();
-                    event.target.closest('tr').remove();
-                }
-            });
         }
     }
 })
+
+// Remove product row from the table
+formTbody.addEventListener('click', (event) => {
+    if (event.target && event.target.classList.contains('remove-row')) {
+        event.preventDefault();
+        event.target.closest('tr').remove();
+    }
+
+    updateGrand();
+});
 
 // Check if a product is already in the table
 function isProductInTable(productName) {
@@ -192,8 +306,9 @@ function isProductInTable(productName) {
     });
 }
 
-const appendToTBody = (prodId, prodName, prodUnit, prodCost, prodSelling, prodQuantity, prodCrit) => {
+const appendToTBody = (prodId, prodName, prodCost, prodSelling, prodQuantity, surcharge="0.00") => {
     const newRow = document.createElement('tr');
+    newRow.dataset.id = prodId;
     newRow.className = "bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600";
     newRow.innerHTML = `
         <td class="product-name-${prodId} px-6 py-4 font-semibold text-gray-900 dark:text-white">${prodName}</td>
@@ -232,11 +347,11 @@ const appendToTBody = (prodId, prodName, prodUnit, prodCost, prodSelling, prodQu
                     placeholder="0.00" 
                     style="text-align: right;" 
                     onkeydown="if(event.key === 'e' || event.key === 'E' || event.key === '+' || event.key === '-') event.preventDefault();"
-                    value = "0.00"
+                    value = ${surcharge}
                 >
             </div>
         </td>
-        <td class="item-total-${prodId} px-6 py-4 font-semibold text-gray-900 dark:text-white product-name">
+        <td id="item-total-${prodId}" class="px-6 py-4 font-semibold text-gray-900 dark:text-white product-name">
         </td>
         <td class="px-6 py-4">
             <a href="#" class="font-medium text-red-600 dark:text-red-500 hover:underline remove-row">Remove</a>
@@ -329,19 +444,121 @@ const btn_increase = (item_name, item_id, item_max) => {
 
 
 const updateTotal = (id) => {
-    const totalElement = document.querySelector(`.item-total-${id}`); // Get the DOM element
+    const totalElement = document.querySelector(`#item-total-${id}`); // Get the DOM element
     const quantityVal = parseInt(document.querySelector(`#quantity-${id}`).value, 10);
     const surchargeVal = parseFloat(document.querySelector(`#surcharge-${id}`).value, 10);
     const sellingVal = parseFloat(document.querySelector(`.product-selling-${id}`).innerText.replace(/[^\d.]/g, ''), 10);
 
     let total = quantityVal * (sellingVal + (sellingVal * (surchargeVal / 100)));
     total = parseFloat(total).toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
-    console.log({
-        quantityVal,
-        surchargeVal,
-        sellingVal,
-        sellingText: document.querySelector(`.product-selling-${id}`).innerText
-    });
-    
     totalElement.innerText = `${total}`
+
+    updateGrand();
 };
+
+const updateGrand = () => {
+    const totalPrices = document.querySelectorAll('[id^="item-total-"')
+    let total = 0;
+    totalPrices.forEach(el => {
+        total += parseFloat(el.innerText.replace(/[^\d.]/g, ''), 10)
+    })
+
+    total = parseFloat(total).toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
+    salesFormGrand.innerText = `${total}`
+}
+
+
+const salesAPI = async (mode, id = null) => {
+    // Check if the values are correct first
+    if (!formClient.value){
+        generic_alert("Client name cannot be empty.")
+        return;
+    } else if (!formIssued.value && formatDate(formIssued.value)){
+        generic_alert("Please provide a valid date.")
+        return;
+    } else if (formNet.value === '' || formPayment.value === ''){
+        generic_alert("Please select a net day.")
+        return;
+    } else if (!formAdressOne.value || !formCity.value || !formProvince.value || !formZip.value) {
+        generic_alert("Please fill out all required address fields")
+        return;
+    } else if (formTbody.rows.length === 0) { // Check if tbody has rows
+        generic_alert("Please add at least one product to the sales record.");
+        return;
+    }
+
+    // Determine the API endpoint based on mode
+    const url = mode === 'POST' ? '/api/sales-records/' : `/api/sales-records/${id}/`;
+    const method = mode === 'POST' ? 'POST' : 'PUT';
+
+    // Extract the grand total value
+    const grand_total = parseFloat(salesFormGrand.innerText.replace(/[^\d.]/g, ''), 10);
+
+    // Prepare items array from table rows
+    const items = [];
+    const rows = document.querySelectorAll('#sales-form-tbody tr');
+    rows.forEach(row => {
+        const productId = row.dataset.id;
+        const quantity = row.querySelector('[id^="quantity-"]').value;
+        const surcharge = row.querySelector('[id^="surcharge-"]').value;
+        const total = row.querySelector('[id^="item-total-"]').innerText.replace(/[^\d.]/g, '');
+
+        items.push({
+            product: productId,
+            quantity: parseInt(quantity) || 0,
+            surcharge: parseFloat(surcharge) || 0,
+            total: parseFloat(total) || 0,
+        });
+    });
+
+    // Construct the payload
+    const payload = {
+        client: {
+            name: formClient.value.trim(),
+            address_line_1: formAdressOne.value.trim(),
+            address_line_2: formAdressTwo.value.trim(),
+            city: formCity.value.trim(),
+            province: formProvince.value.trim(),
+            zip_code: formZip.value.trim(),
+        },
+        date_issued: formatDate(formIssued.value.trim()),
+        net_day: parseInt(formNet.value) || 30,
+        status: formPayment.value === "true",
+        total: grand_total,
+        items,
+    };
+
+    // Log the payload for debugging
+    console.log('Payload:', payload);
+
+    try {
+        // Make the API request
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('API Response:', data);
+            generic_alert('Sales record successfully saved.', reload = true);
+        } else {
+            const error = await response.json();
+            console.error('API Error:', error);
+            generic_alert('Error saving sales record. Please check your input.');
+        }
+    } catch (error) {
+        console.error('Request Error:', error);
+        generic_alert('An unexpected error occurred.');
+    }
+};
+
+// Date formatter
+function formatDate(date) {
+    const dateObj = new Date(date);
+    return isNaN(dateObj) ? null : dateObj.toISOString().split('T')[0];
+}

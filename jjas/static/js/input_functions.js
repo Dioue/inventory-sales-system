@@ -51,3 +51,14 @@ function validateNumberInput(input) {
         input.value = input.value.slice(0, 4);
     }
 }
+
+
+const sanitizeZipCode = (inputElement) => {
+    // Replace all non-numeric characters with an empty string
+    inputElement.value = inputElement.value.replace(/\D/g, '');
+
+    // Optionally, limit the length to 6 characters (if you want to restrict the length)
+    if (inputElement.value.length > 6) {
+        inputElement.value = inputElement.value.slice(0, 6);
+    }
+};

@@ -90,14 +90,27 @@ class BatchOrderItem(SystemGeneratedData):
     class Meta:
         verbose_name_plural = "Batch Order Items"
 
+class Client(SystemGeneratedData):
+    # Address fields for the client
+    name = models.CharField(max_length=255)
+    address_line_1 = models.CharField(max_length=255)
+    address_line_2 = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=100)
+    province = models.CharField(max_length=100)
+    zip_code = models.CharField(max_length=20)
+
+    # Additional client info (e.g. name, email, etc. can be added as needed)
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
 
 def get_default_due_date():
     return now() + timedelta(days=30)
 
 # Sales Record Model
 class SalesRecord(SystemGeneratedData):
-    client = models.CharField(max_length=255)
-    client_address = models.CharField(max_length=255)
+    client = models.ForeignKey(Client, null=True, on_delete=models.SET_NULL)
     date_issued = models.DateField(default=now)
     due_date = models.DateField(default=get_default_due_date)
     net_day = models.PositiveIntegerField(default=30)
@@ -106,8 +119,13 @@ class SalesRecord(SystemGeneratedData):
     status = models.BooleanField(default=False)
     
     def save(self, *args, **kwargs):
-        if not self.pk or self.has_changed("date_issued") or self.has_changed("net_day"):
+        if not self.pk:  # New instance
             self.due_date = self.date_issued + timedelta(days=self.net_day)
+        else:
+            # Fetch the original values if the instance exists
+            original = SalesRecord.objects.get(pk=self.pk)
+            if original.date_issued != self.date_issued or original.net_day != self.net_day:
+                self.due_date = self.date_issued + timedelta(days=self.net_day)
         super().save(*args, **kwargs)
 
     
@@ -153,3 +171,42 @@ class Delivery(SystemGeneratedData):
     class Meta:
         ordering = ["-date_added"]
         verbose_name_plural = "Deliveries"
+
+
+class DailySales(SystemGeneratedData):
+    date = models.DateField(unique=True)
+    total_sales = models.DecimalField(max_digits=13, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"Daily Sales on {self.date} - ₱{self.total_sales}"
+
+    class Meta:
+        ordering = ["-date"]
+        verbose_name_plural = "Daily Sales"
+
+
+class WeeklySales(SystemGeneratedData):
+    start_date = models.DateField()
+    end_date = models.DateField()
+    total_sales = models.DecimalField(max_digits=13, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"Weekly Sales ({self.start_date} to {self.end_date}) - ₱{self.total_sales}"
+
+    class Meta:
+        ordering = ["-start_date"]
+        verbose_name_plural = "Weekly Sales"
+
+
+class MonthlySales(SystemGeneratedData):
+    year = models.PositiveIntegerField()
+    month = models.PositiveIntegerField()  # 1 = January, 12 = December
+    total_sales = models.DecimalField(max_digits=13, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"Monthly Sales ({self.year}-{self.month:02}) - ₱{self.total_sales}"
+
+    class Meta:
+        ordering = ["-year", "-month"]
+        verbose_name_plural = "Monthly Sales"
+        unique_together = ("year", "month")

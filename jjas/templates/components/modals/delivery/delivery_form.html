@@ -9,7 +9,7 @@
             <!-- Modal header -->
             <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                   <h3 id="delivery-form-text" class="text-lg font-semibold text-gray-900 dark:text-white">
-                      delivery Form
+                      Delivery Form
                   </h3>
                   <h6 id="delivery-form-id" class="ml-1 text-sm font-normal text-gray-500 dark:text-white">
                   </h6>
@@ -27,9 +27,9 @@
                     <div class="col-span-2">
                         <label for="delivery-form-sale" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sales Record<span class="text-red-400">*</span></label>
                         <select id="delivery-form-sale"  name="sale" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                            <option selected="" disabled>Select a sale record</option>
-                            {% if tables.undelivered_sales %}
-                                {% for d in tables.undelivered_sales%}
+                            <option value="" selected="" disabled>Select a sale record</option>
+                            {% if tables.sales_record %}
+                                {% for d in tables.sales_record%}
                                 <option value={{d.id}}>({{d.id}}) {{d.client.name}}</option>
                                 {% endfor %}
                             {% endif %}

@@ -60,7 +60,7 @@
                         <td class="px-6 py-4">{{ obj.delivery_date|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.date_claimed|default:"-" }}</td>
                         <td class="flex items-center px-6 py-4">
-                            <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                            <a href="#" data-id={{obj.id}} class="delivery-edit-btn font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                         </td>
                     </tr>
                 {% endfor %}

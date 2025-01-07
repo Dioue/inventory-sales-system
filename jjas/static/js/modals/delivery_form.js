@@ -1,5 +1,6 @@
 
 const createBtn = document.querySelector('.item-create-btn');
+const editBtn = document.querySelectorAll('.delivery-edit-btn');
 const deliveryForm = document.querySelector('#delivery-form');
 const deliveryFormHide = document.querySelector('.delivery-form-hide');
 const formControl = document.querySelector('#delivery-form-control');
@@ -16,14 +17,16 @@ const confirmHide = document.querySelectorAll('.confirm-delivery-hide');
 const modalOptions = {'backdrop': 'static'};
 let allSales = null;
 let sale_issued = null;
+let allDel = null;
 // Global form control
 const formId = document.querySelector('#delivery-form-id');
 
 
 // API Fetch
-const fetchdelivery = async () => {
+const fetchDelivery = async (id = null) => {
     try {
-        const response = await fetch(`/api/delivery/`);
+        const url = id === null ? `/api/delivery/` : `/api/delivery/${id}/`;
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Failed to fetch delivery: ${response.statusText}`);
         }
@@ -51,10 +54,15 @@ const fetchSales = async (id = null) => {
     }
 }
 
+// Load on DOM
+document.addEventListener('DOMContentLoaded', async () => {
+    allDel = await fetchDelivery();
+})
+
 // DOM controllers
 createBtn.addEventListener('click', async () => {
-
-    const delivery = await fetchdelivery();
+    familyGuy();
+    const delivery = await fetchDelivery();
     const maxId = Math.max(...delivery.map(d => d.id), 0) + 1;
 
     // form data injection to DOM
@@ -65,8 +73,8 @@ createBtn.addEventListener('click', async () => {
             const sale = await fetchSales(event.target.value);
             if (sale) {
                 saleSelected.dataset.id = sale.id;
-                deliveryDateInput.removeAttribute('disabled');
-                dateClaimedInput.removeAttribute('disabled');
+                deliveryDateInput.disabled = false;
+                dateClaimedInput.disabled = false;
                 const dateParts = sale.date_issued.split('-');
                 const formattedDate = `${dateParts[1]}-${dateParts[2]}-${dateParts[0]}`;
                 deliveryDateInput.value = formattedDate
@@ -110,9 +118,71 @@ createBtn.addEventListener('click', async () => {
 })
 
 
+editBtn.forEach(el => {
+    el.addEventListener('click', async (event) => {
+
+        const del = await fetchDelivery(event.target.dataset.id);
+        if (del) {
+            formId.innerText = `DN-${del.id}`
+            familyGuy();
+            saleSelected.value = del.sale;
+            saleSelected.disabled = true; 
+            deliveryDateInput.disabled = false;
+            dateClaimedInput.disabled = false;
+            const dateParts = del.delivery_date.split('-');
+            const claimedParts = del.date_claimed.split('-');
+            const formattedDate = `${dateParts[1]}-${dateParts[2]}-${dateParts[0]}`;
+            const formattedClaimed = `${claimedParts[1]}-${claimedParts[2]}-${claimedParts[0]}`;
+            deliveryDateInput.value = formattedDate;
+            dateClaimedInput.value = formattedClaimed;
+        }
+
+
+        const handleSubmit = async () => {
+            new Modal(confirmModal, modalOptions).show();
+            const handleConfirmClick = async () => {
+                await deliveryAPI('PUT', del.id);
+                new Modal(confirmModal, modalOptions).hide();
+            };
+        
+            confirmBtn.addEventListener('click', handleConfirmClick, { once: true });
+        
+            confirmHide.forEach(el => {
+                el.addEventListener('click', () => {
+                    confirmBtn.removeEventListener('click', handleConfirmClick);
+                    new Modal(confirmModal, modalOptions).hide();
+                }, {once: true})
+            })
+        };
+    
+        submitBtn.addEventListener('click', handleSubmit);
+        const handleModalHide = () => {
+            new Modal(deliveryForm, modalOptions).hide();
+            sale_issued = null;
+            familyGuy();
+            submitBtn.removeEventListener('click', handleSubmit);
+            deliveryFormHide.removeEventListener('click', handleModalHide);
+        };
+        deliveryFormHide.addEventListener('click', handleModalHide, { once: true });
+        new Modal(deliveryForm, modalOptions).show();
+
+    })
+})
+
+const familyGuy = () => {
+    deliveryDateInput.disabled = true
+    dateClaimedInput.disabled = true;
+    deliveryDateInput.value = '';
+    dateClaimedInput.value = '';
+    saleSelected.value = ''
+    saleSelected.disabled = false;
+}
+
+
 const deliveryAPI = async (method, id = null) => {
     const deliveryDate = new Date(deliveryDateInput.value);
     const dateClaimed = new Date(dateClaimedInput.value);
+    const issued_sale = new Date(sale_issued);
 
     // Check if `date_claimed` is valid and >= `delivery_date`
     if (isNaN(deliveryDate) || isNaN(dateClaimed)) {
@@ -123,15 +193,29 @@ const deliveryAPI = async (method, id = null) => {
     if (dateClaimed < deliveryDate) {
         generic_alert('Error: Date claimed cannot be earlier than the delivery date.');
         return;
-    } else if (deliveryDate >= sale_issued) {
+    } else if (deliveryDate < issued_sale && deliveryDate.toDateString() !== issued_sale.toDateString()) {
         generic_alert('Error: delivery date cannot be earlier than the sale issued date.');
         return;
-    }
+    } else if (method === 'POST') {
+        const existingDel = allDel.find(del => del.sale == saleSelected.dataset.id) // if exists
+        console.log(allDel)
+        if(existingDel) {
+            generic_alert('Error: Cannot save another delivery with the same sale number.');
+            return;
+        }
+    }   
+
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
     const payload = {
         sale: saleSelected.dataset.id,
-        delivery_date: deliveryDate.toISOString().split('T')[0],
-        date_claimed: dateClaimed.toISOString().split('T')[0],
+        delivery_date: formatDate(deliveryDate),
+        date_claimed: formatDate(dateClaimed),
     };
 
     console.log(payload);
@@ -150,10 +234,10 @@ const deliveryAPI = async (method, id = null) => {
         const responseBody = await response.json();
         if (!response.ok) {
             console.log('Error Response:', responseBody);
-            throw new Error(`Failed to ${method === 'POST' ? 'create' : 'update'} delivery.`);
+            throw new Error(`Failed to ${method === 'POST' ? 'create' : 'update'} delivery.`, reload=true);
         }
         
-        generic_alert(`Delivery ${method === 'POST' ? 'created' : 'updated'} successfully.`, reload = true);
+        generic_alert(`Delivery ${method === 'POST' ? 'created' : 'updated'} successfully.`);
     } catch (error) {
         generic_alert(`Error: ${error.message}`);
     }

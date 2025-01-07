@@ -237,7 +237,6 @@ class DeliveryComponentView(BaseComponentView):
         unit = Unit.objects.all().order_by('id')
         category = Category.objects.all().order_by('id')
         sales_records = SalesRecord.objects.all().order_by('id')
-        undelivered_sales = SalesRecord.objects.filter(deliveries__isnull=True).order_by('id')
         page_obj_search_id = "_delivery"
         search_query = self.request.GET.get(page_obj_search_id, "")
         _, page_obj = self.apply_search_and_pagination(delivery, search_query, ["delivery_id"])
@@ -257,8 +256,7 @@ class DeliveryComponentView(BaseComponentView):
                 },
                 "units": unit,
                 "category": category,
-                "sales_record": sales_records,
-                "undelivered_sales": undelivered_sales
+                "sales_record": sales_records
             },
 
             "form_action": {

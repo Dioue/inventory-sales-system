@@ -1,4 +1,4 @@
-{% load static %}
+{% load static %} {% load humanize %}
 
 {% include 'components/list_actions.html' %}
 
@@ -60,7 +60,7 @@
                         <td class="px-6 py-4">{{ obj.date_issued|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.due_date|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.net_day|default:"-" }}</td>
-                        <td class="px-6 py-4">{{ obj.total|default:"-" }}</td>
+                        <td class="px-6 py-4">₱ {{ obj.total|intcomma|default:"-" }}</td>
                         {% if obj.status == True %}
                             <td class="px-6 py-4">Paid</td>
                         {% elif obj.status == False %}
@@ -92,3 +92,4 @@
 {% include 'components/modals/generic_alert.html' %}
 <script src="{% static 'js/modals/sales_form.js' %}"></script>
 <script src="{% static 'js/generic_alert.js' %}"></script>
+<script src="{% static 'js/input_functions.js' %}"></script>

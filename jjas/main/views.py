@@ -233,21 +233,22 @@ class DeliveryComponentView(BaseComponentView):
         order_direction = self.request.GET.get("direction", "asc")
         order_prefix = "-" if order_direction == "desc" else ""
 
-        sales_records = Delivery.objects.all().order_by(f"{order_prefix}{order_by_field}")
+        delivery = Delivery.objects.all().order_by(f"{order_prefix}{order_by_field}")
         unit = Unit.objects.all().order_by('id')
         category = Category.objects.all().order_by('id')
         sales_records = SalesRecord.objects.all().order_by('id')
+        undelivered_sales = SalesRecord.objects.filter(deliveries__isnull=True).order_by('id')
         page_obj_search_id = "_delivery"
         search_query = self.request.GET.get(page_obj_search_id, "")
-        _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["delivery_id"])
+        _, page_obj = self.apply_search_and_pagination(delivery, search_query, ["delivery_id"])
 
         context.update({
             "tables": {
                 "page_obj": {
                     "data": page_obj,
                     "fields": [
-                    {"name": "Delivery ID", "key": "delivery_id"},
-                    {"name": "Client Name", "key": "client__name"},
+                    {"name": "Delivery Id", "key": "id"},
+                    {"name": "Sale No", "key": "sale_id"},
                     {"name": "Delivery Date", "key": "delivery_date"},
                     {"name": "Date Claimed", "key": "date_claimed"},
                 ],
@@ -256,7 +257,8 @@ class DeliveryComponentView(BaseComponentView):
                 },
                 "units": unit,
                 "category": category,
-                "sales_record": sales_records
+                "sales_record": sales_records,
+                "undelivered_sales": undelivered_sales
             },
 
             "form_action": {

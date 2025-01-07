@@ -22,6 +22,9 @@ class ProductViewSet(viewsets.ModelViewSet):
 class SalesViewSet(viewsets.ModelViewSet):
     queryset = SalesRecord.objects.prefetch_related('items').all()
 
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
 
 class UnitViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Unit.objects.all()
@@ -55,8 +58,7 @@ class SalesRecordViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        # Customize creation logic, if necessary
-        serializer.save()
+        serializer.save(created_by=self.request.user)
 
 class DeliveryViewSet(viewsets.ModelViewSet):
     queryset = Delivery.objects.select_related('sale').all()
@@ -64,5 +66,4 @@ class DeliveryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        # Customize creation logic, if necessary
-        serializer.save()
+        serializer.save(created_by=self.request.user)

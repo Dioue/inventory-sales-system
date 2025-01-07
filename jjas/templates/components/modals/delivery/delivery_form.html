@@ -25,23 +25,23 @@
             <div class="p-4 md:p-5 space-y-4">
                 <div class="grid grid-cols-4 gap-4 mb-4">
                     <div class="col-span-2">
-                        <label for="delivery-form-delivery" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sales Record<span class="text-red-400">*</span></label>
-                        <select id="delivery-form-delivery"  name="sale" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        <label for="delivery-form-sale" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sales Record<span class="text-red-400">*</span></label>
+                        <select id="delivery-form-sale"  name="sale" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             <option selected="" disabled>Select a sale record</option>
-                            {% if tables.delivery_record %}
-                                {% for d in tables.delivery_record%}
-                                <option value={{d.id}}>{{d.id}} - {{d.client}}</option>
+                            {% if tables.undelivered_sales %}
+                                {% for d in tables.undelivered_sales%}
+                                <option value={{d.id}}>({{d.id}}) {{d.client.name}}</option>
                                 {% endfor %}
                             {% endif %}
                         </select>
                     </div>
                     <div class="relative max-w-sm col-span-2">
                         <label for="delivery-form-issued" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Delivery Date<span class="text-red-400">*</span></label>
-                        <input id="delivery-form-issued" name="delivery_date" datepicker datepicker-autohide type="text" datepicker-min-date="01/01/2022" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select a date">
+                        <input id="delivery-form-issued" name="delivery_date" datepicker-format="mm-dd-yyyy" datepicker datepicker-autohide type="text" datepicker-min-date="01/01/2022" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select a date" disabled>
                     </div>
                     <div class="relative max-w-sm col-span-2">
                         <label for="delivery-form-claimed" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date claimed<span class="text-red-400">*</span></label>
-                        <input id="delivery-form-claimed" name="date_claimed" datepicker datepicker-autohide type="text" datepicker-min-date="01/01/2022" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select a date">
+                        <input id="delivery-form-claimed" name="date_claimed" datepicker-format="mm-dd-yyyy" datepicker datepicker-buttons datepicker-autoselect-today datepicker-autohide type="text" datepicker-min-date="01/01/2022" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select a date" disabled>
                     </div>
                 </div>
                 <div class="flex">
@@ -59,4 +59,3 @@
 </div>
 
 {% include 'components/modals/delivery/confirm_popup.html' %}
-<script src="{% static 'js/input_functions.js' %}"></script>

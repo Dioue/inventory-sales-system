@@ -130,7 +130,7 @@ class SalesRecord(SystemGeneratedData):
 
     
     def __str__(self):
-        return f"Sale {self.id} | {self.client}"
+        return f"{self.id}"
 
     class Meta:
         ordering = ["-date_issued"]
@@ -161,8 +161,8 @@ class SalesRecordItem(SystemGeneratedData):
 # Delivery Model
 class Delivery(SystemGeneratedData):
     sale = models.ForeignKey(SalesRecord, on_delete=models.SET_NULL, null=True, related_name="deliveries")
-    delivery_date = models.DateTimeField(null=True)
-    date_claimed = models.DateTimeField(null=True)
+    delivery_date = models.DateField(null=True)
+    date_claimed = models.DateField(null=True)
     image = models.ImageField(upload_to="deliveries/images/",default='defaults/no_image.png')
 
     def __str__(self):

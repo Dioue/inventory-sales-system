@@ -309,4 +309,4 @@ class SalesRecordSerializer(serializers.ModelSerializer):
 class DeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = Delivery
-        fields = ['id', 'sale', 'sale_id', 'delivery_date', 'date_claimed', 'image', 'client']
+        fields = ['id', 'sale', 'delivery_date', 'date_claimed']

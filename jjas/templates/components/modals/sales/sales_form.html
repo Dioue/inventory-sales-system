@@ -28,7 +28,9 @@
                 </div>
                 <div class="relative max-w-sm col-span-2">
                     <label for="sales-form-issued" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date issued<span class="text-red-400">*</span></label>
-                    <input id="sales-form-issued" name="date_issued" datepicker datepicker-autohide type="text" datepicker-min-date="01/01/2022" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select a date">
+                    <input id="sales-form-issued" name="date_issued" datepicker 
+                    datepicker-format="mm-dd-yyyy"
+                    datepicker-autohide type="text" datepicker-min-date="01/01/2022" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select a date">
                 </div>
                 <div class="col-span-4 flex direction-row">
                     <div class="col-span-2 mr-4">
@@ -151,4 +153,3 @@
 </div>
 
 {% include 'components/modals/sales/confirm_popup.html' %}
-<script src="{% static 'js/input_functions.js' %}"></script>

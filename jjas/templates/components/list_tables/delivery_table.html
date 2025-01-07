@@ -56,13 +56,10 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             {{ obj.id|default:"--" }}
                         </th>
-                        <td class="px-6 py-4">{{ obj.client_name|default:"-" }}</td>
+                        <td class="px-6 py-4">{{ obj.sale|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.delivery_date|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.date_claimed|default:"-" }}</td>
-                        <td class="px-6 py-4">{{ obj.net_day|default:"-" }}</td>
                         <td class="flex items-center px-6 py-4">
-                            <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
-                            <span class="mx-2">|</span>
                             <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                         </td>
                     </tr>
@@ -81,4 +78,7 @@
 </div>
 
 {% include 'components/modals/delivery/delivery_form.html' %}
+{% include 'components/modals/generic_alert.html' %}
 <script src="{% static 'js/modals/delivery_form.js' %}"></script>
+<script src="{% static 'js/input_functions.js' %}"></script>
+<script src="{% static 'js/generic_alert.js' %}"></script>

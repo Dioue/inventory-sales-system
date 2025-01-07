@@ -2,18 +2,17 @@
 // show a view quackity quack
 const view = document.querySelectorAll('.batch_view');
 const edit = document.querySelectorAll('.batch_edit');
-const modalView = document.getElementById('default_item_view');
-const modalEdit = document.getElementById('batch_update');
-const modalViewHideBtn = document.querySelector('.default_item_view_hide');
-const modalEditHideBtn = document.getElementById('batch_update_hide_btn');
-const noData = document.getElementById('no-data');
-const dropdown = document.getElementById('product-dropdown-update');
-const searchInput = document.getElementById('table-search-update');
-const tableBody = document.getElementById('batch-tbody-update');
-const setStatic = {"backdrop": "static"}
+const _modalView = document.getElementById('default_item_view');
+const _modalEdit = document.getElementById('batch_update');
+const _modalViewHideBtn = document.querySelector('.default_item_view_hide');
+const _modalEditHideBtn = document.getElementById('batch_update_hide_btn');
+const _noData = document.getElementById('no-data');
+const _dropdown = document.getElementById('product-dropdown-update');
+const _searchInput = document.getElementById('table-search-update');
+const _tableBody = document.getElementById('batch-tbody-update');
+const _setStatic = {"backdrop": "static"}
 const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
-let products = null;
-let dataTableInstance = null;
+let _products = null;
 let update_units = [];
 let update_category = [];
 let gp = 0;
@@ -39,7 +38,7 @@ const fetchProductData = async () => {
         if (!response.ok) throw new Error(`Error: ${response.statusText}`);
 
         const prod = await response.json();
-        products = prod;
+        _products = prod;
         return prod;
     } catch (error) {
         console.error('Error fetching products:', error);
@@ -86,9 +85,9 @@ async function handleViewClick(event) {
             supplier_name.innerText = batch.supplier;
             purchase_date.innerText = batch.purchase_date;
 
-            const tableBodyView = document.querySelector('#batch-view-table tbody');
+            const _tableBodyView = document.querySelector('#batch-view-table tbody');
             if (batch.items.length > 0) {
-                tableBodyView.innerHTML = '';
+                _tableBodyView.innerHTML = '';
                 const fragment = document.createDocumentFragment();
                 batch.items.forEach(item => {
                     const row = document.createElement('tr');
@@ -99,12 +98,12 @@ async function handleViewClick(event) {
                     });
                     fragment.appendChild(row);
                 });
-                tableBodyView.appendChild(fragment);
+                _tableBodyView.appendChild(fragment);
 
 
                 // Attach the simpleDatatables library. This shit is awesome! 
                 if (typeof simpleDatatables.DataTable !== 'undefined') {
-                    if (!tableBodyView.classList.contains('initialized')) {
+                    if (!_tableBodyView.classList.contains('initialized')) {
                         dataTableInstance = new simpleDatatables.DataTable("#batch-view-table", {
                             searchable: true,
                             sortable: true,
@@ -115,7 +114,7 @@ async function handleViewClick(event) {
                 }
             }
             
-            new Modal(modalView, setStatic).show();  
+            new Modal(_modalView, _setStatic).show();  
         } catch (error) {
             console.error('Error handling view click:', error);
         }
@@ -130,8 +129,8 @@ function handleModalHide() {
 }
 
 view.forEach(el => el.addEventListener('click', handleViewClick));
-modalViewHideBtn.addEventListener('click', () => {
-    new Modal(modalView, setStatic).hide();
+_modalViewHideBtn.addEventListener('click', () => {
+    new Modal(_modalView, _setStatic).hide();
     handleModalHide();
 });
 
@@ -150,32 +149,32 @@ async function handleEditClick(event) {
             document.querySelector('.bu-header-id').innerText = `BN-${batch.id}`;
 
             // update the search again omg its so repetitive ive done this on batch create
-            searchInput.addEventListener('click', async () => {
-                products = await fetchProductData();
+            _searchInput.addEventListener('click', async () => {
+                _products = await fetchProductData();
                 
             })
 
-            searchInput.addEventListener('input', () => {
-                const filter = searchInput.value.toLowerCase();
+            _searchInput.addEventListener('input', () => {
+                const filter = _searchInput.value.toLowerCase();
         
                 if (filter.length > 0) {
-                    const filteredProducts = products.filter(product => {
+                    const filtered_Products = _products.filter(product => {
                         const regex = new RegExp(`^${filter}`, 'i');
                         return regex.test(product.code) || regex.test(product.name);
                     });
-                    populateDropdown(filteredProducts);
+                    _populate_Dropdown(filtered_Products);
                 } else {
-                    resetDropdown();
+                    reset_Dropdown();
                 }
             });
 
             if (batch.items.length > 0) {
-                tableBody.innerHTML = '';
+                _tableBody.innerHTML = '';
                 batch.items.forEach(item => {
-                    const _p = products.find(prod => prod.id === item.product)
+                    const _p = _products.find(prod => prod.id === item.product)
                     const _u = update_units.find(u => u.id === _p.unit)
                     const nRow = createRow(_p.id, _p.name, _u.name, item.cost_price, _p.critical_level, item.quantity, item.defective)
-                    tableBody.appendChild(nRow);
+                    _tableBody.appendChild(nRow);
                     updateTotalBU(_p.id);
                 })
                 updateGrandBU();
@@ -198,7 +197,7 @@ async function handleEditClick(event) {
             });
             });
 
-            new Modal(modalEdit, setStatic).show();
+            new Modal(_modalEdit, _setStatic).show();
         } catch (error) {
             console.error('Error handling view click:', error);
         }
@@ -207,8 +206,8 @@ async function handleEditClick(event) {
 
 
 edit.forEach(el => el.addEventListener('click', handleEditClick));
-modalEditHideBtn.addEventListener('click', () => {
-    new Modal(modalEdit, setStatic).hide();
+_modalEditHideBtn.addEventListener('click', () => {
+    new Modal(_modalEdit, _setStatic).hide();
 });
 
 
@@ -223,13 +222,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await fetchCategoryUpdate();
 })
 
-function populateDropdown(products) {
+function _populate_Dropdown(_products) {
     // Remove dynamically added items but keep the "no-data" element
-    const dynamicItems = dropdown.querySelectorAll('li:not(#no-data)');
+    const dynamicItems = _dropdown.querySelectorAll('li:not(#no-data)');
     dynamicItems.forEach(item => item.remove());
 
-    if (products.length > 0) {
-        products.forEach(async product => {
+    if (_products.length > 0) {
+        _products.forEach(async product => {
 
             let unitName = 'No unit'; 
             if (product.unit) {
@@ -260,27 +259,27 @@ function populateDropdown(products) {
             item.textContent = `(${product_category}-${product.code}) ${product.name}`;
             item.dataset.unit = unitName;
 
-            dropdown.appendChild(item);
+            _dropdown.appendChild(item);
         });
-        dropdown.classList.remove('hidden');
-        noData.classList.add('hidden');
+        _dropdown.classList.remove('hidden');
+        _noData.classList.add('hidden');
     } else {
-        dropdown.classList.remove('hidden'); // Show the dropdown to display "no-data"
-        noData.classList.remove('hidden');  // Make sure "no-data" is visible
+        _dropdown.classList.remove('hidden'); // Show the _dropdown to display "no-data"
+        _noData.classList.remove('hidden');  // Make sure "no-data" is visible
     }
 }
 
-// Reset dropdown when no matches are found or input is cleared
-function resetDropdown() {
-    const dynamicItems = dropdown.querySelectorAll('li:not(#no-data)');
+// Reset _dropdown when no matches are found or input is cleared
+function reset_Dropdown() {
+    const dynamicItems = _dropdown.querySelectorAll('li:not(#no-data)');
     dynamicItems.forEach(item => item.remove());
-    dropdown.classList.add('hidden');
-    noData.classList.remove('hidden');
-    searchInput.value = '';
+    _dropdown.classList.add('hidden');
+    _noData.classList.remove('hidden');
+    _searchInput.value = '';
 }
 
-// Add product to table on dropdown item click
-dropdown.addEventListener('click', (event) => {
+// Add product to table on _dropdown item click
+_dropdown.addEventListener('click', (event) => {
     if (event.target && event.target.classList.contains('product-item')) {
         const productText = event.target.textContent.trim();
         const name = event.target.dataset.name;
@@ -291,19 +290,19 @@ dropdown.addEventListener('click', (event) => {
 
         if (!isProductInTable(name)) {
             let nRow = createRow(id, name, unit, cost, crit);
-            tableBody.appendChild(nRow);
+            _tableBody.appendChild(nRow);
             updateGrandBU();
-            resetDropdown();
+            reset_Dropdown();
             
         } else {
             alert('Product already added to the table.');
-            resetDropdown();
+            reset_Dropdown();
         }
     }
 });
 
 // Remove product row from the table
-tableBody.addEventListener('click', (event) => {
+_tableBody.addEventListener('click', (event) => {
     if (event.target && event.target.classList.contains('remove-row')) {
         event.preventDefault();
         event.target.closest('tr').remove();
@@ -314,7 +313,7 @@ tableBody.addEventListener('click', (event) => {
 
 // Check if a product is already in the table
 function isProductInTable(productName) {
-    return Array.from(tableBody.querySelectorAll('tr')).some(row => {
+    return Array.from(_tableBody.querySelectorAll('tr')).some(row => {
         return row.querySelector('.product-name')?.textContent === productName;
     });
 }

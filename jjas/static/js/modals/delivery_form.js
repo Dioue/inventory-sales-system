@@ -234,10 +234,10 @@ const deliveryAPI = async (method, id = null) => {
         const responseBody = await response.json();
         if (!response.ok) {
             console.log('Error Response:', responseBody);
-            throw new Error(`Failed to ${method === 'POST' ? 'create' : 'update'} delivery.`, reload=true);
+            throw new Error(`Failed to ${method === 'POST' ? 'create' : 'update'} delivery.`);
         }
         
-        generic_alert(`Delivery ${method === 'POST' ? 'created' : 'updated'} successfully.`);
+        generic_alert(`Delivery ${method === 'POST' ? 'created' : 'updated'} successfully.`, reload=true);
     } catch (error) {
         generic_alert(`Error: ${error.message}`);
     }

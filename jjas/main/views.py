@@ -381,7 +381,7 @@ class SalesComponentView(BaseComponentView):
         sales_records = SalesRecord.objects.all().order_by(f"{order_prefix}{order_by_field}")
         page_obj_search_id = "_sales"
         search_query = self.request.GET.get(page_obj_search_id, "")
-        _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["sale_id"])
+        _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["id"])
 
         context.update({
             "tables": {

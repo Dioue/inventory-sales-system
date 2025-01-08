@@ -1,4 +1,4 @@
-from .models import (BatchOrder, BatchOrderItem, Category, Delivery, Product, SalesRecord, SalesRecordItem, Unit)
+from .models import (BatchOrder, BatchOrderItem, Category, Delivery, Product, SalesRecord, SalesRecordItem, Client, Unit)
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.shortcuts import render, redirect, reverse
@@ -59,14 +59,14 @@ class ProcessDeleteView(View):
 
     def _delete_sales_records(self, selected_items):
         """Handle deletion of sales records and related data."""
-        sales_records = SalesRecord.objects.filter(sale_id__in=selected_items)
+        sales_records = SalesRecord.objects.filter(id__in=selected_items)
         clients_to_check = set(sales_records.values_list("client_id", flat=True))
 
-        SalesRecordItem.objects.filter(sales_record__sale_id__in=selected_items).delete()
+        SalesRecordItem.objects.filter(sales_record__id__in=selected_items).delete()
         sales_records.delete()
 
         for client_id in clients_to_check:
-            if client_id and not SalesRecord.objects.filter(client_id=client_id).exists():
+            if client_id and not SalesRecord.objects.filter(id=client_id).exists():
                 Client.objects.filter(pk=client_id).delete()
 
     def _delete_batch_orders(self, selected_items):

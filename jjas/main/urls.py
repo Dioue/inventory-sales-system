@@ -26,7 +26,7 @@ urlpatterns = [
     path('category/', views.CategoryComponentView.as_view(), name='auth_category_component'),
     path('sales/', views.SalesComponentView.as_view(), name='auth_sales_component'),
     path('delivery/', views.DeliveryComponentView.as_view(), name='auth_delivery_component'),
-    path('sku-analysis/', views.SKUComponentView.as_view(), name='auth_sku_component'),
+    path('product-analytics/', views.SKUComponentView.as_view(), name='auth_sku_component'),
     path('sales-insights/', views.InsightsComponentView.as_view(), name='auth_insights_component'),
 
     # function routes

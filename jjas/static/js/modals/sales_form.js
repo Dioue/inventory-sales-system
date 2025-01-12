@@ -222,7 +222,7 @@ formSearch.addEventListener('input', async() => {
 
 // form search reset
 function resetDropdown() {
-    const dynamicItems = dropdown.querySelectorAll('li:not(#no-data)');
+    const dynamicItems = formSearchDropdown.querySelectorAll('li:not(#no-data)');
     dynamicItems.forEach(item => item.remove());
     formSearchDropdown.classList.add('hidden');
     formNoData.classList.remove('hidden');

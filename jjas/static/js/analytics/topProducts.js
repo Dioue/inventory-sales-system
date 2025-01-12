@@ -15,8 +15,11 @@ const productOptions = {
       width: "100%",
       height: 322,
       toolbar: {
-        show: false,
-      }
+        show: true,
+        tools: {
+            pan: false,
+        },
+      },
     },
     fill: {
       opacity: 1,

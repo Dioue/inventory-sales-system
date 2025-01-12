@@ -22,6 +22,9 @@ const revenueOptions = {
       },
       toolbar: {
         show: false,
+        tools: {
+            pan: false,
+        },
       },
     },
     tooltip: {

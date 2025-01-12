@@ -430,7 +430,7 @@ class SKUComponentView(BaseComponentView):
 
         context.update({
             "header_crumbs": [
-                {"name": "SKU Analysis", "url": reverse("auth_sku_component")},
+                {"name": "Product Analytics", "url": reverse("auth_sku_component")},
             ]
         })
         return context

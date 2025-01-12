@@ -63,8 +63,15 @@ const batchChartData = {
 
 
 // Initialize the chart
-const options = {
-  chart: { type: 'area', height: 200 },
+const batchSaleOptions = {
+  chart: { type: 'area', height: 200, 
+    toolbar: {
+      show: true,
+      tools: {
+          pan: false,
+      },
+    },
+  },
   dataLabels: {
     enabled: false,
   },
@@ -72,7 +79,7 @@ const options = {
   xaxis: batchChartData.last7Days.xaxis,
 };
 
-const batchChart = new ApexCharts(document.getElementById("batch-chart"), options);
+const batchChart = new ApexCharts(document.getElementById("batch-chart"), batchSaleOptions);
 batchChart.render();
 
 // Update chart and batch data

@@ -64,7 +64,14 @@ const deliveryData = {
   
   // Initialize the deliveryChart
   const deliveryOptions = {
-    chart: { type: 'area', height: 200 },
+    chart: { type: 'area', height: 200,
+      toolbar: {
+        show: true,
+        tools: {
+            pan: false,
+        },
+      },
+     },
     dataLabels: {
       enabled: false,
     },

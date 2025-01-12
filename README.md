@@ -3,6 +3,7 @@
 > npm install -g tailwindcss
 > npm install flowbite
 > npm install simple-datatables --save
+> npm install apexcharts --save
 
 ### To start tailwind
 

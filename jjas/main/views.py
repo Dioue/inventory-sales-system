@@ -345,11 +345,12 @@ class ProductComponentView(BaseComponentView):
                         {"name": "Product Name", "key": "name"},
                         {"name": "Code", "key": "code"},
                         {"name": "Quantity", "key": "quantity"},
+                        {"name": "Unit", "key": "unit"},
                         {"name": "Selling Price", "key": "selling_price"},
                         {"name": "Critical Level", "key": "critical_level"},
                         {"name": "Product Status", "key": "status"}
                     ],
-                    "fill_count": 11,
+                    "fill_count": 12,
                     "search_id": page_obj_search_id
                 }, 
                 "unit":{
@@ -389,7 +390,7 @@ class SalesComponentView(BaseComponentView):
                     "data": page_obj,
                     "fields": [
                     {"name": "Sale No", "key": "id"},
-                    {"name": "Client", "key": "client__name"},
+                    {"name": "Company Name", "key": "client__name"},
                     {"name": "Date Issued", "key": "date_issued"},
                     {"name": "Due Date", "key": "due_date"},
                     {"name": "Net Day", "key": "net_day"},

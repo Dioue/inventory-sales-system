@@ -58,6 +58,7 @@
                         </th>
                         <td class="px-6 py-4">{{ obj.code|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.quantity|default:"-" }}</td>
+                        <td class="px-6 py-4">{{ obj.unit.name|lower|default:"-" }}</td>
                         <td class="px-6 py-4">₱ {{ obj.selling_price|intcomma|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.critical_level|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.status|default:"-" }}</td>

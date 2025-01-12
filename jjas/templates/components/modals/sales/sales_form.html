@@ -21,10 +21,10 @@
             {% csrf_token %}
             <div class="grid gap-4 mb-4 grid-cols-10">
                 <div class="col-span-4">
-                    <label for="sales-form-client" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Client Name<span class="text-red-400">*</span></label>
+                    <label for="sales-form-client" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Company Name<span class="text-red-400">*</span></label>
                     <input id="sales-form-client" type="text" name="client" 
                     class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                    placeholder="Enter client name" required="true" maxlength="60" oninput="toTitleCase(this)">
+                    placeholder="Enter company name" required="true" maxlength="60" oninput="toTitleCase(this)">
                 </div>
                 <div class="relative max-w-sm col-span-2">
                     <label for="sales-form-issued" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date issued<span class="text-red-400">*</span></label>
@@ -36,7 +36,7 @@
                     <div class="col-span-2 mr-4">
                         <label for="sales-form-net" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Net day<span class="text-red-400">*</span></label>
                         <select id="sales-form-net"  name="net_day" class="shadow-md rounded-lg bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                            <option selected="" disabled>Select a net day</option>
+                            <option value="" selected disabled>Select a net day</option>
                                 <option value="30" sele>30 days</option>
                                 <option value="45" sele>45 days</option>
                                 <option value="60" sele>60 days</option>
@@ -46,7 +46,7 @@
                     <div class="col-span-2">
                         <label for="sales-form-status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Payment status<span class="text-red-400">*</span></label>
                         <select id="sales-form-status"  name="status" class="shadow-md rounded-lg bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                            <option selected="" disabled>Select payment status</option>
+                            <option value="" selected  disabled>Select payment status</option>
                             <option value="false">Unpaid</option>
                             <option value="true">Paid</option>
                         </select>

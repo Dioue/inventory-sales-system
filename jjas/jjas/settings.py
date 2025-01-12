@@ -38,6 +38,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'unfold',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -131,6 +132,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),  # Your custom static files
+    os.path.join(BASE_DIR, 'node_modules'),  # Include node_modules
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -161,3 +167,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Set the maximum file size (e.g., 10 MB)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
+
+
+UNFOLD = {
+    "SITE_HEADER": "JJAS Trading Admin",
+}

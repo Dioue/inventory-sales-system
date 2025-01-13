@@ -1,3 +1,5 @@
+
+
 var insightChartOptions = {
     series: [{
     name: 'Product Sold',

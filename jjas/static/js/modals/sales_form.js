@@ -321,7 +321,7 @@ const appendToTBody = (prodId, prodName, prodCost, prodSelling, prodQuantity, su
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16"/>
                     </svg>
                 </button>
-                <input type="text" onblur="setToOneOnExit(this, ${prodQuantity})"  id="quantity-${prodId}" oninput="sanitizeToOne(this, ${prodQuantity})" aria-describedby="helper-text-explanation" class=" border-x-0 border-gray-300 h-11 font-medium text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-8/12 pb-6 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" value="1" min="0" max="9999" required />
+                <input type="text" onblur="setToOneOnExit(this, ${prodQuantity})"  id="quantity-${prodId}" oninput="sanitizeToOne(this, ${prodQuantity})" aria-describedby="helper-text-explanation" class=" border-x-0 border-gray-300 h-11 font-medium text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-8/12 pb-6 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" value="${prodQuantity}" min="0" max="9999" required />
                 <div class="absolute bottom-1 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 flex items-center text-xs text-gray-600 space-x-1 rtl:space-x-reverse">
                     <span>Max: ${prodQuantity}</span>
                 </div>

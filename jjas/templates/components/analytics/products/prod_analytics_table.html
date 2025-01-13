@@ -1,10 +1,8 @@
 {% load static %} {% load humanize %}
 
-{% include 'components/list_actions.html' %}
+{% include 'components/analytics/products/list_actions.html' %}
 
 <div class="relative overflow-x-auto border border-gray-400 rounded-lg bg-gray-50 sm:rounded-lg">
-    <form id="multiple-delete-request" method="post" action="{{form_action.delete}}">
-    {% csrf_token %}
     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400" id="product_list_table">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
@@ -63,14 +61,10 @@
                         <td class="px-6 py-4">{{ obj.critical_level|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.status|default:"-" }}</td>
                         <td class="flex items-center px-6 py-4">
-                            <button type="button" class="font-medium text-blue-600 dark:text-blue-500 hover:underline" >View</button>
-                            <span class="mx-2">|</span>
-                            <button type="button" class="product-update-btn font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                            data-id="{{obj.id|default:'--'}}">
-                            Edit
-                        </button>
-                        
-                        
+                            <button type="button" class="show-insight-btn font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                            data-id="{{obj.id}}">
+                            Show Insights
+                            </button>
                         </td>
                     </tr>
                 {% endfor %}
@@ -83,6 +77,9 @@
             {% endif %}
         </tbody>
     </table>
-</form>
     {% include 'components/page_obj_paginator.html' %}
 </div>
+
+
+{% include 'components/modals/analytics/products/insight.html' %}
+<script src="{% static 'js/modals/sales_analytics.js' %}"></script>

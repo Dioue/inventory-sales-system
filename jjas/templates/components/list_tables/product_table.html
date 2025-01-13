@@ -63,10 +63,11 @@
                         <td class="px-6 py-4">{{ obj.critical_level|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.status|default:"-" }}</td>
                         <td class="flex items-center px-6 py-4">
-                            <button type="button" class="font-medium text-blue-600 dark:text-blue-500 hover:underline" >View</button>
+                            <button type="button" class="product-view-btn font-medium text-blue-600 dark:text-blue-500 hover:underline" 
+                            data-id="{{obj.id}}">View</button>
                             <span class="mx-2">|</span>
                             <button type="button" class="product-update-btn font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                            data-id="{{obj.id|default:'--'}}">
+                            data-id="{{obj.id}}">
                             Edit
                         </button>
                         
@@ -89,8 +90,10 @@
 
 {% include 'components/modals/products/product_create.html' %}
 {% include 'components/modals/products/product_update.html' %}
+{% include 'components/modals/products/product_view.html' %}
 {% include 'components/modals/generic_alert.html' %}
 <script src="{% static 'js/modals/product_crud.js' %}"></script>
 <script src="{% static 'js/modals/product_form.js' %}"></script>
+<script src="{% static 'js/modals/product_view.js' %}"></script>
 <script src="{% static 'js/generic_alert.js' %}"></script>
 <script src="{% static 'js/input_functions.js' %}"></script>

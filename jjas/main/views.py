@@ -384,6 +384,8 @@ class SalesComponentView(BaseComponentView):
         search_query = self.request.GET.get(page_obj_search_id, "")
         _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["id"])
 
+        
+
         context.update({
             "tables": {
                 "page_obj": {
@@ -428,10 +430,36 @@ class SKUComponentView(BaseComponentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        order_by_field = self.request.GET.get("order_by", "id")
+        order_direction = self.request.GET.get("direction", "asc")
+        order_prefix = "-" if order_direction == "desc" else ""
+
+        products = Product.objects.all().order_by(f"{order_prefix}{order_by_field}")
+
+        page_obj_search_id = "_product"
+        search_query = self.request.GET.get(page_obj_search_id, "")
+        _, page_obj = self.apply_search_and_pagination(products, search_query, ["name"])
         context.update({
             "header_crumbs": [
-                {"name": "Product Analytics", "url": reverse("auth_sku_component")},
-            ]
+                {"name": "Sales Analytics", "url": reverse("auth_sku_component")},
+            ],
+            "tables": {
+                "page_obj": {
+                    "header": "product",
+                    "data": page_obj,
+                    "fields": [
+                        {"name": "Product Name", "key": "name"},
+                        {"name": "Code", "key": "code"},
+                        {"name": "Quantity", "key": "quantity"},
+                        {"name": "Unit", "key": "unit"},
+                        {"name": "Selling Price", "key": "selling_price"},
+                        {"name": "Critical Level", "key": "critical_level"},
+                        {"name": "Product Status", "key": "status"}
+                    ],
+                    "fill_count": 12,
+                    "search_id": page_obj_search_id
+                },
+            },
         })
         return context
     

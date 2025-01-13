@@ -58,7 +58,6 @@ const fetchProducts = async (id = null) => {
         console.error(`Error fetching product: `, error);
         throw error;
     }
-
 }
 
 const fetchUnits = async () => {

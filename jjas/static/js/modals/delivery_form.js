@@ -239,6 +239,6 @@ const deliveryAPI = async (method, id = null) => {
         
         generic_alert(`Delivery ${method === 'POST' ? 'created' : 'updated'} successfully.`, reload=true);
     } catch (error) {
-        generic_alert(`Error: ${error.message}`);
+        generic_alert(`${error.message}`);
     }
 };

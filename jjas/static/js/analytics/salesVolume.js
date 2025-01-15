@@ -64,7 +64,7 @@ const salesData = {
   
   // Initialize the salesChart
   const salesOptions = {
-    chart: { type: 'area', height: 200,
+    chart: { type: 'area', height: 150,
       toolbar: {
         show: true,
         tools: {

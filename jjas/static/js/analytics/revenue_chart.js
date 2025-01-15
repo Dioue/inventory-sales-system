@@ -13,7 +13,8 @@ const revenueOptions = {
       },
     ],
     chart: {
-      height: "100%",
+      height: "60%",
+      naxHeight: "100%",
       maxWidth: "100%",
       type: "area",
       fontFamily: "Inter, sans-serif",

@@ -64,7 +64,7 @@ const deliveryData = {
   
   // Initialize the deliveryChart
   const deliveryOptions = {
-    chart: { type: 'area', height: 200,
+    chart: { type: 'area', height: 150,
       toolbar: {
         show: true,
         tools: {

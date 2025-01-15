@@ -13,7 +13,7 @@ const productOptions = {
       },
       type: "bar",
       width: "100%",
-      height: 322,
+      height: 200,
       toolbar: {
         show: true,
         tools: {

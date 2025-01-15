@@ -64,7 +64,7 @@ const batchChartData = {
 
 // Initialize the chart
 const batchSaleOptions = {
-  chart: { type: 'area', height: 200, 
+  chart: { type: 'area', height: 150, 
     toolbar: {
       show: true,
       tools: {

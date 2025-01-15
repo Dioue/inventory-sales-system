@@ -4,25 +4,27 @@
 {% endblock %}
 
 {% block system_component %}
-<div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4 mb-4">
-  <div class="bg-gray-100 rounded-lg dark:border-gray-600">
-    {% include 'components/analytics/dashboard/batch_volume_chart.html' %}
+<div class="max-h-screen">
+  <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4 mb-4">
+    <div class="rounded-lg dark:border-gray-600">
+      {% include 'components/analytics/dashboard/batch_volume_chart.html' %}
+    </div>
+    <div class="rounded-lg border-gray-300 dark:border-gray-600">
+      {% include 'components/analytics/dashboard/sales_volume_chart.html' %}
+    </div>
+  
+    <div class="rounded-lg border-gray-300 dark:border-gray-600">
+      {% include 'components/analytics/dashboard/delivery_volume_chart.html' %}
+    </div>
   </div>
-  <div class="rounded-lg border-gray-300 dark:border-gray-600">
-    {% include 'components/analytics/dashboard/sales_volume_chart.html' %}
-  </div>
-
-  <div class="rounded-lg border-gray-300 dark:border-gray-600">
-    {% include 'components/analytics/dashboard/delivery_volume_chart.html' %}
-  </div>
-</div>
-
-<div class="grid grid-cols-10 gap-4 mb-4">
-  <div class="col-span-6 rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72">
-    {% include 'components/analytics/dashboard/revenue_chart.html' %}
-  </div>
-  <div class="col-span-4 rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72">
-    {% include 'components/analytics/dashboard/top_products_chart.html' %}
+  
+  <div class="grid grid-cols-10 gap-4 mb-4">
+    <div class="col-span-6 rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72">
+      {% include 'components/analytics/dashboard/revenue_chart.html' %}
+    </div>
+    <div class="col-span-4 rounded-lg border-gray-300 dark:border-gray-600 h-48 md:h-72">
+      {% include 'components/analytics/dashboard/top_products_chart.html' %}
+    </div>
   </div>
 </div>
 {% endblock %}

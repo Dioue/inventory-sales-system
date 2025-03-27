@@ -138,7 +138,7 @@ class BatchOrderComponentView(BaseComponentView):
                     "data": page_obj,
                     "fields": [
                         {"name": "Batch No", "key": "id"},
-                        {"name": "Grand Total", "id": "grand_total"},
+                        {"name": "Grand Total", "key": "grand_total"},
                         {"name": "Supplier", "key": "supplier"},  # Use actual field names
                         {"name": "Purchase Date", "key": "purchase_date"},
                         {"name": "Created by", "key": "created_by"},
@@ -397,7 +397,7 @@ class SalesComponentView(BaseComponentView):
                     {"name": "Due Date", "key": "due_date"},
                     {"name": "Net Day", "key": "net_day"},
                     {"name": "Total", "key": "total"},
-                    {"name": "Order Status", "key": "order_status"},
+                    {"name": "Order Status", "key": "status"},
                 ],
                     "fill_count": 9,
                     "search_id": page_obj_search_id

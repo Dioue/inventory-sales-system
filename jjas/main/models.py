@@ -210,3 +210,8 @@ class MonthlySales(SystemGeneratedData):
         ordering = ["-year", "-month"]
         verbose_name_plural = "Monthly Sales"
         unique_together = ("year", "month")
+
+
+
+# Database Recovery Tables ---------------------------------------------------------------------
+

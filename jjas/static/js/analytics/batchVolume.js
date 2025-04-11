@@ -24,25 +24,25 @@ const batchData = {
 
 const batchChartData = {
   today: {
-    series: [{ name: 'Batches', data: [5, 6] }],
+    series: [{ name: 'Deliveries', data: [5, 6] }],
     xaxis: { categories: ['11 Jan', '12 Jan'] },
   },
   last7Days: {
-    series: [{ name: 'Batches', data: [10, 15, 20, 25, 30, 35, 40] }],
+    series: [{ name: 'Deliveries', data: [10, 0, 0, 25, 30, 35, 40] }],
     xaxis: { categories: ['06 Jan', '07 Jan', '08 Jan', '09 Jan', '10 Jan', '11 Jan', '12 Jan'] },
   },
   last30Days: {
     series: [
       {
-        name: 'Batches',
+        name: 'Deliveries',
         data: (() => {
-          const dailyData = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155];
-          const aggregatedData = [];
-          for (let i = 0; i < dailyData.length; i += 7) {
-            const weekData = dailyData.slice(i, i + 7);
-            aggregatedData.push(weekData.reduce((sum, value) => sum + value, 0));
+          const batchDailyData = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155];
+          const aggregatedbatchData = [];
+          for (let i = 0; i < batchDailyData.length; i += 7) {
+            const batchWeekData = batchDailyData.slice(i, i + 7);
+            aggregatedbatchData.push(batchWeekData.reduce((sum, value) => sum + value, 0));
           }
-          return aggregatedData;
+          return aggregatedbatchData;
         })(),
       },
     ],
@@ -62,16 +62,16 @@ const batchChartData = {
 };
 
 
-// Initialize the chart
-const batchSaleOptions = {
-  chart: { type: 'area', height: 150, 
+// Initialize the batchChart
+const batchOptions = {
+  chart: { type: 'area', height: 150,
     toolbar: {
       show: true,
       tools: {
           pan: false,
       },
     },
-  },
+   },
   dataLabels: {
     enabled: false,
   },
@@ -79,16 +79,16 @@ const batchSaleOptions = {
   xaxis: batchChartData.last7Days.xaxis,
 };
 
-const batchChart = new ApexCharts(document.getElementById("batch-chart"), batchSaleOptions);
+const batchChart = new ApexCharts(document.getElementById("batch-chart"), batchOptions);
 batchChart.render();
 
-// Update chart and batch data
+// Update batchChart and batch data
 document.querySelectorAll('#lastDaysdropdown_batch a').forEach((dropdownItem) => {
   dropdownItem.addEventListener('click', (event) => {
     event.preventDefault();
     const text = dropdownItem.textContent.trim();
 
-    // Update chart
+    // Update batchChart
     if (text === 'Today') {
       batchChart.updateOptions(batchChartData.today);
       updateBatchData(batchData.today);

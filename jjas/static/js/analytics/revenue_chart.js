@@ -84,7 +84,7 @@ const revenueOptions = {
     }
     
     if (document.getElementById("revenue-chart") && typeof ApexCharts !== 'undefined') {
-    const chart = new ApexCharts(document.getElementById("revenue-chart"), revenueOptions);
-    chart.render();
+    const RevChart = new ApexCharts(document.getElementById("revenue-chart"), revenueOptions);
+    RevChart.render();
     }
     

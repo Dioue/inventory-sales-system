@@ -92,7 +92,7 @@ const productOptions = {
   }
   
   if(document.getElementById("products-chart") && typeof ApexCharts !== 'undefined') {
-    const chart = new ApexCharts(document.getElementById("products-chart"), productOptions);
-    chart.render();
+    const topProdChart = new ApexCharts(document.getElementById("products-chart"), productOptions);
+    topProdChart.render();
   }
   

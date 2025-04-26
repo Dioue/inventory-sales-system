@@ -1,86 +1,74 @@
 // Define datasets
-const salesData = {
-    today: {
-      total: "1.5k",
-      range: "sales today",
-      change: "+8%",
-      changePositive: true,
-    },
-    last7Days: {
-      total: "32.4k",
-      range: "sales this week",
-      change: "+12%",
-      changePositive: true,
-    },
-    last30Days: {
-      total: "120k",
-      range: "sales this month",
-      change: "-5%",
-      changePositive: false,
-    },
-  };
-  
-  
-  
-  const salesChartData = {
-    today: {
-      series: [{ name: 'Sales', data: [5, 6] }],
-      xaxis: { categories: ['11 Jan', '12 Jan'] },
-    },
-    last7Days: {
-      series: [{ name: 'Sales', data: [10, 15, 20, 25, 30, 35, 40] }],
-      xaxis: { categories: ['06 Jan', '07 Jan', '08 Jan', '09 Jan', '10 Jan', '11 Jan', '12 Jan'] },
-    },
-    last30Days: {
-      series: [
-        {
-          name: 'Sales',
-          data: (() => {
-            const salesDailyData = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155];
-            const aggregatedSalesData = [];
-            for (let i = 0; i < salesDailyData.length; i += 7) {
-              const salesWeekData = salesDailyData.slice(i, i + 7);
-              aggregatedSalesData.push(salesWeekData.reduce((sum, value) => sum + value, 0));
-            }
-            return aggregatedSalesData;
-          })(),
-        },
-      ],
-      xaxis: {
-        categories: (() => {
-          const totalDays = 30;
-          const categories = [];
-          for (let i = 0; i < totalDays; i += 7) {
-            const startDay = i + 1;
-            const endDay = Math.min(i + 7, totalDays);
-            categories.push(`${startDay}–${endDay} Jan`);
-          }
-          return categories;
-        })(),
+let salesData = {};
+let salesChartData = {};
+let salesChart;  // Declare it here so it's accessible outside
+
+fetch('/api/sales-delivery-volume/')
+  .then(res => res.json())
+  .then(data => {
+    // Prepare sales data for different ranges (today, last 7 days, last 30 days)
+    salesData = {
+      today: {
+        total: `${formatNumber(data.today.total_sales)}`,
+        range: "Sales Today",
+        change: `${data.today.change_sales > 0 ? '+' : ''}${data.today.change_sales}%`,
+        changePositive: data.today.changePositive_sales,
       },
-    },
-  };
-  
-  
-  // Initialize the salesChart
-  const salesOptions = {
-    chart: { type: 'area', height: 150,
-      toolbar: {
-        show: true,
-        tools: {
+      last7Days: {
+        total: formatNumber(data.last7Days.total_sales),
+        range: "Sales This Week",
+        change: `${data.last7Days.change_sales > 0 ? '+' : ''}${data.last7Days.change_sales}%`,
+        changePositive: data.last7Days.changePositive_sales,
+      },
+      last30Days: {
+        total: formatNumber(data.last30Days.total_sales),
+        range: "Sales This Month",
+        change: `${data.last30Days.change_sales > 0 ? '+' : ''}${data.last30Days.change_sales}%`,
+        changePositive: data.last30Days.changePositive_sales,
+      },
+    };
+
+    // Prepare chart data for different date ranges
+    salesChartData = {
+      today: {
+        series: [{ name: 'Sales', data: data.today.sales_data }],
+        xaxis: { categories: data.today.dates },
+      },
+      last7Days: {
+        series: [{ name: 'Sales', data: data.last7Days.sales_data }],
+        xaxis: { categories: data.last7Days.dates },
+      },
+      last30Days: {
+        series: [{ name: 'Sales', data: data.last30Days.sales_data }],
+        xaxis: { categories: data.last30Days.dates },
+      },
+    };
+
+    // Initialize ApexCharts with data for the last 7 days as the default view
+    const salesOptions = {
+      chart: {
+        type: 'area',
+        height: 150,
+        toolbar: {
+          show: true,
+          tools: {
             pan: false,
+          },
         },
       },
-     },
-    dataLabels: {
-      enabled: false,
-    },
-    series: salesChartData.last7Days.series, // Default to last 7 days
-    xaxis: salesChartData.last7Days.xaxis,
-  };
+      dataLabels: { enabled: false },
+      series: salesChartData.last7Days.series,
+      xaxis: salesChartData.last7Days.xaxis,
+    };
+
+    salesChart = new ApexCharts(document.getElementById("sales-chart"), salesOptions);
+    salesChart.render();
+
+    // Set initial sales data on page load
+    updateSalesData(salesData.last7Days);
+  })
+  .catch(error => console.error('Error fetching sales data:', error));
   
-  const salesChart = new ApexCharts(document.getElementById("sales-chart"), salesOptions);
-  salesChart.render();
   
   // Update salesChart and sales data
   document.querySelectorAll('#lastDaysdropdown_sales a').forEach((dropdownItem) => {

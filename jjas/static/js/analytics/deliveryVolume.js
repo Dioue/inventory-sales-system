@@ -1,86 +1,73 @@
 // Define datasets
-const deliveryData = {
-    today: {
-      total: "1.5k",
-      range: "delivery today",
-      change: "+8%",
-      changePositive: true,
-    },
-    last7Days: {
-      total: "32.4k",
-      range: "delivery this week",
-      change: "+12%",
-      changePositive: true,
-    },
-    last30Days: {
-      total: "120k",
-      range: "delivery this month",
-      change: "-5%",
-      changePositive: false,
-    },
-  };
-  
-  
-  
-  const deliveryChartData = {
-    today: {
-      series: [{ name: 'Deliveries', data: [5, 6] }],
-      xaxis: { categories: ['11 Jan', '12 Jan'] },
-    },
-    last7Days: {
-      series: [{ name: 'Deliveries', data: [10, 15, 20, 25, 30, 35, 40] }],
-      xaxis: { categories: ['06 Jan', '07 Jan', '08 Jan', '09 Jan', '10 Jan', '11 Jan', '12 Jan'] },
-    },
-    last30Days: {
-      series: [
-        {
-          name: 'Deliveries',
-          data: (() => {
-            const deliveryDailyData = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155];
-            const aggregateddeliveryData = [];
-            for (let i = 0; i < deliveryDailyData.length; i += 7) {
-              const deliveryWeekData = deliveryDailyData.slice(i, i + 7);
-              aggregateddeliveryData.push(deliveryWeekData.reduce((sum, value) => sum + value, 0));
-            }
-            return aggregateddeliveryData;
-          })(),
-        },
-      ],
-      xaxis: {
-        categories: (() => {
-          const totalDays = 30;
-          const categories = [];
-          for (let i = 0; i < totalDays; i += 7) {
-            const startDay = i + 1;
-            const endDay = Math.min(i + 7, totalDays);
-            categories.push(`${startDay}–${endDay} Jan`);
-          }
-          return categories;
-        })(),
+let deliveryData = {};
+let deliveryChartData = {};
+let deliveryChart;  // Declare it here so it's accessible outside
+
+fetch('/api/sales-delivery-volume/')  // Update the endpoint to match the delivery data API
+  .then(res => res.json())
+  .then(data => {
+    // Prepare data for today's, last 7 days, and last 30 days delivery data
+    deliveryData = {
+      today: {
+        total: `${formatNumber(data.today.total_deliveries)}`,  // Using total_delivery from API
+        range: "Deliveries Today",
+        change: `${data.today.change_deliveries > 0 ? '+' : ''}${data.today.change_deliveries}%`,
+        changePositive: data.today.changePositive_deliveries, // Assuming boolean value for positive change
       },
-    },
-  };
-  
-  
-  // Initialize the deliveryChart
-  const deliveryOptions = {
-    chart: { type: 'area', height: 150,
-      toolbar: {
-        show: true,
-        tools: {
+      last7Days: {
+        total: formatNumber(data.last7Days.total_deliveries),
+        range: "Deliveries This Week",
+        change: `${data.last7Days.change_deliveries > 0 ? '+' : ''}${data.last7Days.change_deliveries}%`,
+        changePositive: data.last7Days.changePositive_deliveries,
+      },
+      last30Days: {
+        total: formatNumber(data.last30Days.total_deliveries),
+        range: "Deliveries This Month",
+        change: `${data.last30Days.change_deliveries > 0 ? '+' : ''}${data.last30Days.change_deliveries}%`,
+        changePositive: data.last30Days.changePositive_deliveries,
+      },
+    };
+
+    // Prepare chart data for different date ranges
+    deliveryChartData = {
+      today: {
+        series: [{ name: 'Deliveries', data: data.today.delivery_data }],
+        xaxis: { categories: data.today.dates },  // Assuming dates are in an array
+      },
+      last7Days: {
+        series: [{ name: 'Deliveries', data: data.last7Days.delivery_data }],
+        xaxis: { categories: data.last7Days.dates },
+      },
+      last30Days: {
+        series: [{ name: 'Deliveries', data: data.last30Days.delivery_data }],
+        xaxis: { categories: data.last30Days.dates },
+      },
+    };
+
+    // Initialize the chart with the default "Last 7 Days" view
+    const deliveryOptions = {
+      chart: {
+        type: 'area',
+        height: 150,
+        toolbar: {
+          show: true,
+          tools: {
             pan: false,
+          },
         },
       },
-     },
-    dataLabels: {
-      enabled: false,
-    },
-    series: deliveryChartData.last7Days.series, // Default to last 7 days
-    xaxis: deliveryChartData.last7Days.xaxis,
-  };
-  
-  const deliveryChart = new ApexCharts(document.getElementById("delivery-chart"), deliveryOptions);
-  deliveryChart.render();
+      dataLabels: { enabled: false },
+      series: deliveryChartData.last7Days.series,
+      xaxis: deliveryChartData.last7Days.xaxis,
+    };
+
+    deliveryChart = new ApexCharts(document.getElementById("delivery-chart"), deliveryOptions);
+    deliveryChart.render();
+
+    // Set initial delivery data to be displayed
+    updateDeliveryData(deliveryData.last7Days);
+  })
+  .catch(error => console.error('Error fetching delivery data:', error));
   
   // Update deliveryChart and delivery data
   document.querySelectorAll('#lastDaysdropdown_delivery a').forEach((dropdownItem) => {

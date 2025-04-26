@@ -28,6 +28,8 @@ urlpatterns = [
     path('delivery/', views.DeliveryComponentView.as_view(), name='auth_delivery_component'),
     path('product-analytics/', views.SKUComponentView.as_view(), name='auth_sku_component'),
     path('sales-insights/', views.InsightsComponentView.as_view(), name='auth_insights_component'),
+    path('api/batch-volume/', views.batch_volume_stats, name='batch-volume-stats'),
+    path('api/sales-delivery-volume/', views.sales_and_delivery_stats, name='sales-delivery-volume-stats'),
 
     # function routes
     path('delete/<str:model_key>/', ProcessDeleteView.as_view(), name='process_delete'),

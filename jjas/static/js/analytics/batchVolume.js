@@ -1,86 +1,72 @@
 // Define datasets
-const batchData = {
-  today: {
-    total: "1.5k",
-    range: "batch today",
-    change: "+8%",
-    changePositive: true,
-  },
-  last7Days: {
-    total: "32.4k",
-    range: "batch this week",
-    change: "+12%",
-    changePositive: true,
-  },
-  last30Days: {
-    total: "120k",
-    range: "batch this month",
-    change: "-5%",
-    changePositive: false,
-  },
-};
+let batchData = {};
+let batchChartData = {};
+let batchChart;  // Declare it here so it's accessible outside
 
-
-
-const batchChartData = {
-  today: {
-    series: [{ name: 'Deliveries', data: [5, 6] }],
-    xaxis: { categories: ['11 Jan', '12 Jan'] },
-  },
-  last7Days: {
-    series: [{ name: 'Deliveries', data: [10, 0, 0, 25, 30, 35, 40] }],
-    xaxis: { categories: ['06 Jan', '07 Jan', '08 Jan', '09 Jan', '10 Jan', '11 Jan', '12 Jan'] },
-  },
-  last30Days: {
-    series: [
-      {
-        name: 'Deliveries',
-        data: (() => {
-          const batchDailyData = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155];
-          const aggregatedbatchData = [];
-          for (let i = 0; i < batchDailyData.length; i += 7) {
-            const batchWeekData = batchDailyData.slice(i, i + 7);
-            aggregatedbatchData.push(batchWeekData.reduce((sum, value) => sum + value, 0));
-          }
-          return aggregatedbatchData;
-        })(),
+fetch('/api/batch-volume/')
+  .then(res => res.json())
+  .then(data => {
+    // Prepare data
+    batchData = {
+      today: {
+        total: `${formatNumber(data.today.total)}`,
+        range: "batch today",
+        change: `${data.today.change > 0 ? '+' : ''}${data.today.change}%`,
+        changePositive: data.today.changePositive,
       },
-    ],
-    xaxis: {
-      categories: (() => {
-        const totalDays = 30;
-        const categories = [];
-        for (let i = 0; i < totalDays; i += 7) {
-          const startDay = i + 1;
-          const endDay = Math.min(i + 7, totalDays);
-          categories.push(`${startDay}–${endDay} Jan`);
-        }
-        return categories;
-      })(),
-    },
-  },
-};
-
-
-// Initialize the batchChart
-const batchOptions = {
-  chart: { type: 'area', height: 150,
-    toolbar: {
-      show: true,
-      tools: {
-          pan: false,
+      last7Days: {
+        total: formatNumber(data.last7Days.total),
+        range: "batch this week",
+        change: `${data.last7Days.change > 0 ? '+' : ''}${data.last7Days.change}%`,
+        changePositive: data.last7Days.changePositive,
       },
-    },
-   },
-  dataLabels: {
-    enabled: false,
-  },
-  series: batchChartData.last7Days.series, // Default to last 7 days
-  xaxis: batchChartData.last7Days.xaxis,
-};
+      last30Days: {
+        total: formatNumber(data.last30Days.total),
+        range: "batch this month",
+        change: `${data.last30Days.change > 0 ? '+' : ''}${data.last30Days.change}%`,
+        changePositive: data.last30Days.changePositive,
+      },
+    };
 
-const batchChart = new ApexCharts(document.getElementById("batch-chart"), batchOptions);
-batchChart.render();
+    batchChartData = {
+      today: {
+        series: [{ name: 'Batch', data: data.today.data }],
+        xaxis: { categories: data.today.dates },
+      },
+      last7Days: {
+        series: [{ name: 'Batch', data: data.last7Days.data }],
+        xaxis: { categories: data.last7Days.dates },
+      },
+      last30Days: {
+        series: [{ name: 'Batch', data: data.last30Days.data }],
+        xaxis: { categories: data.last30Days.dates },
+      },
+    };
+
+    // ✅ Initialize chart now that data is ready
+    const batchOptions = {
+      chart: {
+        type: 'area',
+        height: 150,
+        toolbar: {
+          show: true,
+          tools: {
+            pan: false,
+          },
+        },
+      },
+      dataLabels: { enabled: false },
+      series: batchChartData.last7Days.series,
+      xaxis: batchChartData.last7Days.xaxis,
+    };
+
+    batchChart = new ApexCharts(document.getElementById("batch-chart"), batchOptions);
+    batchChart.render();
+
+    // Set initial data
+    updateBatchData(batchData.last7Days);
+  })
+  .catch(error => console.error('Error fetching batch data:', error));
 
 // Update batchChart and batch data
 document.querySelectorAll('#lastDaysdropdown_batch a').forEach((dropdownItem) => {
@@ -140,3 +126,8 @@ function updateBatchData(data) {
   }
 }
 
+
+function formatNumber(num) {
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+  return num.toString();
+}

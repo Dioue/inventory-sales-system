@@ -58,7 +58,15 @@ fetch('/api/sales-delivery-volume/')  // Update the endpoint to match the delive
       },
       dataLabels: { enabled: false },
       series: deliveryChartData.last7Days.series,
-      xaxis: deliveryChartData.last7Days.xaxis,
+      xaxis: {
+        type: 'datetime',
+        categories: deliveryChartData.last7Days.xaxis.categories,
+        labels: {
+          formatter: function (value) {
+            return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          },
+        },
+      },
     };
 
     deliveryChart = new ApexCharts(document.getElementById("delivery-chart"), deliveryOptions);
@@ -98,7 +106,7 @@ fetch('/api/sales-delivery-volume/')  // Update the endpoint to match the delive
   
   
   // Function to update delivery data
-  function updatedeliveryData(data) {
+  function updateDeliveryData(data) {
     document.getElementById('deliveryTotal').textContent = data.total;
     document.getElementById('deliveryRange').textContent = data.range;
   

@@ -58,7 +58,15 @@ fetch('/api/sales-delivery-volume/')
       },
       dataLabels: { enabled: false },
       series: salesChartData.last7Days.series,
-      xaxis: salesChartData.last7Days.xaxis,
+      xaxis: {
+        type: 'datetime',
+        categories: salesChartData.last7Days.xaxis.categories,
+        labels: {
+          formatter: function (value) {
+            return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          },
+        },
+      },
     };
 
     salesChart = new ApexCharts(document.getElementById("sales-chart"), salesOptions);

@@ -3,8 +3,6 @@ from .models import Product, Unit, Category, BatchOrder, BatchOrderItem, SalesRe
 from datetime import timedelta, datetime
 from decimal import Decimal
 
-
-
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Unit
@@ -311,3 +309,18 @@ class DeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = Delivery
         fields = ['id', 'sale', 'delivery_date', 'date_claimed']
+
+
+class TopProductSerializer(serializers.Serializer):
+    product__name = serializers.CharField(source="product_name")  # Maps product__name → product_name
+    total_revenue = serializers.DecimalField(max_digits=13, decimal_places=2)
+
+
+class TreeMapSerializer(serializers.Serializer):
+    class Meta:
+            model = Product
+            fields = ('name', 'quantity')  # Adjust fields as per your needs
+
+class CategorySalesSerializer(serializers.Serializer):
+    category_code = serializers.CharField()
+    total_quantity = serializers.IntegerField()

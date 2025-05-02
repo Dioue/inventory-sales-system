@@ -8,15 +8,20 @@ from django.http import HttpRequest, HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
+from django.db.models import Q, Count
 from .utils import request_user_info, apply_search_and_pagination
 from .models import (BatchOrder, BatchOrderItem, Category, Delivery, Product, SalesRecord, SalesRecordItem, Unit)
-
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db.models import Sum
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 from django.utils.timezone import now
+from rest_framework.views import APIView
+from django.db.models import Sum, F, ExpressionWrapper, DecimalField
+from .serializers import TopProductSerializer, TreeMapSerializer
+from rest_framework import generics
+from .serializers import CategorySalesSerializer
 
 
 # Login View
@@ -673,3 +678,107 @@ def sales_and_delivery_stats(request):
             "delivery_data": last30_deliveries_data,
         }
     })
+
+
+
+class RevenueExpenseReportAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Get query parameter for filter: today, last7, last30
+        period = request.query_params.get('period', 'last7')
+        today = now().date()
+
+        if period == 'today':
+            start_date = today
+        elif period == 'last30':
+            start_date = today - timedelta(days=29)
+        else:  # default to last 7 days
+            start_date = today - timedelta(days=6)
+
+        end_date = today
+
+        # Generate date labels and initialize data
+        date_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+        categories = [date.strftime("%d %B") for date in date_range]
+        revenue = []
+        expenses = []
+
+        for date in date_range:
+            day_sales = SalesRecord.objects.filter(date_issued=date).aggregate(total=Sum('total'))['total'] or 0
+            day_expenses = BatchOrder.objects.filter(purchase_date=date).aggregate(total=Sum('grand_total'))['total'] or 0
+            revenue.append(float(day_sales))
+            expenses.append(float(day_expenses))
+
+        return Response({
+            "categories": categories,
+            "revenue": revenue,
+            "expenses": expenses
+        })
+
+class TopProductsAPIView(APIView):
+    def get(self, request):
+        top_products = (
+        SalesRecordItem.objects
+        .filter(product__isnull=False)
+        .values(product_name=F('product__name'))  # <- alias field here
+        .annotate(
+            total_revenue=Sum(
+                ExpressionWrapper(F('quantity') * F('product__selling_price'), output_field=DecimalField())
+            )
+        )
+        .order_by('-total_revenue')[:5]
+    )
+
+        serialized = TopProductSerializer(top_products, many=True)
+        return Response(serialized.data)
+
+
+class TreeMapView(APIView):
+    def get(self, request, *args, **kwargs):
+        # Get product count per category
+        category_counts = (
+            Product.objects
+            .values('category__name')
+            .annotate(product_count=Count('id'))
+            .order_by('-product_count')
+        )
+
+        data = [
+            {'x': item['category__name'], 'y': item['product_count']}
+            for item in category_counts if item['product_count'] > 0
+        ]
+
+        return Response(data)
+    
+class CategorySalesHeatMapView(APIView):
+    def get(self, request, *args, **kwargs):
+        range_param = request.query_params.get('range', 'all')
+        today = now().date()
+        current_year = today.year
+
+        if range_param == 'this_year':
+            start_date = datetime(current_year, 1, 1).date()
+            sales_items = SalesRecordItem.objects.filter(sales_record__date_issued__gte=start_date)
+        elif range_param == 'last_year':
+            start_date = datetime(current_year - 1, 1, 1).date()
+            end_date = datetime(current_year - 1, 12, 31).date()
+            sales_items = SalesRecordItem.objects.filter(
+                sales_record__date_issued__gte=start_date,
+                sales_record__date_issued__lte=end_date
+            )
+        else:
+            sales_items = SalesRecordItem.objects.all()
+
+        # Group by category and date
+        grouped_sales = (
+            sales_items
+            .values(
+                category_code=F('product__category__code'),
+                date=F('sales_record__date_issued')
+            )
+            .annotate(total_quantity=Sum('quantity'))
+            .order_by('category_code', 'date')
+        )
+
+        return Response(grouped_sales)

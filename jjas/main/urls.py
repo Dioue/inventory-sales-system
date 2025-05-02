@@ -30,6 +30,10 @@ urlpatterns = [
     path('sales-insights/', views.InsightsComponentView.as_view(), name='auth_insights_component'),
     path('api/batch-volume/', views.batch_volume_stats, name='batch-volume-stats'),
     path('api/sales-delivery-volume/', views.sales_and_delivery_stats, name='sales-delivery-volume-stats'),
+    path('api/revenue-expense/', views.RevenueExpenseReportAPIView.as_view(), name='revenue-expense-api'),
+    path('api/top-products/', views.TopProductsAPIView.as_view(), name='top-products'),
+    path('api/tree-map/', views.TreeMapView.as_view(), name='tree-map-categories'),
+    path('api/category-sales-heatmap/', views.CategorySalesHeatMapView.as_view(), name='category-sales-heatmap'),
 
     # function routes
     path('delete/<str:model_key>/', ProcessDeleteView.as_view(), name='process_delete'),

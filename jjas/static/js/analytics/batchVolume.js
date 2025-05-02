@@ -57,7 +57,15 @@ fetch('/api/batch-volume/')
       },
       dataLabels: { enabled: false },
       series: batchChartData.last7Days.series,
-      xaxis: batchChartData.last7Days.xaxis,
+      xaxis: {
+        type: 'datetime',
+        categories: batchChartData.last7Days.xaxis.categories,
+        labels: {
+          formatter: function (value) {
+            return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          },
+        },
+      },
     };
 
     batchChart = new ApexCharts(document.getElementById("batch-chart"), batchOptions);

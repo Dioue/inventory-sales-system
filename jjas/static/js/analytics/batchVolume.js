@@ -10,19 +10,19 @@ fetch('/api/batch-volume/')
     batchData = {
       today: {
         total: `${formatNumber(data.today.total)}`,
-        range: "batch today",
+        range: "Batch Volume",
         change: `${data.today.change > 0 ? '+' : ''}${data.today.change}%`,
         changePositive: data.today.changePositive,
       },
       last7Days: {
         total: formatNumber(data.last7Days.total),
-        range: "batch this week",
+        range: "Batch Volume",
         change: `${data.last7Days.change > 0 ? '+' : ''}${data.last7Days.change}%`,
         changePositive: data.last7Days.changePositive,
       },
       last30Days: {
         total: formatNumber(data.last30Days.total),
-        range: "batch this month",
+        range: "Batch Volume",
         change: `${data.last30Days.change > 0 ? '+' : ''}${data.last30Days.change}%`,
         changePositive: data.last30Days.changePositive,
       },
@@ -43,7 +43,6 @@ fetch('/api/batch-volume/')
       },
     };
 
-    // ✅ Initialize chart now that data is ready
     const batchOptions = {
       chart: {
         type: 'area',
@@ -71,12 +70,10 @@ fetch('/api/batch-volume/')
     batchChart = new ApexCharts(document.getElementById("batch-chart"), batchOptions);
     batchChart.render();
 
-    // Set initial data
     updateBatchData(batchData.last7Days);
   })
   .catch(error => console.error('Error fetching batch data:', error));
 
-// Update batchChart and batch data
 document.querySelectorAll('#lastDaysdropdown_batch a').forEach((dropdownItem) => {
   dropdownItem.addEventListener('click', (event) => {
     event.preventDefault();

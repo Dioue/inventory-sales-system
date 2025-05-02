@@ -10,19 +10,19 @@ fetch('/api/sales-delivery-volume/')
     salesData = {
       today: {
         total: `${formatNumber(data.today.total_sales)}`,
-        range: "Sales Today",
+        range: "Sales Volume",
         change: `${data.today.change_sales > 0 ? '+' : ''}${data.today.change_sales}%`,
         changePositive: data.today.changePositive_sales,
       },
       last7Days: {
         total: formatNumber(data.last7Days.total_sales),
-        range: "Sales This Week",
+        range: "Sales Volume",
         change: `${data.last7Days.change_sales > 0 ? '+' : ''}${data.last7Days.change_sales}%`,
         changePositive: data.last7Days.changePositive_sales,
       },
       last30Days: {
         total: formatNumber(data.last30Days.total_sales),
-        range: "Sales This Month",
+        range: "Sales Volume",
         change: `${data.last30Days.change_sales > 0 ? '+' : ''}${data.last30Days.change_sales}%`,
         changePositive: data.last30Days.changePositive_sales,
       },

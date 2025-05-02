@@ -1,4 +1,4 @@
-// 1. Define chart options (you can use initial dummy data)
+// 1. Define chart options (initial dummy data)
 const revenueOptions = {
   series: [],
   chart: {
@@ -40,14 +40,14 @@ const revenueOptions = {
   },
 };
 
-// 2. Declare chart variable in outer scope
+// 2. Declare chart variable
 let RevChart;
 
 if (document.getElementById("revenue-chart") && typeof ApexCharts !== 'undefined') {
   RevChart = new ApexCharts(document.getElementById("revenue-chart"), revenueOptions);
   RevChart.render();
 
-  // 3. Fetch initial data after chart has been created
+  // 3. Fetch initial data
   fetchRevenueData();
 }
 
@@ -56,9 +56,15 @@ async function fetchRevenueData(period = 'last7') {
     const response = await fetch(`/api/revenue-expense/?period=${period}`);
     const data = await response.json();
 
+    // Update chart data
     const updatedOptions = {
       xaxis: {
-        categories: data.categories
+        categories: data.categories,
+        labels: {
+          formatter: function (value) {
+            return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          },
+        },
       },
       series: [
         {
@@ -73,8 +79,31 @@ async function fetchRevenueData(period = 'last7') {
         }
       ]
     };
-
     RevChart.updateOptions(updatedOptions);
+
+    // ---- DOM UPDATES ----
+    // Update sales total
+    const netTotal = data.net_total ?? 0;
+    const salesTotalEl = document.getElementById("revenue-sales");
+    if (salesTotalEl) {
+      salesTotalEl.textContent = Intl.NumberFormat('en-US', {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0,
+      }).format(netTotal);
+    }
+
+    // Update subtitle
+    const salesRangeEl = document.getElementById("revenue-sales-range");
+    if (salesRangeEl) {
+      const labelMap = {
+        today: "sales today",
+        last7: "sales this week",
+        last30: "sales this month"
+      };
+      salesRangeEl.textContent = labelMap[period] || "sales";
+    }
+
   } catch (error) {
     console.error("Error fetching chart data:", error);
   }
@@ -92,6 +121,7 @@ document.querySelectorAll('#lastDaysdropdown_revenue a').forEach((dropdownItem) 
 
     fetchRevenueData(period);
 
+    // Update dropdown label
     document.getElementById('dropdownDefaultButton_revenue').innerHTML = `
       ${text}
       <svg class="w-2.5 m-2.5 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"

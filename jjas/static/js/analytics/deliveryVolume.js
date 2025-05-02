@@ -10,19 +10,19 @@ fetch('/api/sales-delivery-volume/')  // Update the endpoint to match the delive
     deliveryData = {
       today: {
         total: `${formatNumber(data.today.total_deliveries)}`,  // Using total_delivery from API
-        range: "Deliveries Today",
+        range: "Delivery Volume",
         change: `${data.today.change_deliveries > 0 ? '+' : ''}${data.today.change_deliveries}%`,
         changePositive: data.today.changePositive_deliveries, // Assuming boolean value for positive change
       },
       last7Days: {
         total: formatNumber(data.last7Days.total_deliveries),
-        range: "Deliveries This Week",
+        range: "Delivery Volume",
         change: `${data.last7Days.change_deliveries > 0 ? '+' : ''}${data.last7Days.change_deliveries}%`,
         changePositive: data.last7Days.changePositive_deliveries,
       },
       last30Days: {
         total: formatNumber(data.last30Days.total_deliveries),
-        range: "Deliveries This Month",
+        range: "Delivery Volume",
         change: `${data.last30Days.change_deliveries > 0 ? '+' : ''}${data.last30Days.change_deliveries}%`,
         changePositive: data.last30Days.changePositive_deliveries,
       },

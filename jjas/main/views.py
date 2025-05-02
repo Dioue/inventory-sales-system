@@ -704,16 +704,24 @@ class RevenueExpenseReportAPIView(APIView):
         revenue = []
         expenses = []
 
+        total_revenue = 0
+        total_expenses = 0
+
         for date in date_range:
             day_sales = SalesRecord.objects.filter(date_issued=date).aggregate(total=Sum('total'))['total'] or 0
             day_expenses = BatchOrder.objects.filter(purchase_date=date).aggregate(total=Sum('grand_total'))['total'] or 0
             revenue.append(float(day_sales))
             expenses.append(float(day_expenses))
 
+            total_revenue += float(day_sales)
+            total_expenses += float(day_expenses)
+
         return Response({
             "categories": categories,
             "revenue": revenue,
-            "expenses": expenses
+            "expenses": expenses,
+            "sales_total": total_revenue,
+            "net_total": total_revenue - total_expenses,
         })
 
 class TopProductsAPIView(APIView):

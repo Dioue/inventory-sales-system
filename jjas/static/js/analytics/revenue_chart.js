@@ -2,7 +2,7 @@
 const revenueOptions = {
   series: [],
   chart: {
-    height: "60%",
+    height: "100%",
     type: "area",
     fontFamily: "Inter, sans-serif",
     dropShadow: { enabled: false },

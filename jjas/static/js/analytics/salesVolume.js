@@ -48,7 +48,7 @@ fetch('/api/sales-delivery-volume/')
     const salesOptions = {
       chart: {
         type: 'area',
-        height: 150,
+        height: 200,
         toolbar: {
           show: true,
           tools: {

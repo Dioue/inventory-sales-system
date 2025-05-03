@@ -6,6 +6,7 @@ from datetime import timedelta
 
 # Abstract Base Class for Common Fields
 class SystemGeneratedData(models.Model):
+    
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
     date_added = models.DateTimeField(auto_now_add=True, editable=False)
     date_modified = models.DateTimeField(auto_now=True, editable=False)
@@ -210,8 +211,3 @@ class MonthlySales(SystemGeneratedData):
         ordering = ["-year", "-month"]
         verbose_name_plural = "Monthly Sales"
         unique_together = ("year", "month")
-
-
-
-# Database Recovery Tables ---------------------------------------------------------------------
-

@@ -46,7 +46,7 @@ fetch('/api/batch-volume/')
     const batchOptions = {
       chart: {
         type: 'area',
-        height: 150,
+        height: 200,
         toolbar: {
           show: true,
           tools: {

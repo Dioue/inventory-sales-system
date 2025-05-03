@@ -5,7 +5,7 @@ const productOptions = {
     sparkline: { enabled: false },
     type: "bar",
     width: "100%",
-    height: 200,
+    height: 268,
     toolbar: {
       show: true,
       tools: { pan: false },

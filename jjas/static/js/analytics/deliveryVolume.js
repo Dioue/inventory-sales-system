@@ -48,7 +48,7 @@ fetch('/api/sales-delivery-volume/')  // Update the endpoint to match the delive
     const deliveryOptions = {
       chart: {
         type: 'area',
-        height: 150,
+        height: 200,
         toolbar: {
           show: true,
           tools: {

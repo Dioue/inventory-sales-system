@@ -7,6 +7,7 @@ from .api import ProductViewSet, UnitViewSet, BatchOrderViewSet, CategoryViewSet
 from rest_framework.routers import DefaultRouter
 from .views import ProductForecastAPIView
 
+
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
 router.register(r'units', UnitViewSet)
@@ -20,7 +21,6 @@ urlpatterns = [
     path('', views.LoginView.as_view(), name='login_view'),
     path("login/", views.LoginView.as_view(), name="login_view"),
     path("logout/", views.LogoutView.as_view(), name="logout_view"),
-    path("forgot-password/", views.ForgotPasswordView.as_view(), name="forgot_password"),
     path("dashboard/", views.SystemDashboardView.as_view(), name='system_dashboard'),
     path('batch-orders/', views.BatchOrderComponentView.as_view(), name='auth_batch_order_component'),
     path('products/', views.ProductComponentView.as_view(), name='auth_product_component'),
@@ -39,6 +39,8 @@ urlpatterns = [
 
     # function routes
     path('delete/<str:model_key>/', ProcessDeleteView.as_view(), name='process_delete'),
+
+    
 
     # API calls
     path('api/', include(router.urls)),

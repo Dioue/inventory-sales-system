@@ -62,16 +62,6 @@ class LogoutView(View):
         return redirect("login_view")
 
 
-# Forgot Password View
-class ForgotPasswordView(View):
-    template_name = "pages/forgot_password.html"
-
-    def get(self, request: HttpRequest) -> HttpResponse:
-        if request.user.is_authenticated:
-            referer = request.META.get("HTTP_REFERER", "/")
-            return redirect(referer)
-        return render(request, self.template_name)
-
 """ Base component for all products with table pagination """
 class BaseComponentView(LoginRequiredMixin, TemplateView):
     """Base view for components with user info and pagination support."""

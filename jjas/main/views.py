@@ -483,87 +483,8 @@ class SKUComponentView(BaseComponentView):
         })
         return context
     
-
 @api_view(['GET'])
-def batch_volume_stats(request):
-    today = now().date()
-    last_7_days = today - timedelta(days=6)
-    last_30_days = today - timedelta(days=29)
-    prev_7_days = last_7_days - timedelta(days=7)
-    prev_30_days = last_30_days - timedelta(days=30)
-
-    def daterange(start_date, end_date):
-        return [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
-
-    # Today's total
-    today_total = BatchOrderItem.objects.filter(batch__purchase_date=today).aggregate(
-        total_quantity=Sum('quantity'))['total_quantity'] or 0
-
-    # Yesterday
-    yesterday = today - timedelta(days=1)
-    yesterday_total = BatchOrderItem.objects.filter(batch__purchase_date=yesterday).aggregate(
-        total_quantity=Sum('quantity'))['total_quantity'] or 0
-
-    # --- Last 7 Days ---
-    last7_queryset = BatchOrderItem.objects.filter(batch__purchase_date__range=[last_7_days, today])
-    last7_raw = last7_queryset.values('batch__purchase_date').annotate(total=Sum('quantity'))
-
-    last7_map = {item['batch__purchase_date']: item['total'] for item in last7_raw}
-    last7_dates = daterange(last_7_days, today)
-    last7_data = [last7_map.get(day, 0) for day in last7_dates]
-    last7_labels = [day.strftime('%Y-%m-%d') for day in last7_dates]
-    last7_total = sum(last7_data)
-
-    # Previous 7 Days
-    prev7_queryset = BatchOrderItem.objects.filter(batch__purchase_date__range=[prev_7_days, last_7_days - timedelta(days=1)])
-    prev7_total = prev7_queryset.aggregate(total=Sum('quantity'))['total'] or 0
-
-    # --- Last 30 Days ---
-    last30_queryset = BatchOrderItem.objects.filter(batch__purchase_date__range=[last_30_days, today])
-    last30_raw = last30_queryset.values('batch__purchase_date').annotate(total=Sum('quantity'))
-
-    last30_map = {item['batch__purchase_date']: item['total'] for item in last30_raw}
-    last30_dates = daterange(last_30_days, today)
-    last30_data = [last30_map.get(day, 0) for day in last30_dates]
-    last30_labels = [day.strftime('%Y-%m-%d') for day in last30_dates]
-    last30_total = sum(last30_data)
-
-    # Previous 30 Days
-    prev30_queryset = BatchOrderItem.objects.filter(batch__purchase_date__range=[prev_30_days, last_30_days - timedelta(days=1)])
-    prev30_total = prev30_queryset.aggregate(total=Sum('quantity'))['total'] or 0
-
-    def calc_change(current, previous):
-        if previous == 0:
-            return 100 if current > 0 else 0
-        return round(((current - previous) / previous) * 100)
-
-    return Response({
-        "today": {
-            "total": today_total,
-            "change": calc_change(today_total, yesterday_total),
-            "changePositive": today_total >= yesterday_total,
-            "dates": [today.strftime('%Y-%m-%d')],
-            "data": [today_total],
-        },
-        "last7Days": {
-            "total": last7_total,
-            "change": calc_change(last7_total, prev7_total),
-            "changePositive": last7_total >= prev7_total,
-            "dates": last7_labels,
-            "data": last7_data,
-        },
-        "last30Days": {
-            "total": last30_total,
-            "change": calc_change(last30_total, prev30_total),
-            "changePositive": last30_total >= prev30_total,
-            "dates": last30_labels,
-            "data": last30_data,
-        }
-    })
-
-
-@api_view(['GET'])
-def sales_and_delivery_stats(request):
+def combined_stats(request):
     today = now().date()
     yesterday = today - timedelta(days=1)
     last_7_days = today - timedelta(days=6)
@@ -577,13 +498,13 @@ def sales_and_delivery_stats(request):
     def get_sales_data_with_quantity(start_date, end_date):
         sales_items = SalesRecordItem.objects.filter(
             sales_record__date_issued__range=[start_date, end_date]
-        ).values(date_issued=F('sales_record__date_issued')).annotate(
-            total_sales=Sum('total'),
+        ).values('sales_record__date_issued').annotate(
+            total_sales=Count('id'),
             total_quantity=Sum('quantity')
         )
 
         data_map = {
-            item['date_issued']: {
+            item['sales_record__date_issued']: {
                 'sales': item['total_sales'],
                 'quantity': item['total_quantity']
             } for item in sales_items
@@ -598,105 +519,73 @@ def sales_and_delivery_stats(request):
 
         return labels, sales_data, quantity_data, total_sales, total_quantity
 
-    def calc_change(current, previous):
-        if previous == 0:
-            return 100 if current > 0 else 0
-        return round(((current - previous) / previous) * 100)
+    def get_delivery_data(start_date, end_date):
+        delivery_queryset = Delivery.objects.filter(delivery_date__range=[start_date, end_date])
+        delivery_raw = delivery_queryset.values('delivery_date').annotate(total=Count('id'))
+        delivery_map = {item['delivery_date']: item['total'] for item in delivery_raw}
+        date_list = daterange(start_date, end_date)
+        data = [delivery_map.get(day, 0) for day in date_list]
+        total = sum(data)
+        return data, total
 
-    # Today's sales and quantity
-    today_sales_data = SalesRecordItem.objects.filter(sales_record__date_issued=today).aggregate(
-        total_sales=Sum('total'),
-        total_quantity=Sum('quantity')
-    )
-    today_sales_total = today_sales_data['total_sales'] or 0
-    today_quantity_total = today_sales_data['total_quantity'] or 0
+    def get_batch_data(start_date, end_date):
+        batch_queryset = BatchOrderItem.objects.filter(batch__purchase_date__range=[start_date, end_date])
+        batch_raw = batch_queryset.values('batch__purchase_date').annotate(total=Sum('quantity'))
+        batch_map = {item['batch__purchase_date']: item['total'] for item in batch_raw}
+        date_list = daterange(start_date, end_date)
+        data = [batch_map.get(day, 0) for day in date_list]
+        total = sum(data)
+        return data, total
 
-    # Yesterday's sales and quantity
-    yesterday_sales_data = SalesRecordItem.objects.filter(sales_record__date_issued=yesterday).aggregate(
-        total_sales=Sum('total'),
-        total_quantity=Sum('quantity')
-    )
-    yesterday_sales_total = yesterday_sales_data['total_sales'] or 0
-    yesterday_quantity_total = yesterday_sales_data['total_quantity'] or 0
+    # Today
+    today_batch_total = BatchOrderItem.objects.filter(batch__purchase_date=today).aggregate(
+        total=Sum('quantity'))['total'] or 0
+    today_sales = SalesRecordItem.objects.filter(sales_record__date_issued=today).aggregate(
+        total_sales=Count('id'), total_quantity=Sum('quantity'))
+    today_delivery_total = Delivery.objects.filter(delivery_date=today).count()
 
-    # Last 7 days
+
+    # 7 Days
     last7_labels, last7_sales_data, last7_qty_data, last7_sales_total, last7_qty_total = get_sales_data_with_quantity(last_7_days, today)
-    prev7_sales_total = SalesRecordItem.objects.filter(
-        sales_record__date_issued__range=[prev_7_days, last_7_days - timedelta(days=1)]
-    ).aggregate(total=Sum('total'))['total'] or 0
+    last7_delivery_data, last7_delivery_total = get_delivery_data(last_7_days, today)
+    last7_batch_data, last7_batch_total = get_batch_data(last_7_days, today)
 
-    # Last 30 days
+
+    # 30 Days
     last30_labels, last30_sales_data, last30_qty_data, last30_sales_total, last30_qty_total = get_sales_data_with_quantity(last_30_days, today)
-    prev30_sales_total = SalesRecordItem.objects.filter(
-        sales_record__date_issued__range=[prev_30_days, last_30_days - timedelta(days=1)]
-    ).aggregate(total=Sum('total'))['total'] or 0
-
-    today_delivery_total = Delivery.objects.filter(delivery_date=today).values('id').distinct().count()
-    yesterday_delivery_total = Delivery.objects.filter(delivery_date=yesterday).values('id').distinct().count()
-
-    last7_deliveries_queryset = Delivery.objects.filter(delivery_date__range=[last_7_days, today])
-    last7_deliveries_raw = last7_deliveries_queryset.values('delivery_date').annotate(total_deliveries=Count('id', distinct=True))
-    last7_deliveries_map = {item['delivery_date']: item['total_deliveries'] for item in last7_deliveries_raw}
-    last7_deliveries_dates = daterange(last_7_days, today)
-    last7_deliveries_data = [last7_deliveries_map.get(day, 0) for day in last7_deliveries_dates]
-    last7_deliveries_total = sum(last7_deliveries_data)
-
-    prev7_deliveries_total = Delivery.objects.filter(delivery_date__range=[prev_7_days, last_7_days - timedelta(days=1)]).values('id').distinct().count()
-
-    last30_deliveries_queryset = Delivery.objects.filter(delivery_date__range=[last_30_days, today])
-    last30_deliveries_raw = last30_deliveries_queryset.values('delivery_date').annotate(total_deliveries=Count('id', distinct=True))
-    last30_deliveries_map = {item['delivery_date']: item['total_deliveries'] for item in last30_deliveries_raw}
-    last30_deliveries_dates = daterange(last_30_days, today)
-    last30_deliveries_data = [last30_deliveries_map.get(day, 0) for day in last30_deliveries_dates]
-    last30_deliveries_total = sum(last30_deliveries_data)
-
-    prev30_deliveries_total = Delivery.objects.filter(delivery_date__range=[prev_30_days, last_30_days - timedelta(days=1)]).values('id').distinct().count()
+    last30_delivery_data, last30_delivery_total = get_delivery_data(last_30_days, today)
+    last30_batch_data, last30_batch_total = get_batch_data(last_30_days, today)
 
 
     return Response({
         "today": {
-            "total_sales": today_sales_total,
-            "total_quantity": today_quantity_total,
-            "total_deliveries": today_delivery_total,
-            "change_sales": calc_change(today_sales_total, yesterday_sales_total),
-            "change_deliveries": calc_change(today_delivery_total, yesterday_delivery_total),
-            "changePositive_sales": today_sales_total >= yesterday_sales_total,
-            "changePositive_deliveries": today_delivery_total >= yesterday_delivery_total,
-            "dates": [today.strftime('%Y-%m-%d')],
-            "sales_data": [today_sales_total],
-            "quantity_data": [today_quantity_total],
-            "delivery_data": [today_delivery_total],
+            "batch_total": today_batch_total,
+            "sales_total": today_sales['total_sales'] or 0,
+            "quantity_total": today_sales['total_quantity'] or 0,
+            "delivery_total": today_delivery_total,
+            "date": today.strftime('%Y-%m-%d'),
         },
         "last7Days": {
-            "total_sales": last7_sales_total,
-            "total_quantity": last7_qty_total,
-            "total_deliveries": last7_deliveries_total,
-            "change_sales": calc_change(last7_sales_total, prev7_sales_total),
-            "change_deliveries": calc_change(last7_deliveries_total, prev7_deliveries_total),
-            "changePositive_sales": last7_sales_total >= prev7_sales_total,
-            "changePositive_deliveries": last7_deliveries_total >= prev7_deliveries_total,
+            "batch_total": last7_batch_total,
+            "sales_total": last7_sales_total,
+            "delivery_total": last7_delivery_total,
             "dates": last7_labels,
+            "batch_data": last7_batch_data,
             "sales_data": last7_sales_data,
             "quantity_data": last7_qty_data,
-            "delivery_data": last7_deliveries_data,
+            "delivery_data": last7_delivery_data,
         },
         "last30Days": {
-            "total_sales": last30_sales_total,
-            "total_quantity": last30_qty_total,
-            "total_deliveries": last30_deliveries_total,
-            "change_sales": calc_change(last30_sales_total, prev30_sales_total),
-            "change_deliveries": calc_change(last30_deliveries_total, prev30_deliveries_total),
-            "changePositive_sales": last30_sales_total >= prev30_sales_total,
-            "changePositive_deliveries": last30_deliveries_total >= prev30_deliveries_total,
+            "batch_total": last30_batch_total,
+            "sales_total": last30_sales_total,
+            "delivery_total": last30_delivery_total,
             "dates": last30_labels,
+            "batch_data": last30_batch_data,
             "sales_data": last30_sales_data,
             "quantity_data": last30_qty_data,
-            "delivery_data": last30_deliveries_data,
+            "delivery_data": last30_delivery_data,
         }
     })
-
-
-
 
 class RevenueExpenseReportAPIView(APIView):
     permission_classes = [IsAuthenticated]

@@ -3,36 +3,30 @@ let deliveryData = {};
 let deliveryChartData = {};
 let deliveryChart;  // Declare it here so it's accessible outside
 
-fetch('/api/sales-delivery-volume/')  // Update the endpoint to match the delivery data API
+fetch('/api/volume-stats/')  // Update the endpoint to match the delivery data API
   .then(res => res.json())
   .then(data => {
     // Prepare data for today's, last 7 days, and last 30 days delivery data
     deliveryData = {
       today: {
-        total: `${formatNumber(data.today.total_deliveries)}`,  // Using total_delivery from API
+        total: `${formatNumber(data.today.delivery_total)}`,  // Using total_delivery from API
         range: "Delivery Volume",
-        change: `${data.today.change_deliveries > 0 ? '+' : ''}${data.today.change_deliveries}%`,
-        changePositive: data.today.changePositive_deliveries, // Assuming boolean value for positive change
       },
       last7Days: {
-        total: formatNumber(data.last7Days.total_deliveries),
+        total: formatNumber(data.last7Days.delivery_total),
         range: "Delivery Volume",
-        change: `${data.last7Days.change_deliveries > 0 ? '+' : ''}${data.last7Days.change_deliveries}%`,
-        changePositive: data.last7Days.changePositive_deliveries,
       },
       last30Days: {
-        total: formatNumber(data.last30Days.total_deliveries),
+        total: formatNumber(data.last30Days.delivery_total),
         range: "Delivery Volume",
-        change: `${data.last30Days.change_deliveries > 0 ? '+' : ''}${data.last30Days.change_deliveries}%`,
-        changePositive: data.last30Days.changePositive_deliveries,
       },
     };
 
     // Prepare chart data for different date ranges
     deliveryChartData = {
       today: {
-        series: [{ name: 'Deliveries', data: data.today.delivery_data }],
-        xaxis: { categories: data.today.dates },  // Assuming dates are in an array
+        series: [{ name: 'Deliveries', data: data.today.delivery_total }],
+        xaxis: { categories: data.today.date },  // Assuming dates are in an array
       },
       last7Days: {
         series: [{ name: 'Deliveries', data: data.last7Days.delivery_data }],
@@ -108,29 +102,7 @@ fetch('/api/sales-delivery-volume/')  // Update the endpoint to match the delive
   // Function to update delivery data
   function updateDeliveryData(data) {
     document.getElementById('deliveryTotal').textContent = data.total;
-    console.log(data);
     document.getElementById('deliveryRange').textContent = data.range;
-  
-    const deliveryArrow = document.getElementById('deliveryArrow');
-  
-    const deliveryChangeContainer = document.getElementById('deliveryChangeContainer');
-    if (data.changePositive) {
-      deliveryChangeContainer.classList.add('text-green-500', 'dark:text-green-500');
-      deliveryChangeContainer.classList.remove('text-red-500', 'dark:text-red-500');
-      deliveryArrow.innerHTML = `
-      <svg  class="w-3 h-3 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 14">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13V1m0 0L1 5m4-4 4 4"/>
-      </svg>
-      `
-    } else {
-      deliveryChangeContainer.classList.add('text-red-500', 'dark:text-red-500');
-      deliveryChangeContainer.classList.remove('text-green-500', 'dark:text-green-500');
-      deliveryArrow.innerHTML = `
-      <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 14-4-4m4 4 4-4"/>
-      </svg>
-      `
-    }
   }
   
   

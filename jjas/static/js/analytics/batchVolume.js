@@ -3,42 +3,36 @@ let batchData = {};
 let batchChartData = {};
 let batchChart;  // Declare it here so it's accessible outside
 
-fetch('/api/batch-volume/')
+fetch('/api/volume-stats/')
   .then(res => res.json())
   .then(data => {
     // Prepare data
     batchData = {
       today: {
-        total: `${formatNumber(data.today.total)}`,
+        total: `${formatNumber(data.today.batch_total)}`,
         range: "Batch Volume",
-        change: `${data.today.change > 0 ? '+' : ''}${data.today.change}%`,
-        changePositive: data.today.changePositive,
       },
       last7Days: {
-        total: formatNumber(data.last7Days.total),
+        total: formatNumber(data.last7Days.batch_total),
         range: "Batch Volume",
-        change: `${data.last7Days.change > 0 ? '+' : ''}${data.last7Days.change}%`,
-        changePositive: data.last7Days.changePositive,
       },
       last30Days: {
-        total: formatNumber(data.last30Days.total),
+        total: formatNumber(data.last30Days.batch_total),
         range: "Batch Volume",
-        change: `${data.last30Days.change > 0 ? '+' : ''}${data.last30Days.change}%`,
-        changePositive: data.last30Days.changePositive,
       },
     };
 
     batchChartData = {
       today: {
-        series: [{ name: 'Batch', data: data.today.data }],
-        xaxis: { categories: data.today.dates },
+        series: [{ name: 'Batch', data: data.today.batch_total }],
+        xaxis: { categories: data.today.date },
       },
       last7Days: {
-        series: [{ name: 'Batch', data: data.last7Days.data }],
+        series: [{ name: 'Batch', data: data.last7Days.batch_data }],
         xaxis: { categories: data.last7Days.dates },
       },
       last30Days: {
-        series: [{ name: 'Batch', data: data.last30Days.data }],
+        series: [{ name: 'Batch', data: data.last30Days.batch_data }],
         xaxis: { categories: data.last30Days.dates },
       },
     };
@@ -105,30 +99,6 @@ document.querySelectorAll('#lastDaysdropdown_batch a').forEach((dropdownItem) =>
 function updateBatchData(data) {
   document.getElementById('batchTotal').textContent = data.total;
   document.getElementById('batchRange').textContent = data.range;
-
-  const batchChangeElement = document.getElementById('batchChange');
-  batchChangeElement.textContent = data.change;
-
-  const batchArrow = document.getElementById('batchArrow');
-
-  const batchChangeContainer = document.getElementById('batchChangeContainer');
-  if (data.changePositive) {
-    batchChangeContainer.classList.add('text-green-500', 'dark:text-green-500');
-    batchChangeContainer.classList.remove('text-red-500', 'dark:text-red-500');
-    batchArrow.innerHTML = `
-    <svg  class="w-3 h-3 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 14">
-      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13V1m0 0L1 5m4-4 4 4"/>
-    </svg>
-    `
-  } else {
-    batchChangeContainer.classList.add('text-red-500', 'dark:text-red-500');
-    batchChangeContainer.classList.remove('text-green-500', 'dark:text-green-500');
-    batchArrow.innerHTML = `
-    <svg class="w-4 h-4 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 14-4-4m4 4 4-4"/>
-    </svg>
-    `
-  }
 }
 
 

@@ -115,7 +115,11 @@ class SalesRecord(SystemGeneratedData):
     date_issued = models.DateField(default=now)
     due_date = models.DateField(default=get_default_due_date)
     net_day = models.PositiveIntegerField(default=30)
-    image = models.ImageField(upload_to="invoices/images/", default="defaults/no_image.png")
+    image = models.ImageField(
+        upload_to="invoices/images/",
+        null=True,
+        blank=True
+    )
     total = models.DecimalField(max_digits=13, decimal_places=2)
     status = models.BooleanField(default=False)
     

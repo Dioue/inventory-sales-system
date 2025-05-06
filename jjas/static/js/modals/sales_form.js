@@ -543,7 +543,6 @@ const salesAPI = async (mode, id = null) => {
     console.log('Payload:', payload);
 
     try {
-        // Make the API request
         const response = await fetch(url, {
             method: method,
             headers: {
@@ -552,20 +551,28 @@ const salesAPI = async (mode, id = null) => {
             },
             body: JSON.stringify(payload),
         });
-
+    
         if (response.ok) {
             const data = await response.json();
             console.log('API Response Submitted:', data);
             generic_alert('Sales record successfully saved.', reload = true);
         } else {
-            const error = await response.json();
-            console.error('API Error:', error);
+            let errorText = '';
+            try {
+                const error = await response.json();
+                errorText = JSON.stringify(error);
+            } catch {
+                errorText = await response.text();
+            }
+            console.error('API Error:', errorText);
             generic_alert('Error saving sales record. Please check your input.');
-        }
+        }        
+    
     } catch (error) {
         console.error('Request Error:', error);
         generic_alert('An unexpected error occurred.');
     }
+    
 };
 
 // Date formatter

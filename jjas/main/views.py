@@ -438,40 +438,55 @@ class SKUComponentView(BaseComponentView):
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        order_by_field = self.request.GET.get("order_by", "id")
-        order_direction = self.request.GET.get("direction", "asc")
-        order_prefix = "-" if order_direction == "desc" else ""
+        # Handle date range filter (default: last 1 month)
+        range_str = self.request.GET.get("range", "1m")
+        days_lookup = {"1m": 30, "3m": 90, "6m": 180}
+        days = days_lookup.get(range_str, 30)
+        start_date = now().date() - timedelta(days=days)
 
-        products = Product.objects.all().order_by(f"{order_prefix}{order_by_field}")
+        # Aggregate sold product data
+        sold_products = (
+            SalesRecordItem.objects
+            .filter(sales_record__date_issued__gte=start_date)
+            .values(
+                "product__id",
+                "product__name",
+                "product__code",
+                "product__category__name",
+                "product__selling_price"
+            )
+            .annotate(total_quantity_sold=Sum("quantity"))
+            .order_by("-total_quantity_sold")
+        )
 
-        page_obj_search_id = "_product"
+        page_obj_search_id = "_sold_product"
         search_query = self.request.GET.get(page_obj_search_id, "")
-        _, page_obj = self.apply_search_and_pagination(products, search_query, ["name"])
+        _, page_obj = self.apply_search_and_pagination(sold_products, search_query, ["product__name", "product__code"])
+
         context.update({
             "header_crumbs": [
                 {"name": "Sales Analytics", "url": reverse("auth_sku_component")},
             ],
             "tables": {
                 "page_obj": {
-                    "header": "product",
+                    "header": "sold_products",
                     "data": page_obj,
                     "fields": [
-                        {"name": "Product Name", "key": "name"},
-                        {"name": "Code", "key": "code"},
-                        {"name": "Quantity", "key": "quantity"},
-                        {"name": "Unit", "key": "unit"},
-                        {"name": "Selling Price", "key": "selling_price"},
-                        {"name": "Critical Level", "key": "critical_level"},
-                        {"name": "Product Status", "key": "status"}
+                        {"name": "Product Name", "key": "product__name"},
+                        {"name": "Product Code", "key": "product__code"},
+                        {"name": "Category", "key": "product__category__name"},
+                        {"name": "Quantity Sold", "key": "total_quantity_sold"},
+                        {"name": "Selling Price", "key": "product__selling_price"},
                     ],
-                    "fill_count": 12,
+                    "fill_count": 10,
                     "search_id": page_obj_search_id
                 },
             },
+            "range_selected": range_str
         })
         return context
     

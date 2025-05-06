@@ -62,3 +62,9 @@ const sanitizeZipCode = (inputElement) => {
         inputElement.value = inputElement.value.slice(0, 6);
     }
 };
+
+
+const dateToday = () => {
+    let dt = new Date().toISOString().split('T')[0];
+    return dt
+};

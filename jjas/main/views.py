@@ -356,6 +356,7 @@ class ProductComponentView(BaseComponentView):
                     "header": "product",
                     "data": page_obj,
                     "fields": [
+                        {"name": "Product Id", "key": "id"},
                         {"name": "Product Name", "key": "name"},
                         {"name": "Code", "key": "code"},
                         {"name": "Quantity", "key": "quantity"},

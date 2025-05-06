@@ -54,8 +54,9 @@
                             </div>
                         </td>
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            {{ obj.name|default:"--" }}
+                            {{ obj.id|default:"--" }}
                         </th>
+                        <td class="px-6 py-4">{{ obj.name|default:"--" }}</td>
                         <td class="px-6 py-4">{{ obj.code|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.quantity|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.unit.name|lower|default:"-" }}</td>

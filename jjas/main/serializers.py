@@ -281,13 +281,22 @@ class SalesRecordSerializer(serializers.ModelSerializer):
         # Weekly
         start_of_week = date - timedelta(days=date.weekday())
         end_of_week = start_of_week + timedelta(days=6)
-        weekly_sales, _ = WeeklySales.objects.get_or_create(
+
+        weekly_sales = WeeklySales.objects.filter(
             start_date=start_of_week,
-            end_date=end_of_week,
-        )
-        weekly_sales.total_sales = Decimal(weekly_sales.total_sales)
-        weekly_sales.total_sales += total
-        weekly_sales.save()
+            end_date=end_of_week
+        ).first()
+
+        if not weekly_sales:
+            weekly_sales = WeeklySales.objects.create(
+                start_date=start_of_week,
+                end_date=end_of_week,
+                total_sales=total
+            )
+        else:
+            weekly_sales.total_sales = Decimal(weekly_sales.total_sales)
+            weekly_sales.total_sales += total
+            weekly_sales.save()
 
         # Monthly
         monthly_sales, _ = MonthlySales.objects.get_or_create(

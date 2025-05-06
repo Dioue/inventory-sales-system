@@ -486,11 +486,8 @@ class SKUComponentView(BaseComponentView):
 @api_view(['GET'])
 def combined_stats(request):
     today = now().date()
-    yesterday = today - timedelta(days=1)
     last_7_days = today - timedelta(days=6)
-    prev_7_days = last_7_days - timedelta(days=7)
     last_30_days = today - timedelta(days=29)
-    prev_30_days = last_30_days - timedelta(days=30)
 
     def daterange(start_date, end_date):
         return [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]

@@ -562,14 +562,14 @@ const salesAPI = async (mode, id = null) => {
                 const error = await response.json();
                 errorText = JSON.stringify(error);
             } catch {
-                errorText = await response.text();
+                errorText = await response.json();
             }
             console.error('API Error:', errorText);
             generic_alert('Error saving sales record. Please check your input.');
         }        
     
     } catch (error) {
-        console.error('Request Error:', error);
+        console.error(error);
         generic_alert('An unexpected error occurred.');
     }
     

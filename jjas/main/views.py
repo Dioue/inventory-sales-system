@@ -443,7 +443,7 @@ class SKUComponentView(BaseComponentView):
         context = super().get_context_data(**kwargs)
 
         # Handle date range filter (default: last 1 month)
-        range_str = self.request.GET.get("range", "1m")
+        range_str = self.request.GET.get("last-month-projection", "1m")
         days_lookup = {"1m": 30, "3m": 90, "6m": 180}
         days = days_lookup.get(range_str, 30)
         start_date = now().date() - timedelta(days=days)

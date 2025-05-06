@@ -131,6 +131,8 @@ createBtn.addEventListener('click', async () => {
     new Modal(salesForm, modalOptions).show();
 })
 
+let isSubmitHandlerAttached = false;
+
 updateBtn.forEach(el => {
     el.addEventListener('click', async (event) => {
         try {
@@ -164,24 +166,31 @@ updateBtn.forEach(el => {
                     await salesAPI('PUT', sale.id);
                     new Modal(confirmModal, modalOptions).hide();
                 };
-            
+    
                 confirmBtn.addEventListener('click', handleConfirmClick, { once: true });
-            
+    
                 confirmHide.forEach(el => {
                     el.addEventListener('click', () => {
                         confirmBtn.removeEventListener('click', handleConfirmClick);
                         new Modal(confirmModal, modalOptions).hide();
-                    }, {once: true})
-                })
+                    }, { once: true });
+                });
             };
             
             const handleModalHide = () => {
                 new Modal(salesForm, modalOptions).hide();
-                submitBtn.removeEventListener('click', handleSubmit);
+                if (isSubmitHandlerAttached) {
+                    submitBtn.removeEventListener('click', handleSubmit);
+                    isSubmitHandlerAttached = false;
+                }
                 salesFormHide.removeEventListener('click', handleModalHide);
             };
-        
-            submitBtn.addEventListener('click', handleSubmit);
+    
+            if (!isSubmitHandlerAttached) {
+                submitBtn.addEventListener('click', handleSubmit);
+                isSubmitHandlerAttached = true;
+            }
+
             salesFormHide.addEventListener('click', handleModalHide, { once: true });
             new Modal(salesForm, modalOptions).show();
         } catch (error) {
@@ -489,6 +498,8 @@ const salesAPI = async (mode, id = null) => {
     // Determine the API endpoint based on mode
     const url = mode === 'POST' ? '/api/sales-records/' : `/api/sales-records/${id}/`;
     const method = mode === 'POST' ? 'POST' : 'PUT';
+    console.log('API URL:', url);
+    console.log('API Method:', method);
 
     // Extract the grand total value
     const grand_total = parseFloat(salesFormGrand.innerText.replace(/[^\d.]/g, ''), 10);
@@ -509,6 +520,7 @@ const salesAPI = async (mode, id = null) => {
             total: parseFloat(total) || 0,
         });
     });
+
 
     // Construct the payload
     const payload = {
@@ -543,7 +555,7 @@ const salesAPI = async (mode, id = null) => {
 
         if (response.ok) {
             const data = await response.json();
-            console.log('API Response:', data);
+            console.log('API Response Submitted:', data);
             generic_alert('Sales record successfully saved.', reload = true);
         } else {
             const error = await response.json();
@@ -559,5 +571,11 @@ const salesAPI = async (mode, id = null) => {
 // Date formatter
 function formatDate(date) {
     const dateObj = new Date(date);
-    return isNaN(dateObj) ? null : dateObj.toISOString().split('T')[0];
+    if (isNaN(dateObj)) return null;
+
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
 }

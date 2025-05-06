@@ -9,19 +9,19 @@ fetch('/api/sales-delivery-volume/')
     // Prepare sales data for different ranges (today, last 7 days, last 30 days)
     salesData = {
       today: {
-        total: `${formatNumber(data.today.total_sales)}`,
+        total: `${formatNumber(data.today.total_quantity)}`,
         range: "Sales Volume",
         change: `${data.today.change_sales > 0 ? '+' : ''}${data.today.change_sales}%`,
         changePositive: data.today.changePositive_sales,
       },
       last7Days: {
-        total: formatNumber(data.last7Days.total_sales),
+        total: formatNumber(data.last7Days.total_quantity),
         range: "Sales Volume",
         change: `${data.last7Days.change_sales > 0 ? '+' : ''}${data.last7Days.change_sales}%`,
         changePositive: data.last7Days.changePositive_sales,
       },
       last30Days: {
-        total: formatNumber(data.last30Days.total_sales),
+        total: formatNumber(data.last30Days.total_quantity),
         range: "Sales Volume",
         change: `${data.last30Days.change_sales > 0 ? '+' : ''}${data.last30Days.change_sales}%`,
         changePositive: data.last30Days.changePositive_sales,
@@ -31,15 +31,15 @@ fetch('/api/sales-delivery-volume/')
     // Prepare chart data for different date ranges
     salesChartData = {
       today: {
-        series: [{ name: 'Sales', data: data.today.sales_data }],
+        series: [{ name: 'Sales', data: data.today.quantity_data }],
         xaxis: { categories: data.today.dates },
       },
       last7Days: {
-        series: [{ name: 'Sales', data: data.last7Days.sales_data }],
+        series: [{ name: 'Sales', data: data.last7Days.quantity_data }],
         xaxis: { categories: data.last7Days.dates },
       },
       last30Days: {
-        series: [{ name: 'Sales', data: data.last30Days.sales_data }],
+        series: [{ name: 'Sales', data: data.last30Days.quantity_data }],
         xaxis: { categories: data.last30Days.dates },
       },
     };
@@ -110,9 +110,7 @@ fetch('/api/sales-delivery-volume/')
   function updateSalesData(data) {
     document.getElementById('salesTotal').textContent = data.total;
     document.getElementById('salesRange').textContent = data.range;
-  
-    const salesChangeElement = document.getElementById('salesChange');
-    salesChangeElement.textContent = data.change;
+
   
     const salesArrow = document.getElementById('salesArrow');
   

@@ -86,13 +86,13 @@ fetch('/api/sales-delivery-volume/')  // Update the endpoint to match the delive
       // Update deliveryChart
       if (text === 'Today') {
         deliveryChart.updateOptions(deliveryChartData.today);
-        updatedeliveryData(deliveryData.today);
+        updateDeliveryData(deliveryData.today);
       } else if (text === 'Last 7 days') {
         deliveryChart.updateOptions(deliveryChartData.last7Days);
-        updatedeliveryData(deliveryData.last7Days);
+        updateDeliveryData(deliveryData.last7Days);
       } else if (text === 'Last 30 days') {
         deliveryChart.updateOptions(deliveryChartData.last30Days);
-        updatedeliveryData(deliveryData.last30Days);
+        updateDeliveryData(deliveryData.last30Days);
       }
   
       // Update dropdown button text
@@ -108,10 +108,8 @@ fetch('/api/sales-delivery-volume/')  // Update the endpoint to match the delive
   // Function to update delivery data
   function updateDeliveryData(data) {
     document.getElementById('deliveryTotal').textContent = data.total;
+    console.log(data);
     document.getElementById('deliveryRange').textContent = data.range;
-  
-    const deliveryChangeElement = document.getElementById('deliveryChange');
-    deliveryChangeElement.textContent = data.change;
   
     const deliveryArrow = document.getElementById('deliveryArrow');
   

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .api import ProductViewSet, UnitViewSet, BatchOrderViewSet, CategoryViewSet, SalesRecordViewSet, DeliveryViewSet
 from rest_framework.routers import DefaultRouter
+from .views import ProductForecastAPIView
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
@@ -34,6 +35,7 @@ urlpatterns = [
     path('api/top-products/', views.TopProductsAPIView.as_view(), name='top-products'),
     path('api/tree-map/', views.TreeMapView.as_view(), name='tree-map-categories'),
     path('api/category-sales-heatmap/', views.CategorySalesHeatMapView.as_view(), name='category-sales-heatmap'),
+    path('api/forecast/product/<int:product_id>/', ProductForecastAPIView.as_view(), name='product-forecast'),
 
     # function routes
     path('delete/<str:model_key>/', ProcessDeleteView.as_view(), name='process_delete'),

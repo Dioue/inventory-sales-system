@@ -526,6 +526,7 @@ async function batchPut() {
         // Gather data from the form
         const supplier = document.getElementById('supplier-input-update').value.trim();
         const purchaseDate = document.getElementById('purchase-date-update').value.trim(); // MM/DD/YYYY format
+        
         const items = [];
         const rows = document.querySelectorAll('#batch-tbody-update tr');
 
@@ -545,7 +546,7 @@ async function batchPut() {
         const batchId = document.querySelector('.bu-header-id').innerText.replace('BN-', '').trim();
 
         // Format purchase date to ISO (YYYY-MM-DD)
-        const [month, day, year] = purchaseDate.split('/');
+        const [month, day, year] = purchaseDate.split('-');
         const formattedDate = `${year}-${month}-${day}`;
 
         // Construct the payload

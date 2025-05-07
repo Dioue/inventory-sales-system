@@ -2825,11 +2825,6 @@ input:checked + .toggle-bg {
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
 }
 
-.text-green-500 {
-  --tw-text-opacity: 1;
-  color: rgb(14 159 110 / var(--tw-text-opacity, 1));
-}
-
 .text-green-600 {
   --tw-text-opacity: 1;
   color: rgb(5 122 85 / var(--tw-text-opacity, 1));
@@ -2848,11 +2843,6 @@ input:checked + .toggle-bg {
 .text-red-400 {
   --tw-text-opacity: 1;
   color: rgb(249 128 128 / var(--tw-text-opacity, 1));
-}
-
-.text-red-500 {
-  --tw-text-opacity: 1;
-  color: rgb(240 82 82 / var(--tw-text-opacity, 1));
 }
 
 .text-red-600 {
@@ -3306,11 +3296,6 @@ input:checked + .toggle-bg {
 .dark\:text-green-400:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(49 196 141 / var(--tw-text-opacity, 1));
-}
-
-.dark\:text-green-500:is(.dark *) {
-  --tw-text-opacity: 1;
-  color: rgb(14 159 110 / var(--tw-text-opacity, 1));
 }
 
 .dark\:text-primary-500:is(.dark *) {

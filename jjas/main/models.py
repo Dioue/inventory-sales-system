@@ -4,15 +4,38 @@ from django.utils.timezone import now
 from datetime import timedelta
 
 
+class SoftDeletionManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
 # Abstract Base Class for Common Fields
 class SystemGeneratedData(models.Model):
     
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
     date_added = models.DateTimeField(auto_now_add=True, editable=False)
     date_modified = models.DateTimeField(auto_now=True, editable=False)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    objects = SoftDeletionManager()   
+    all_objects = models.Manager() 
 
     class Meta:
         abstract = True
+
+    def soft_delete(self):
+        self.is_deleted = True
+        self.deleted_at = now()
+        self.save(update_fields=["is_deleted", "deleted_at"])
+
+    def restore(self):
+        self.is_deleted = False
+        self.deleted_at = None
+        self.save(update_fields=["is_deleted", "deleted_at"])
+
+    def delete(self, *args, **kwargs):
+        self.soft_delete()
+
 
 # Category Model
 class Category(SystemGeneratedData):
@@ -171,7 +194,7 @@ class Delivery(SystemGeneratedData):
     image = models.ImageField(upload_to="deliveries/images/",default='defaults/no_image.png')
 
     def __str__(self):
-        return f"Delivery {self.id} for {self.client.name if self.client else 'No Client'}"
+        return f"Delivery {self.id} for {self.sale.client.name if self.sale and self.sale.client else 'No Client'}"
 
     class Meta:
         ordering = ["-date_added"]

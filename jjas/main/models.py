@@ -14,8 +14,8 @@ class SystemGeneratedData(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
     date_added = models.DateTimeField(auto_now_add=True, editable=False)
     date_modified = models.DateTimeField(auto_now=True, editable=False)
-    is_deleted = models.BooleanField(default=False)
-    deleted_at = models.DateTimeField(null=True, blank=True)
+    is_deleted = models.BooleanField(default=False, db_index=True)
+    deleted_at = models.DateTimeField(null=True, blank=True, db_index=True)
 
     objects = SoftDeletionManager()   
     all_objects = models.Manager() 
@@ -99,6 +99,14 @@ class BatchOrder(SystemGeneratedData):
     class Meta:
         verbose_name_plural = "Batch Orders"
 
+    def soft_delete(self):
+        super().soft_delete()
+        self.items.update(is_deleted=True, deleted_at=now())
+
+    def restore(self):
+        super().restore()
+        self.items.update(is_deleted=False, deleted_at=None)
+
 
 # Batch Order Item Model
 class BatchOrderItem(SystemGeneratedData):
@@ -164,6 +172,17 @@ class SalesRecord(SystemGeneratedData):
         ordering = ["-date_issued"]
         verbose_name_plural = "Sales Records"
 
+    def soft_delete(self):
+        super().soft_delete()
+        self.items.update(is_deleted=True, deleted_at=now())
+        self.deliveries.update(is_deleted=True, deleted_at=now())
+
+    def restore(self):
+        super().restore()
+        self.items.update(is_deleted=False, deleted_at=None)
+        self.deliveries.update(is_deleted=False, deleted_at=None)
+
+
 
 # Sales Record Item Model
 class SalesRecordItem(SystemGeneratedData):
@@ -182,8 +201,8 @@ class SalesRecordItem(SystemGeneratedData):
         super().save(*args, **kwargs)
 
 
-        def __str__(self):
-            return f"Item {self.id} in Sale {self.sales_record.id}"
+    def __str__(self):
+        return f"Item {self.id} in Sale {self.sales_record.id}"
 
 
 # Delivery Model

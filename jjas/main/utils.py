@@ -3,6 +3,7 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.shortcuts import render, redirect, reverse
 from django.views.decorators.cache import never_cache
+from django.utils.timezone import now
 from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
@@ -16,7 +17,7 @@ def request_user_info(request):
 
 
 class ProcessDeleteView(View):
-    """Handles deletion of selected items for products, categories, sales records, batch orders, and batch order items."""
+    """Handles deletion (soft or hard) of selected items."""
 
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
@@ -24,6 +25,8 @@ class ProcessDeleteView(View):
 
     def post(self, request, *args, **kwargs):
         selected_items = request.POST.getlist("selected_items")
+        hard_delete = request.POST.get("hard_delete", "false").lower() == "true"
+
         if not selected_items:
             messages.warning(request, "No item selected.")
             return redirect(request.META.get("HTTP_REFERER", "/"))
@@ -37,49 +40,55 @@ class ProcessDeleteView(View):
             "batch_order_item": BatchOrderItem
         }
 
-        # Identify the model based on a parameter (e.g., passed in the URL or POST data)
-        model_key = kwargs.get("model_key")  # Example: "product", "category", or "sales_record"
+        model_key = kwargs.get("model_key")
         model = model_map.get(model_key)
 
-        if model:
-            if model_key == "sales_record":
-                self._delete_sales_records(selected_items)
-            elif model_key == "batch_order":
-                self._delete_batch_orders(selected_items)
-            elif model_key == "batch_order_item":
-                self._delete_batch_order_items(selected_items)
-            else:
-                model.objects.filter(pk__in=selected_items).delete()
-
-            messages.success(request, f"Selected {model_key.replace('_', ' ')} item(s) deleted successfully.")
-        else:
+        if not model:
             messages.error(request, "Invalid model specified for deletion.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
 
+        if model_key == "sales_record":
+            self._delete_sales_records(selected_items, hard_delete)
+        elif model_key == "batch_order":
+            self._delete_batch_orders(selected_items, hard_delete)
+        elif model_key == "batch_order_item":
+            self._delete_batch_order_items(selected_items, hard_delete)
+        else:
+            queryset = model.objects.filter(pk__in=selected_items)
+            if hard_delete:
+                queryset.delete()
+            else:
+                for obj in queryset:
+                    obj.soft_delete()
+
+        messages.success(request, f"Selected {model_key.replace('_', ' ')} item(s) {'permanently ' if hard_delete else ''}deleted successfully.")
         return redirect(request.META.get("HTTP_REFERER", "/"))
 
-    def _delete_sales_records(self, selected_items):
-        """Handle deletion of sales records and related data."""
-        sales_records = SalesRecord.objects.filter(id__in=selected_items)
-        clients_to_check = set(sales_records.values_list("client_id", flat=True))
+    def _delete_sales_records(self, selected_items, hard_delete):
+        records = SalesRecord.objects.filter(id__in=selected_items)
+        if hard_delete:
+            SalesRecordItem.objects.filter(sales_record__in=records).delete()
+            records.delete()
+        else:
+            SalesRecordItem.objects.filter(sales_record__in=records).update(deleted_at=now(), is_deleted=True)
+            records.update(deleted_at=now(), is_deleted=True)
 
-        SalesRecordItem.objects.filter(sales_record__id__in=selected_items).delete()
-        sales_records.delete()
+    def _delete_batch_orders(self, selected_items, hard_delete):
+        orders = BatchOrder.objects.filter(pk__in=selected_items)
+        items = BatchOrderItem.objects.filter(batch__in=orders)
+        if hard_delete:
+            items.delete()
+            orders.delete()
+        else:
+            items.update(deleted_at=now(), is_deleted=True)
+            orders.update(deleted_at=now(), is_deleted=True)
 
-        for client_id in clients_to_check:
-            if client_id and not SalesRecord.objects.filter(id=client_id).exists():
-                Client.objects.filter(pk=client_id).delete()
-
-    def _delete_batch_orders(self, selected_items):
-        """Handle deletion of batch orders and related data."""
-        batch_orders = BatchOrder.objects.filter(pk__in=selected_items)
-        batch_order_items = BatchOrderItem.objects.filter(batch__in=batch_orders)
-
-        batch_order_items.delete()  # Delete all items related to the batch orders
-        batch_orders.delete()  # Delete the batch orders themselves
-
-    def _delete_batch_order_items(self, selected_items):
-        """Handle deletion of batch order items."""
-        BatchOrderItem.objects.filter(pk__in=selected_items).delete()
+    def _delete_batch_order_items(self, selected_items, hard_delete):
+        items = BatchOrderItem.objects.filter(pk__in=selected_items)
+        if hard_delete:
+            items.delete()
+        else:
+            items.update(deleted_at=now(), is_deleted=True)
 
 
 def apply_search_and_pagination(self, queryset, search_query, search_fields, page_size=10, default_order_by="id"):

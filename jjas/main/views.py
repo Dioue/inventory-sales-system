@@ -695,8 +695,6 @@ class CategorySalesHeatMapView(APIView):
         return Response(grouped_sales)
     
 
-
-
 class ProductForecastAPIView(APIView):
     def get(self, request, product_id):
         try:
@@ -704,3 +702,50 @@ class ProductForecastAPIView(APIView):
             return Response(forecast_df.to_dict(orient='records'))
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def product_insight_data(request, product_id):
+    try:
+        product = Product.all_objects.get(pk=product_id)
+    except Product.DoesNotExist:
+        return Response({"error": "Product not found"}, status=404)
+
+    today = now().date()
+    labels = []
+    purchased_data = []
+    sold_data = []
+    forecast_data = []
+
+    # For last 12 months
+    for i in range(11, -1, -1):
+        month = today - timedelta(days=30*i)
+        year_month = month.strftime('%Y-%m')
+        labels.append(month.replace(day=1).isoformat())
+
+        purchased = BatchOrderItem.objects.filter(
+            product=product,
+            batch__purchase_date__year=month.year,
+            batch__purchase_date__month=month.month,
+            is_deleted=False
+        ).aggregate(total=Sum('quantity'))['total'] or 0
+
+        sold = SalesRecordItem.objects.filter(
+            product=product,
+            sales_record__date_issued__year=month.year,
+            sales_record__date_issued__month=month.month,
+            is_deleted=False
+        ).aggregate(total=Sum('quantity'))['total'] or 0
+
+        forecast = int((sold + purchased) * 0.5)  # Placeholder logic
+
+        purchased_data.append(purchased)
+        sold_data.append(sold)
+        forecast_data.append(forecast)
+
+    return Response({
+        "labels": labels,
+        "purchased": purchased_data,
+        "sold": sold_data,
+        "forecast": forecast_data
+    })

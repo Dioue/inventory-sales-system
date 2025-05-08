@@ -1,20 +1,7 @@
-
-
-var insightChartOptions = {
-    series: [{
-    name: 'Product Sold',
-    type: 'column',
-    data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30]
-  }, {
-    name: 'Product Volume',
-    type: 'area',
-    data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43]
-  }, {
-    name: 'Demand Forecast',
-    type: 'line',
-    data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39]
-  }],
-    chart: {
+// Initialize chart with empty series and labels
+const insightChartOptions = {
+  series: [],
+  chart: {
     height: 350,
     type: 'line',
     stacked: false,
@@ -28,7 +15,6 @@ var insightChartOptions = {
       columnWidth: '50%'
     }
   },
-  
   fill: {
     opacity: [0.85, 0.25, 1],
     gradient: {
@@ -40,9 +26,7 @@ var insightChartOptions = {
       stops: [0, 100, 100, 100]
     }
   },
-  labels: ['01/01/2003', '02/01/2003', '03/01/2003', '04/01/2003', '05/01/2003', '06/01/2003', '07/01/2003',
-    '08/01/2003', '09/01/2003', '10/01/2003', '11/01/2003'
-  ],
+  labels: [],
   markers: {
     size: 0
   },
@@ -51,7 +35,7 @@ var insightChartOptions = {
   },
   yaxis: {
     title: {
-      text: 'Points',
+      text: 'Quantity',
     }
   },
   tooltip: {
@@ -60,14 +44,45 @@ var insightChartOptions = {
     y: {
       formatter: function (y) {
         if (typeof y !== "undefined") {
-          return y.toFixed(0) + " metric";
+          return y.toFixed(0) + " units";
         }
         return y;
-  
       }
     }
   }
-  };
+};
 
-  const insightChart = new ApexCharts(document.querySelector("#insight-chart"), insightChartOptions);
-  insightChart.render();
+// Create chart instance
+const insightChart = new ApexCharts(document.querySelector("#insight-chart"), insightChartOptions);
+insightChart.render();
+
+// Function to fetch and update chart data for a product
+function updateInsightChart(productId) {
+  fetch(`/api/product-insight/${productId}/`)
+    .then(response => response.json())
+    .then(data => {
+      insightChart.updateOptions({
+        labels: data.labels,
+        series: [
+          {
+            name: 'Product Sold',
+            type: 'column',
+            data: data.sold
+          },
+          {
+            name: 'Product Volume',
+            type: 'area',
+            data: data.purchased
+          },
+          {
+            name: 'Demand Forecast',
+            type: 'line',
+            data: data.forecast
+          }
+        ]
+      });
+    })
+    .catch(error => {
+      console.error(error);
+    });
+}

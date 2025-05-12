@@ -34,7 +34,7 @@ urlpatterns = [
     path('api/top-products/', views.TopProductsAPIView.as_view(), name='top-products'),
     path('api/tree-map/', views.TreeMapView.as_view(), name='tree-map-categories'),
     path('api/category-sales-heatmap/', views.CategorySalesHeatMapView.as_view(), name='category-sales-heatmap'),
-    path('api/forecast/product/<int:product_id>/', ProductForecastAPIView.as_view(), name='product-forecast'),
+    path('api/forecast/', ProductForecastAPIView.as_view(), name='generate-forecast'),
     path('api/product-insight/<int:product_id>/', views.product_insight_data, name='product-insight'),
 
     # function routes

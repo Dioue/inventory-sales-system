@@ -23,7 +23,7 @@ from .serializers import TopProductSerializer, TreeMapSerializer
 from rest_framework import generics
 from .serializers import CategorySalesSerializer
 from rest_framework import status
-from .forecast import forecast_tsb 
+from .forecast import forecast_all_products
 
 
 # Login View
@@ -696,10 +696,10 @@ class CategorySalesHeatMapView(APIView):
     
 
 class ProductForecastAPIView(APIView):
-    def get(self, request, product_id):
+    def get(self, request):
         try:
-            forecast_df = forecast_tsb(product_id)
-            return Response(forecast_df.to_dict(orient='records'))
+            forecast_df = forecast_all_products()
+            return Response(forecast_df)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

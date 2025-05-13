@@ -38,7 +38,7 @@ function renderHeatmap(data) {
   const chartOptions = {
     series: series,
     chart: {
-      height: 320,
+      height: 300,
       type: 'heatmap',
       toolbar: { show: false }
     },

@@ -87,18 +87,13 @@ async function handleViewClick(event) {
 
             const _tableBodyView = document.querySelector('#batch-view-table tbody');
             if (batch.items.length > 0) {
-                _tableBodyView.innerHTML = '';
-                const fragment = document.createDocumentFragment();
                 batch.items.forEach(item => {
-                    const row = document.createElement('tr');
+                    const data = []
                     Object.values(item).forEach(value => {
-                        const td = document.createElement('td');
-                        td.textContent = value;
-                        row.appendChild(td);
+                        data.appendChild(value);
                     });
-                    fragment.appendChild(row);
+                    dataTableInstance.insert({data: data});
                 });
-                _tableBodyView.appendChild(fragment);
 
 
                 // Attach the simpleDatatables library. This shit is awesome! 

@@ -21,7 +21,7 @@ from rest_framework.views import APIView
 from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 from .serializers import TopProductSerializer
 from rest_framework import status
-from .forecast import forecast_all_products_bulk
+from .forecast import forecast_all
 from rest_framework.throttling import UserRateThrottle
 from django.core.cache import cache
 from django.db.models.functions import TruncMonth
@@ -715,7 +715,7 @@ class CategorySalesHeatMapView(APIView):
 class ProductForecastAPIView(APIView):
     def get(self, request):
         try:
-            forecast_df = forecast_all_products_bulk()
+            forecast_df = forecast_all()
             return Response(forecast_df)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

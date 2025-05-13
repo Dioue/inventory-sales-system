@@ -3,6 +3,7 @@ const projectionBadge = document.querySelector('.generate-projection-text-badge'
 const projectionModal = document.querySelector('#generate-projection');
 const projectionModalHide = document.querySelector('#generate-projection-hide');
 const selectedProjection = document.querySelector('#last-month-projection');
+let projectionTable = null;
 
 showProjectionBtn.addEventListener('click', () => {
     const selectedProjectionValue = selectedProjection.options[selectedProjection.selectedIndex].text;
@@ -14,22 +15,20 @@ showProjectionBtn.addEventListener('click', () => {
             // Check if forecasts exist and is an array
             if (Array.isArray(data)) {
                 const tbody = document.querySelector('#projection-table tbody');
-                tbody.innerHTML = '';  // Clear existing rows
+                if (projectionTable) {
+                    const formattedData = data.map(item => [
+                        item.product_id,
+                        item.product_name,
+                        item.forecast_30_day ? Number(item.forecast_30_day).toLocaleString() : '—',
+                        item.forecast_90_day ? Number(item.forecast_90_day).toLocaleString() : '—',
+                        item.forecast_180_day ? Number(item.forecast_180_day).toLocaleString() : '—',
+                        item.accuracy !== null ? item.accuracy + "%" : '—',
+                        item.strategy
+                    ]);
+                    projectionTable.insert({ data: formattedData });
+                    
+                }
 
-                data.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer';
-                    row.innerHTML = `
-                        <td class="font-medium text-gray-900 whitespace-nowrap dark:text-white">${item.product_id}</td>
-                        <td>${item.product_name}</td>
-                        <td>${item["1_month"] ? Number(item["1_month"]).toLocaleString() : '—'}</td>
-                        <td>${item["3_months"] ? Number(item["3_months"]).toLocaleString() : '—'}</td>
-                        <td>${item["6_months"] ? Number(item["6_months"]).toLocaleString() : '—'}</td>
-                        <td>${item.accuracy !== null ? item.accuracy + "%" : '—'}</td>
-                        <td>${item.strategy}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
 
                 // Show the modal after loading data
                 const handleModalHide = () => {
@@ -93,8 +92,8 @@ if (document.getElementById("projection-table") && typeof simpleDatatables.DataT
 
         return str
     }
-    const table = new simpleDatatables.DataTable("#projection-table", {
-        paging: false,
+    projectionTable = new simpleDatatables.DataTable("#projection-table", {
+        paging: true,
         perPage: 10,
         template: (options, dom) => "<div class='" + options.classes.top + "'>" +
             "<div class='flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-3 rtl:space-x-reverse w-full sm:w-auto'>" +

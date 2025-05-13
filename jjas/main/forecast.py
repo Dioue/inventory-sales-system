@@ -10,7 +10,10 @@ def safe_mape(y_true, y_pred):
     mask = y_true != 0
     if not np.any(mask):
         return 0.0  # Avoid division by zero
-    return np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask]))
+    
+    mape = np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])
+    capped_mape = np.clip(mape, 0, 1.0)  # Cap to 1.0 (100%)
+    return np.mean(capped_mape) * 100  # Return as percentage
 
 def forecast_all():
     items = SalesRecordItem.objects.filter(quantity__gt=0, is_deleted=False).select_related('sales_record', 'product')

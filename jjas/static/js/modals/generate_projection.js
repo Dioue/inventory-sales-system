@@ -19,9 +19,9 @@ showProjectionBtn.addEventListener('click', () => {
                     const formattedData = data.map(item => [
                         item.product_id,
                         item.product_name,
-                        item.forecast_30_day ? Number(item.forecast_30_day).toLocaleString() : '—',
-                        item.forecast_90_day ? Number(item.forecast_90_day).toLocaleString() : '—',
-                        item.forecast_180_day ? Number(item.forecast_180_day).toLocaleString() : '—',
+                        item.forecast_30_day ? Number(item.forecast_30_day).toLocaleString() : 0,
+                        item.forecast_90_day ? Number(item.forecast_90_day).toLocaleString() : 0,
+                        item.forecast_180_day ? Number(item.forecast_180_day).toLocaleString() : 0,
                         item.accuracy !== null ? item.accuracy + "%" : '—',
                         item.strategy
                     ]);
@@ -164,25 +164,25 @@ if (document.getElementById("projection-table") && typeof simpleDatatables.DataT
     const dropdown = new Dropdown($exportDropdownEl, $exportButton);
 
     document.getElementById("projection-export-csv").addEventListener("click", () => {
-        simpleDatatables.exportCSV(table, {
+        simpleDatatables.exportCSV(projectionTable, {
             download: true,
             lineDelimiter: "\n",
             columnDelimiter: ";"
         })
     })
     document.getElementById("projection-export-sql").addEventListener("click", () => {
-        simpleDatatables.exportSQL(table, {
+        simpleDatatables.exportSQL(projectionTable, {
             download: true,
             tableName: "export_table"
         })
     })
     document.getElementById("projection-export-txt").addEventListener("click", () => {
-        simpleDatatables.exportTXT(table, {
+        simpleDatatables.exportTXT(projectionTable, {
             download: true
         })
     })
     document.getElementById("projection-export-json").addEventListener("click", () => {
-        simpleDatatables.exportJSON(table, {
+        simpleDatatables.exportJSON(projectionTable, {
             download: true,
             space: 3
         })

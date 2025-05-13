@@ -1,84 +1,85 @@
-async function fetchAndRenderHeatmap(range = 'this_year') {
-  const res = await fetch(`/api/category-sales-heatmap/?range=${range}`);
-  const rawData = await res.json();
+let cachedRawData = []; // hold all data for reuse
 
-  if (!rawData.length) {
-    document.querySelector("#heat-map-chart").innerHTML = "<p class='text-center text-gray-500'>No data available.</p>";
+async function fetchAndRenderHeatmap() {
+  const res = await fetch(`/api/category-sales-heatmap/?limit=1000`);
+  cachedRawData = await res.json(); // store for searching
+  renderHeatmap(cachedRawData); // initial render
+}
+
+function renderHeatmap(data) {
+  if (!data.length) {
+    document.querySelector("#heat-map-chart").innerHTML =
+      "<p class='text-center text-gray-500'>No data available.</p>";
     return;
   }
 
-  // Extract unique dates and map category data
-  const dateSet = new Set();
-  const categoryMap = {};
+  // Get the last 12 months
+  const today = new Date();
+  const months = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    months.push(d.toISOString().slice(0, 7)); // 'YYYY-MM'
+  }
 
-  rawData.forEach(({ category_code, date, total_quantity }) => {
-    dateSet.add(date);
+  // Map: category -> {month: quantity}
+  const categoryMap = {};
+  data.forEach(({ category_code, date, total_quantity }) => {
+    const month = date.slice(0, 7);
     if (!categoryMap[category_code]) categoryMap[category_code] = {};
-    categoryMap[category_code][date] = total_quantity;
+    categoryMap[category_code][month] = total_quantity;
   });
 
-  const dates = Array.from(dateSet).sort(); // sorted list of all unique dates
-
-  // Construct data for ApexCharts
-  const series = Object.entries(categoryMap).map(([category, dataMap]) => ({
+  // Build Apex series
+  const series = Object.entries(categoryMap).map(([category, monthData]) => ({
     name: category,
-    data: dates.map(date => dataMap[date] || 0)
+    data: months.map(m => monthData[m] || 0),
   }));
 
-  const heatMapChartOptions = {
+  const chartOptions = {
     series: series,
     chart: {
-      height: 250,
+      height: 320,
       type: 'heatmap',
-      toolbar: {
-        show: true,
-        tools: {
-          zoom: false, zoomin: false, zoomout: false, pan: false,
-        },
-      },
+      toolbar: { show: false }
     },
     xaxis: {
       type: 'category',
-      categories: dates,
+      categories: months,
       labels: {
+        formatter: val => {
+          const [year, month] = val.split("-");
+          const date = new Date(year, parseInt(month) - 1);
+          return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        },
         rotate: -45,
         style: { fontSize: '10px' }
       }
     },
-    dataLabels: {
-      enabled: false
-    },
+    dataLabels: { enabled: false },
     colors: ["#008FFB"],
   };
 
   const chartContainer = document.querySelector("#heat-map-chart");
-  chartContainer.innerHTML = ""; // Clear previous chart
-  const heatMapChart = new ApexCharts(chartContainer, heatMapChartOptions);
+  chartContainer.innerHTML = ""; // Clear old chart
+  const heatMapChart = new ApexCharts(chartContainer, chartOptions);
   heatMapChart.render();
 }
 
+// Handle category search
 document.addEventListener("DOMContentLoaded", () => {
-  const dropdownItems = document.querySelectorAll('.range-option');
-  const buttonLabel = document.querySelector('#dropdownDefaultButton_heatmap');
+  fetchAndRenderHeatmap();
 
-  dropdownItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      const range = item.dataset.range;
-      const label = item.textContent.trim();
+  const searchInput = document.querySelector("#heat-map-search");
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.trim().toLowerCase();
 
-      // Update the dropdown button label
-      buttonLabel.innerHTML = `${label}
-        <svg class="w-2.5 m-2.5 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-        </svg>`;
-
-      // Re-fetch and re-render the chart
-      fetchAndRenderHeatmap(range);
-    });
+    if (!query) {
+      renderHeatmap(cachedRawData);
+    } else {
+      const filtered = cachedRawData.filter(item =>
+        item.category_code.toLowerCase().includes(query)
+      );
+      renderHeatmap(filtered);
+    }
   });
 });
-
-
-// Call it on load
-fetchAndRenderHeatmap();

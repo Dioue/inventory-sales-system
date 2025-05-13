@@ -12,33 +12,9 @@
           <p class="text-sm font-normal text-gray-500 dark:text-gray-400">Category sold over a span of a year</p>
         </div>
       </div>
-      <div>
-        <button
-            id="dropdownDefaultButton_heatmap"
-            data-dropdown-toggle="lastDaysdropdown_heatmap"
-            data-dropdown-placement="bottom"
-            class="text-sm font-medium text-gray-500 border border-gray-400 rounded-lg px-2 dark:text-gray-400 hover:text-gray-900 text-center inline-flex items-center dark:hover:text-white"
-            type="button">
-            This year
-            <svg class="w-2.5 m-2.5 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-            </svg>
-            </button>
-            <!-- Dropdown menu -->
-            <div id="lastDaysdropdown_heatmap" class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700" style="z-index: 999 !important;">
-              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton_heatmap">
-                <li>
-                  <a href="#" data-range="this_year" class="range-option block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">This year</a>
-                </li>
-                <li>
-                  <a href="#" data-range="last_year" class="range-option block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last year</a>
-                </li>
-                <li>
-                  <a href="#" data-range="all_time" class="range-option block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">All time</a>
-                </li>
-              </ul>
-            </div>
-      </div>
+      <div class="pt-4 pb-2">
+        <input id="heat-map-search" type="text" placeholder="Search categories..." class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300" />
+    </div>
     </div>
     <div id="heat-map-chart" class="border-t pt-4 pb-4"></div>
   </div>

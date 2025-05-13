@@ -9,22 +9,25 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Count
-from .utils import request_user_info, apply_search_and_pagination
+from .utils import request_user_info
 from .models import (BatchOrder, BatchOrderItem, Category, Delivery, Product, SalesRecord, SalesRecordItem, Unit)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db.models import Sum
-from datetime import timedelta, date, datetime
+from datetime import timedelta
 from django.utils.timezone import now
 from rest_framework.views import APIView
 from django.db.models import Sum, F, ExpressionWrapper, DecimalField
-from .serializers import TopProductSerializer, TreeMapSerializer
-from rest_framework import generics
-from .serializers import CategorySalesSerializer
+from .serializers import TopProductSerializer
 from rest_framework import status
-from .forecast import forecast_all_products
+from .forecast import forecast_all_products_bulk
+from rest_framework.throttling import UserRateThrottle
+from django.core.cache import cache
+from django.db.models.functions import TruncMonth
 
+class ThrottleTimer(UserRateThrottle):
+    rate = '60/min'
 
 # Login View
 @method_decorator(never_cache, name="dispatch")
@@ -646,59 +649,73 @@ class TopProductsAPIView(APIView):
 
 
 class TreeMapView(APIView):
+    throttle_classes = [ThrottleTimer]
+
     def get(self, request, *args, **kwargs):
-        # Get product count per category
+        cache_key = 'tree_map_category_data'
+        cached_data = cache.get(cache_key)
+
+        if cached_data is not None:
+            return Response(cached_data)
+
+        # Efficiently annotate product count per category
         category_counts = (
             Product.objects
             .values('category__name')
-            .annotate(product_count=Count('id'))
+            .annotate(product_count=Count('id', distinct=True))
             .order_by('-product_count')
         )
 
+        # Prepare data, exclude any null category names
         data = [
             {'x': item['category__name'], 'y': item['product_count']}
-            for item in category_counts if item['product_count'] > 0
+            for item in category_counts if item['category__name']
         ]
 
+        cache.set(cache_key, data, timeout=3600)
+
         return Response(data)
-    
+
 class CategorySalesHeatMapView(APIView):
+    throttle_classes = [ThrottleTimer]
+
     def get(self, request, *args, **kwargs):
-        range_param = request.query_params.get('range', 'all')
         today = now().date()
-        current_year = today.year
+        start_date = today - timedelta(days=365)
 
-        if range_param == 'this_year':
-            start_date = datetime(current_year, 1, 1).date()
-            sales_items = SalesRecordItem.objects.filter(sales_record__date_issued__gte=start_date)
-        elif range_param == 'last_year':
-            start_date = datetime(current_year - 1, 1, 1).date()
-            end_date = datetime(current_year - 1, 12, 31).date()
-            sales_items = SalesRecordItem.objects.filter(
-                sales_record__date_issued__gte=start_date,
-                sales_record__date_issued__lte=end_date
-            )
-        else:
-            sales_items = SalesRecordItem.objects.all()
+        # Filter once for performance
+        sales_items = SalesRecordItem.objects.filter(
+            sales_record__date_issued__range=(start_date, today)
+        )
 
-        # Group by category and date
+        # Get top 10 categories
+        top_categories = (
+            sales_items
+            .values(category_code=F('product__category__code'))
+            .annotate(total_sales=Sum('quantity'))
+            .order_by('-total_sales')[:10]
+            .values_list('category_code', flat=True)
+        )
+
+        # Group sales by category and month
         grouped_sales = (
             sales_items
+            .filter(product__category__code__in=top_categories)
+            .annotate(month=TruncMonth('sales_record__date_issued'))
             .values(
                 category_code=F('product__category__code'),
-                date=F('sales_record__date_issued')
+                date=F('month')
             )
             .annotate(total_quantity=Sum('quantity'))
             .order_by('category_code', 'date')
         )
 
         return Response(grouped_sales)
-    
 
 class ProductForecastAPIView(APIView):
     def get(self, request):
         try:
-            forecast_df = forecast_all_products()
+            forecast_df = forecast_all_products_bulk()
             return Response(forecast_df)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

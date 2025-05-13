@@ -1,209 +1,209 @@
 from django.core.management.base import BaseCommand
-from faker import Faker
 from django.contrib.auth.models import User
-from ...models import Category, Unit, Supplier, Product, Client, SalesRecord, SalesRecordItem, Delivery
-from datetime import timedelta, timezone as dt_timezone
 from decimal import Decimal
+from django.db import connection
+from faker import Faker
 import random
-import string
+from datetime import timedelta, datetime
+from ...models import (
+    Category, Client, Unit, Product,
+    BatchOrder, BatchOrderItem,
+    SalesRecord, SalesRecordItem,
+    Delivery
+)
 
+fake = Faker()
+
+START_DATE = datetime(2025, 1, 1)
+END_DATE = datetime(2025, 5, 13)
+
+def random_date():
+    return START_DATE + timedelta(
+        days=random.randint(0, (END_DATE - START_DATE).days)
+    )
+
+def reset_sequence(model):
+    with connection.cursor() as cursor:
+        table = model._meta.db_table
+        cursor.execute(
+            f"SELECT setval(pg_get_serial_sequence('\"{table}\"', 'id'), (SELECT MAX(id) FROM \"{table}\"))"
+        )
 
 class Command(BaseCommand):
-    help = 'Populates the database with random data'
+    help = 'Populate the database with demo data for system testing'
 
     def handle(self, *args, **kwargs):
-        fake = Faker()
 
-        # Get the superuser (admin)
-        try:
-            user = User.objects.get(username='admin')
-        except User.DoesNotExist:
-            self.stdout.write(self.style.ERROR('Superuser (admin) does not exist.'))
-            return
-            
+        self.stdout.write('Clearing existing data...')
 
-        """ # Function to generate the category code (For Categories)
-        def generate_category_code():
-            while True:
-                # Generate 1-3 uppercase letters
-                code = ''.join(random.choices(string.ascii_uppercase, k=random.randint(1, 3)))
+        # Delete from children to parents to avoid FK constraints
+        Delivery.all_objects.all().delete()
+        SalesRecordItem.all_objects.all().delete()
+        SalesRecord.all_objects.all().delete()
+        BatchOrderItem.all_objects.all().delete()
+        BatchOrder.all_objects.all().delete()
+        Product.all_objects.all().delete()
+        Unit.all_objects.all().delete()
+        Client.all_objects.all().delete()
+        Category.all_objects.all().delete()
 
-                # Check if the generated code already exists
-                if not Category.objects.filter(code=code).exists():
-                    return code  # Return the unique code if it does not exist
+        self.stdout.write(self.style.WARNING('All existing records deleted.'))
 
-        # Create Categories
-        for _ in range(25):
-            Category.objects.create(
-                created_by=user,
-                code=generate_category_code(),  # Using the new function to generate the code
-                name=fake.unique.word()
-            ) """
+        user = User.objects.first()
 
-        """ # Create Units (UoM) with predefined valid values and ensure uniqueness
-        valid_units = ['set', 'piece', 'box']
-
-        for unit in valid_units:
-            # Create the unit with a unique name
-            Unit.objects.create(
-                created_by=user,
-                name=unit
-            ) """
-
-        """ # Create Suppliers
-        for _ in range(5):
-            # Generate a company name with common formats (Inc., Corp., Ltd, etc.)
-            company_name = fake.company() + " " + random.choice(["Inc.", "Corp.", "Ltd", "Limited", "LLC", "Co.", "Group"])
-            
-            # Generate a phone number for the contact
-            contact = fake.phone_number()
-
-            Supplier.objects.create(
-                created_by=user,
-                name=company_name,
-                contact=contact
-            ) """
-
-
-        # Function to generate a product code based on category code with 3 to 6 digits consisting of 0 and 9
-        def generate_product_code():
-            while True:
-                # Generate one random letter at the beginning and end
-                start_letter = random.choice(string.ascii_uppercase)
-                end_letter = random.choice(string.ascii_uppercase)
-                
-                # Generate 3-6 digits using only '0' and '9'
-                digits = ''.join(random.choices(['0', '9'], k=random.randint(2, 4)))
-
-                # Combine letters and digits to create the product code
-                product_code = f"{start_letter}{digits}{end_letter}"
-
-                # Check if the generated code already exists in the Product model
-                if not Product.objects.filter(code=product_code).exists():
-                    return product_code  # Return the unique code if it does not exist
-
-                # List of car brands and models for the application field
-        car_brands_and_models = [
-            "Toyota Corolla", "Honda Civic", "Ford Mustang", "Chevrolet Camaro", 
-            "Tesla Model 3", "BMW 3 Series", "Audi A4", "Mercedes-Benz C-Class",
-            "Hyundai Elantra", "Nissan Altima", "Volkswagen Jetta", "Kia Optima", 
-            "Mazda 3", "Subaru Impreza", "Lexus IS", "Chrysler 300", 
-            "Dodge Charger", "Porsche 911", "Jaguar F-Type", "Land Rover Range Rover"
+        self.stdout.write('Creating categories...')
+        categories = [
+            Category(
+                code=f"CAT{str(i).zfill(4)}",
+                name=fake.word(),
+                created_by=user
+            ) for i in range(1000)
         ]
+        Category.objects.bulk_create(categories)
+        reset_sequence(Category)
 
-        # Create Products
-        for _ in range(30):
-            # Pick a random category
-            category = Category.objects.order_by('?').first()
-            category_code = category.code  # Get the code of the chosen category
+        self.stdout.write('Creating clients...')
+        clients = [
+            Client(
+                name=fake.name(),
+                address_line_1=fake.street_address(),
+                address_line_2=fake.secondary_address(),
+                city=fake.city(),
+                province=fake.state(),
+                zip_code=fake.zipcode(),
+                created_by=user
+            ) for _ in range(1000)
+        ]
+        Client.objects.bulk_create(clients)
+        reset_sequence(Client)
 
-            # Generate product attributes
-            product_status = random.choice(['Available', 'Out of Stock', 'Critical'])
+        self.stdout.write('Creating units...')
+        units = [Unit(name=unit, created_by=user) for unit in ['Piece', 'Box', 'Pack', 'Set']]
+        Unit.objects.bulk_create(units)
+        reset_sequence(Unit)
+        units = list(Unit.objects.all())
 
-            Product.objects.create(
-                created_by=user,  # Assuming `user` is defined elsewhere
-                name=fake.unique.word().capitalize(),
-                code=generate_product_code(),  # Match with `code` field
-                application=random.choice(car_brands_and_models),
-                side=random.choice(["FRONT", "BACK", "REAR"]),
+        categories = list(Category.objects.all())
+
+        self.stdout.write('Creating products...')
+        products = [
+            Product(
+                name=f"{fake.word().capitalize()}{i}",
+                code=f"P{str(i).zfill(5)}",
+                category=random.choice(categories),
+                unit=random.choice(units),
+                application=fake.word(),
+                side=fake.word(),
                 description=fake.text(max_nb_chars=100),
-                image=None,  # Default to no image
-                quantity_left=fake.random_int(min=0, max=100),
-                cost_price=fake.pydecimal(left_digits=3, right_digits=2, positive=True),
-                selling_price=fake.pydecimal(left_digits=4, right_digits=2, positive=True),
-                critical_level=fake.random_int(min=1, max=10),
-                status=product_status,
-                unit=Unit.objects.order_by('?').first(),
-                supplier=Supplier.objects.order_by('?').first(),
-                category=category
-            )
-
-        print('Successfully populated the database with random data.')
-
-        
-        """ self.stdout.write(self.style.SUCCESS('Creating Clients...'))
-        for _ in range(20):
-            Client.objects.create(
-                created_by=user,
-                name=fake.company(),
-                address=fake.address()
-            )
-
-        self.stdout.write(self.style.SUCCESS('Clients created successfully.'))
-
-        # Create Sales Records and Sales Items
-        self.stdout.write(self.style.SUCCESS('Creating Sales Records and Sales Items...'))
-        clients = list(Client.objects.all())
+                quantity=random.randint(10, 500),
+                cost_price=round(random.uniform(100, 500), 2),
+                selling_price=round(random.uniform(500, 1000), 2),
+                critical_level=random.randint(5, 20),
+                created_by=user
+            ) for i in range(10000)
+        ]
+        Product.objects.bulk_create(products)
+        reset_sequence(Product)
         products = list(Product.objects.all())
 
-        if not products:
-            self.stdout.write(self.style.ERROR('No products available to create sales items. Please populate products first.'))
-            return
-
-        for _ in range(40):
-            # Pick a random client
-            client = random.choice(clients)
-
-            # Generate a sales record
-            net_day = random.choice([0, 15, 30, 60, 90])
-            date_issued = fake.date_this_year()
-
-            # Create Sales Record
-            sales_record = SalesRecord.objects.create(
+        self.stdout.write('Creating batch orders...')
+        batch_orders = []
+        batch_items = []
+        for i in range(10000):
+            date = random_date()
+            bo = BatchOrder(
+                supplier=fake.company(),
+                purchase_date=date,
+                grand_total=random.randint(1000, 250000),
                 created_by=user,
-                client=client,
-                date_issued=date_issued,
-                net_day=net_day,
-                total=0,  # Initial total (will be updated after creating items)
-                order_status=random.choice(['Unpaid', 'Paid'])
+                date_added=date,
+                date_modified=date
             )
+            batch_orders.append(bo)
+        BatchOrder.objects.bulk_create(batch_orders)
+        reset_sequence(BatchOrder)
+        batch_orders = list(BatchOrder.objects.all())
 
-            sales_items = []
-            total_amount = Decimal('0.00')
+        for bo in batch_orders:
+            item_count = random.randint(1, 5)
+            for _ in range(item_count):
+                product = random.choice(products)
+                quantity = random.randint(1, 20)
+                cost_price = product.cost_price
+                item = BatchOrderItem(
+                    batch=bo,
+                    product=product,
+                    quantity=quantity,
+                    cost_price=cost_price,
+                    defective=random.randint(0, 2),
+                    created_by=user,
+                    date_added=bo.date_added,
+                    date_modified=bo.date_modified
+                )
+                batch_items.append(item)
+        BatchOrderItem.objects.bulk_create(batch_items)
+        reset_sequence(BatchOrderItem)
 
-            for _ in range(random.randint(1, 25)):
+        self.stdout.write('Creating sales records...')
+        clients = list(Client.objects.all())
+        sales_records = []
+        sales_items = []
+        for i in range(10000):
+            date_issued = random_date()
+            net_day = 30
+            due_date = date_issued + timedelta(days=net_day)
+            sr = SalesRecord(
+                client=random.choice(clients),
+                date_issued=date_issued,
+                due_date=due_date,
+                net_day=net_day,
+                total=0,
+                created_by=user,
+                date_added=date_issued,
+                date_modified=date_issued
+            )
+            sales_records.append(sr)
+        SalesRecord.objects.bulk_create(sales_records)
+        reset_sequence(SalesRecord)
+        sales_records = list(SalesRecord.objects.all())
+
+        for sr in sales_records:
+            item_count = random.randint(1, 5)
+            total = 0
+            for _ in range(item_count):
                 product = random.choice(products)
                 quantity = random.randint(1, 10)
-                surcharge = Decimal(round(random.uniform(0, 50), 2))  # Convert to Decimal
-                amount = (product.selling_price * quantity) + surcharge
-
-                # Create sales record item
-                sales_item = SalesRecordItem(
-                    sales_record=sales_record,
+                surcharge = Decimal(str(round(random.uniform(0, 100), 2)))
+                item_total = product.selling_price * quantity + surcharge
+                total += item_total
+                item = SalesRecordItem(
+                    sales_record=sr,
                     product=product,
                     quantity=quantity,
                     surcharge=surcharge,
-                    amount=amount
+                    total=item_total,
+                    created_by=user,
+                    date_added=sr.date_issued,
+                    date_modified=sr.date_issued
                 )
-                sales_items.append(sales_item)
-                total_amount += amount
+                sales_items.append(item)
+            sr.total = total
+        SalesRecord.objects.bulk_update(sales_records, ['total'])
+        SalesRecordItem.objects.bulk_create(sales_items)
+        reset_sequence(SalesRecordItem)
 
-            # Bulk create sales items for efficiency
-            SalesRecordItem.objects.bulk_create(sales_items)
-
-            # Update the sales record total with the accumulated amount
-            sales_record.total = round(total_amount, 2)
-            sales_record.save()
-
-        self.stdout.write(self.style.SUCCESS('Sales Records and Sales Items created successfully.'))
-
-
-        # Create Deliveries
-        self.stdout.write(self.style.SUCCESS('Creating Deliveries...'))
-        sales_records = list(SalesRecord.objects.all())  # Get all sales records
-        for _ in range(350):
-            # Pick a random sales record
-            sales_record = random.choice(sales_records)
-
-            # Generate a delivery
-            delivery_date = fake.date_time_this_year(tzinfo=dt_timezone.utc)
-            claimed_date = delivery_date + timedelta(days=random.randint(1, 30))  # Claim date within 30 days after delivery
-
-            Delivery.objects.create(
+        self.stdout.write('Creating deliveries...')
+        deliveries = [
+            Delivery(
+                sale=sr,
+                delivery_date=sr.date_issued + timedelta(days=random.randint(1, 10)),
+                date_claimed=sr.date_issued + timedelta(days=random.randint(5, 15)),
                 created_by=user,
-                client=sales_record.client,  # Assuming Delivery is associated with SalesRecord's client
-                delivery_date=delivery_date,
-                date_claimed=claimed_date,
-            )
+                date_added=sr.date_issued,
+                date_modified=sr.date_issued
+            ) for sr in sales_records
+        ]
+        Delivery.objects.bulk_create(deliveries)
+        reset_sequence(Delivery)
 
-        self.stdout.write(self.style.SUCCESS('Deliveries created successfully.')) """
+        self.stdout.write(self.style.SUCCESS('Successfully populated demonstration data.'))

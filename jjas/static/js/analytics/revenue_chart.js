@@ -34,7 +34,7 @@ const revenueOptions = {
     show: false,
     labels: {
       formatter: function (value) {
-        return '$' + value;
+        return '₱ ' + value;
       },
     },
   },
@@ -88,7 +88,7 @@ async function fetchRevenueData(period = 'last7') {
     if (salesTotalEl) {
       salesTotalEl.textContent = Intl.NumberFormat('en-US', {
         style: "currency",
-        currency: "USD",
+        currency: "Php",
         minimumFractionDigits: 0,
       }).format(netTotal);
     }
@@ -97,9 +97,9 @@ async function fetchRevenueData(period = 'last7') {
     const salesRangeEl = document.getElementById("revenue-sales-range");
     if (salesRangeEl) {
       const labelMap = {
-        today: "sales today",
-        last7: "sales this week",
-        last30: "sales this month"
+        today: "sales to revenue today",
+        last7: "sales to revenue this week",
+        last30: "sales to revenue this month"
       };
       salesRangeEl.textContent = labelMap[period] || "sales";
     }

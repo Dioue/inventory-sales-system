@@ -21,12 +21,12 @@ showProjectionBtn.addEventListener('click', () => {
                             : 'N/A';
 
                         return [
-                            accuracy,
                             item.product_id,
                             item.product_name,
                             item.forecast_30_day ? Number(item.forecast_30_day).toLocaleString() : '0',
                             item.forecast_90_day ? Number(item.forecast_90_day).toLocaleString() : '0',
                             item.forecast_180_day ? Number(item.forecast_180_day).toLocaleString() : '0',
+                            accuracy,
                             item.strategy
                         ];
                     });

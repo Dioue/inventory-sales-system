@@ -117,7 +117,7 @@ class BatchOrderComponentView(BaseComponentView):
         search_query = self.request.GET.get(page_obj_search_id, "")
         
         # tables obj
-        _, page_obj = self.apply_search_and_pagination(batch_order, search_query, ["id"])
+        _, page_obj = self.apply_search_and_pagination(batch_order, search_query, ["id", "created_by"])
 
         context.update({
             "content_label": {
@@ -145,12 +145,12 @@ class BatchOrderComponentView(BaseComponentView):
                     "data": page_obj,
                     "fields": [
                         {"name": "Batch No", "key": "id"},
-                        {"name": "Grand Total", "key": "grand_total"},
-                        {"name": "Supplier", "key": "supplier"},  # Use actual field names
+                        {"name": "Supplier", "key": "supplier"},
+                        {"name": "Grand Total", "key": "grand_total"},  # Use actual field names
                         {"name": "Purchase Date", "key": "purchase_date"},
                         {"name": "Created by", "key": "created_by"},
                     ],
-                    "fill_count": 6,
+                    "fill_count": 7,
                     "search_id": page_obj_search_id
                 },
                 "products": {
@@ -187,7 +187,7 @@ class CategoryComponentView(BaseComponentView):
         categories = Category.objects.all().order_by(f"{order_prefix}{order_by_field}")
         page_obj_search_id = "_category"
         search_query = self.request.GET.get(page_obj_search_id, "")
-        _, page_obj = self.apply_search_and_pagination(categories, search_query, ["code"])
+        _, page_obj = self.apply_search_and_pagination(categories, search_query, ["code", "name"])
 
         context.update({
             "tables": {

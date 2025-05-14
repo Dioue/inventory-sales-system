@@ -84,29 +84,26 @@ async function handleViewClick(event) {
             grand_total.innerText = parseFloat(batch.grand_total).toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
             supplier_name.innerText = batch.supplier;
             purchase_date.innerText = batch.purchase_date;
+            let batch_table_instance = null;
 
-            const _tableBodyView = document.querySelector('#batch-view-table tbody');
+            // Attach the simpleDatatables library. This shit is awesome! 
+            if (typeof simpleDatatables.DataTable !== 'undefined') {
+                batch_table_instance = new simpleDatatables.DataTable("#batch-view-table", {
+                    searchable: true,
+                    sortable: true,
+                    perPageSelect: false
+                });
+            }
+
             if (batch.items.length > 0) {
                 batch.items.forEach(item => {
                     const data = []
                     Object.values(item).forEach(value => {
-                        data.appendChild(value);
+                        data.push(value);
                     });
-                    dataTableInstance.insert({data: data});
+                    batch_table_instance.insert({data: [data]});
                 });
-
-
-                // Attach the simpleDatatables library. This shit is awesome! 
-                if (typeof simpleDatatables.DataTable !== 'undefined') {
-                    if (!_tableBodyView.classList.contains('initialized')) {
-                        dataTableInstance = new simpleDatatables.DataTable("#batch-view-table", {
-                            searchable: true,
-                            sortable: true,
-                            perPageSelect: false
-                        });
-
-                    }
-                }
+                
             }
             
             new Modal(_modalView, _setStatic).show();  
@@ -541,7 +538,7 @@ async function batchPut() {
         const batchId = document.querySelector('.bu-header-id').innerText.replace('BN-', '').trim();
 
         // Format purchase date to ISO (YYYY-MM-DD)
-        const [month, day, year] = purchaseDate.split('-');
+        const [month, day, year] = purchaseDate.split('/');
         const formattedDate = `${year}-${month}-${day}`;
 
         // Construct the payload

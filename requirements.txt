@@ -14,3 +14,5 @@ pandas
 scikit-learn
 numpy
 statsforecast
+celery
+redis

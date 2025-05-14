@@ -4,18 +4,28 @@ from statsforecast import StatsForecast
 from statsforecast.models import TSB
 from django.utils.timezone import now
 from .models import SalesRecordItem
+from django.core.cache import cache
+import multiprocessing
 
-def safe_mape(y_true, y_pred):
+def normalized_safe_mape(y_true, y_pred):
     y_true, y_pred = np.array(y_true), np.array(y_pred)
-    mask = y_true != 0
+    mask = (y_true != 0) | (y_pred != 0)  # Avoid 0/0 division
+
     if not np.any(mask):
-        return 0.0  # Avoid division by zero
+        return 0.0  # No meaningful values to compare
+
+    denominator = (np.abs(y_true[mask]) + np.abs(y_pred[mask])) / 2
+    smape = np.abs(y_true[mask] - y_pred[mask]) / denominator
     
-    mape = np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])
-    capped_mape = np.clip(mape, 0, 1.0)  # Cap to 1.0 (100%)
-    return np.mean(capped_mape) * 100  # Return as percentage
+    capped_smape = np.clip(smape, 0, 1.0)  # Cap at 100%
+    return np.mean(capped_smape) * 100  # Return as percentage
 
 def forecast_all():
+    cache_key = 'forecast_results_cache'
+    cached = cache.get(cache_key)
+    if cached:
+        return cached
+    
     items = SalesRecordItem.objects.filter(quantity__gt=0, is_deleted=False).select_related('sales_record', 'product')
 
     data = []
@@ -32,22 +42,25 @@ def forecast_all():
         return []
 
     # Convert to month start and aggregate
-    df['ds'] = pd.to_datetime(df['ds']).dt.tz_localize(None).dt.to_period('M').dt.to_timestamp()
+    df['ds'] = pd.to_datetime(df['ds']).dt.to_period('M').dt.to_timestamp()
     df = df.groupby(['unique_id', 'ds']).agg({'y': 'sum'}).reset_index()
 
     forecast_results = []
     horizon = 6  # months
     current_month = pd.Timestamp(now()).to_period('M').to_timestamp()
 
+    # Prepare a mapping of product IDs to names for quick lookup
+    product_map = {str(item.product_id): item.product.name for item in items}
+
+    # Forecast for each product group
     for product_id, group_df in df.groupby('unique_id'):
-        product_name = str(items.filter(product_id=product_id).first().product.name)
         group_df = group_df.sort_values('ds')
         num_unique_months = group_df['ds'].nunique()
 
         if num_unique_months < 2:
             # Fallback for less than 2 months of data
             fallback = group_df[group_df['ds'] >= current_month - pd.DateOffset(months=6)]
-            result = sum_recent_months_fallback(product_id, fallback, product_name)
+            result = sum_recent_months_fallback(product_id, fallback, product_map.get(product_id, 'Unknown'))
             result['strategy'] = 'fallback'
             forecast_results.append(result)
             continue
@@ -55,7 +68,7 @@ def forecast_all():
         try:
             # Forecast using TSB
             models = [TSB(alpha_d=0.8, alpha_p=0.9)]
-            sf = StatsForecast(models=models, freq='MS', n_jobs=1)
+            sf = StatsForecast(models=models, freq='MS', n_jobs=multiprocessing.cpu_count())
             sf.fit(group_df)
             forecast_df = sf.predict(h=horizon)
 
@@ -68,12 +81,12 @@ def forecast_all():
                 train_cut = group_df.iloc[:-3]
                 test_cut = group_df.iloc[-3:]
 
-                sf_temp = StatsForecast(models=models, freq='MS', n_jobs=1)
+                sf_temp = StatsForecast(models=models, freq='MS', n_jobs=multiprocessing.cpu_count())
                 sf_temp.fit(train_cut)
                 pred_cut = sf_temp.predict(h=3)
                 pred_values = pred_cut[pred_cut['unique_id'] == product_id]['TSB'].values
                 test_values = test_cut['y'].values
-                mape = safe_mape(test_values, pred_values)
+                mape = normalized_safe_mape(test_values, pred_values)
             else:
                 mape = 0.0
 
@@ -81,11 +94,10 @@ def forecast_all():
             forecast_30 = forecast_values[0]
             forecast_90 = forecast_values[:3].sum()
             forecast_180 = forecast_values[:6].sum()
-            
 
             forecast_results.append({
                 'product_id': product_id,
-                'product_name': product_name,
+                'product_name': product_map.get(product_id, 'Unknown'),
                 'forecast_30_day': float(forecast_30),
                 'forecast_90_day': float(forecast_90),
                 'forecast_180_day': float(forecast_180),
@@ -96,12 +108,12 @@ def forecast_all():
         except Exception as e:
             print(f"TSB error for product {product_id}: {e}")
             fallback = group_df[group_df['ds'] >= current_month - pd.DateOffset(months=6)]
-            result = sum_recent_months_fallback(product_id, fallback, product_name)
+            result = sum_recent_months_fallback(product_id, fallback, product_map.get(product_id, 'Unknown'))
             result['strategy'] = 'fallback-error'
             forecast_results.append(result)
 
+    cache.set(cache_key, forecast_results, timeout=60*60)
     return forecast_results
-
 
 def sum_recent_months_fallback(product_id, df, product_name):
     current_month = pd.Timestamp(now()).to_period('M').to_timestamp()

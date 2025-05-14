@@ -721,6 +721,7 @@ class ProductForecastAPIView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 @api_view(['GET'])
 def product_insight_data(request, product_id):
     try:

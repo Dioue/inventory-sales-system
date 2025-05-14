@@ -14,17 +14,22 @@ showProjectionBtn.addEventListener('click', () => {
         .then(data => {
             // Check if forecasts exist and is an array
             if (Array.isArray(data)) {
-                const tbody = document.querySelector('#projection-table tbody');
                 if (projectionTable) {
-                    const formattedData = data.map(item => [
-                        item.product_id,
-                        item.product_name,
-                        item.forecast_30_day ? Number(item.forecast_30_day).toLocaleString() : 0,
-                        item.forecast_90_day ? Number(item.forecast_90_day).toLocaleString() : 0,
-                        item.forecast_180_day ? Number(item.forecast_180_day).toLocaleString() : 0,
-                        item.accuracy !== null ? item.accuracy + "%" : '—',
-                        item.strategy
-                    ]);
+                    const formattedData = data.map(item => {
+                        const accuracy = (item.accuracy != null && item.accuracy > 0)
+                            ? item.accuracy.toFixed(2) + '%'
+                            : 'N/A';
+
+                        return [
+                            accuracy,
+                            item.product_id,
+                            item.product_name,
+                            item.forecast_30_day ? Number(item.forecast_30_day).toLocaleString() : '0',
+                            item.forecast_90_day ? Number(item.forecast_90_day).toLocaleString() : '0',
+                            item.forecast_180_day ? Number(item.forecast_180_day).toLocaleString() : '0',
+                            item.strategy
+                        ];
+                    });
                     projectionTable.insert({ data: formattedData });
                     
                 }
@@ -94,6 +99,7 @@ if (document.getElementById("projection-table") && typeof simpleDatatables.DataT
     }
     projectionTable = new simpleDatatables.DataTable("#projection-table", {
         paging: true,
+        perPageSelect: [5, 10],
         perPage: 10,
         template: (options, dom) => "<div class='" + options.classes.top + "'>" +
             "<div class='flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-3 rtl:space-x-reverse w-full sm:w-auto'>" +

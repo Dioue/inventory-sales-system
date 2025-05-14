@@ -3,15 +3,18 @@ const projectionBadge = document.querySelector('.generate-projection-text-badge'
 const projectionModal = document.querySelector('#generate-projection');
 const projectionModalHide = document.querySelector('#generate-projection-hide');
 const selectedProjection = document.querySelector('#last-month-projection');
+const projectionSpinner = document.querySelector('.projection-spinner');
 let projectionTable = null;
 
 showProjectionBtn.addEventListener('click', () => {
     const selectedProjectionValue = selectedProjection.options[selectedProjection.selectedIndex].text;
     projectionBadge.textContent = selectedProjectionValue;
-
+    projectionSpinner.classList.remove('hidden');
+    projectionSpinner.classList.add('flex');
     fetch('/api/forecast/')  // Update URL to match your Django endpoint
         .then(response => response.json())
         .then(data => {
+            
             // Check if forecasts exist and is an array
             if (Array.isArray(data)) {
                 if (projectionTable) {
@@ -31,9 +34,7 @@ showProjectionBtn.addEventListener('click', () => {
                         ];
                     });
                     projectionTable.insert({ data: formattedData });
-                    
                 }
-
 
                 // Show the modal after loading data
                 const handleModalHide = () => {
@@ -42,9 +43,13 @@ showProjectionBtn.addEventListener('click', () => {
                 };
                 projectionModalHide.addEventListener('click', handleModalHide, { once: true });
                 new Modal(projectionModal, modalOptions).show();
+                projectionSpinner.classList.add('hidden');
+                projectionSpinner.classList.remove('flex');
             } else {
                 console.error("Forecasts data is missing or not an array:", data.forecasts);
                 alert("Error: Forecast data is not available.");
+                projectionSpinner.classList.add('hidden');
+                projectionSpinner.classList.remove('flex');
             }
         })
         .catch(error => {

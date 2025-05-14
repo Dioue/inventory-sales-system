@@ -84,29 +84,38 @@ async function handleViewClick(event) {
             grand_total.innerText = parseFloat(batch.grand_total).toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
             supplier_name.innerText = batch.supplier;
             purchase_date.innerText = batch.purchase_date;
+
             let batch_table_instance = null;
 
-            // Attach the simpleDatatables library. This shit is awesome! 
-            if (typeof simpleDatatables.DataTable !== 'undefined') {
-                batch_table_instance = new simpleDatatables.DataTable("#batch-view-table", {
+            const tableEl = document.querySelector("#batch-view-table");
+
+            if (typeof simpleDatatables !== 'undefined' &&
+                typeof simpleDatatables.DataTable !== 'undefined' &&
+                tableEl) {
+
+                // Initialize the table
+                batch_table_instance = new simpleDatatables.DataTable(tableEl, {
                     searchable: true,
                     sortable: true,
-                    perPageSelect: false
+                    perPage: 10,
+                    perPageSelect: [5, 10],
                 });
+
+                // Use a short delay to wait for internal setup (hacky but effective)
+                setTimeout(() => {
+                    if (batch_table_instance && batch && Array.isArray(batch.items)) {
+                        const rows = batch.items.map(item => Object.values(item));
+                        try {
+                            batch_table_instance.insert({ data: rows });
+                        } catch (err) {
+                            console.error("Error inserting rows into DataTable:", err);
+                        }
+                    }
+                }, 50); // 10–50ms is usually enough
             }
 
-            if (batch.items.length > 0) {
-                batch.items.forEach(item => {
-                    const data = []
-                    Object.values(item).forEach(value => {
-                        data.push(value);
-                    });
-                    batch_table_instance.insert({data: [data]});
-                });
-                
-            }
-            
-            new Modal(_modalView, _setStatic).show();  
+            new Modal(_modalView, _setStatic).show();
+
         } catch (error) {
             console.error('Error handling view click:', error);
         }

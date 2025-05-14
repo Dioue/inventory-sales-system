@@ -240,29 +240,38 @@ class DeliveryComponentView(BaseComponentView):
         order_direction = self.request.GET.get("direction", "asc")
         order_prefix = "-" if order_direction == "desc" else ""
 
-        delivery = Delivery.objects.all().order_by(f"{order_prefix}{order_by_field}")
-        unit = Unit.objects.all().order_by('id')
-        category = Category.objects.all().order_by('id')
-        sales_records = SalesRecord.objects.all().order_by('id')
-        page_obj_search_id = "_delivery"
-        search_query = self.request.GET.get(page_obj_search_id, "")
-        _, page_obj = self.apply_search_and_pagination(delivery, search_query, ["delivery_id"])
+        # Optimize Delivery queryset
+        delivery_qs = (
+            Delivery.objects
+            .select_related("sale")  # if 'sale' is a ForeignKey
+            .only("id", "sale_id", "delivery_date", "date_claimed")  # fetch only needed fields
+            .order_by(f"{order_prefix}{order_by_field}")
+        )
+
+        # Efficient search and pagination
+        search_query = self.request.GET.get("_delivery", "")
+        _, page_obj = self.apply_search_and_pagination(delivery_qs, search_query, ["id", "sale__id"])
+
+        # Limit Units, Categories, and Sales Records (or fetch dynamically via AJAX)
+        units = Unit.objects.only("id", "name").order_by("id")[:100]
+        categories = Category.objects.only("id", "name").order_by("id")[:100]
+        sales_records = SalesRecord.objects.only("id", "date_issued").order_by("id")[:100]
 
         context.update({
             "tables": {
                 "page_obj": {
                     "data": page_obj,
                     "fields": [
-                    {"name": "Delivery Id", "key": "id"},
-                    {"name": "Sale No", "key": "sale_id"},
-                    {"name": "Delivery Date", "key": "delivery_date"},
-                    {"name": "Date Claimed", "key": "date_claimed"},
-                ],
+                        {"name": "Delivery Id", "key": "id"},
+                        {"name": "Sale No", "key": "sale_id"},
+                        {"name": "Delivery Date", "key": "delivery_date"},
+                        {"name": "Date Claimed", "key": "date_claimed"},
+                    ],
                     "fill_count": 9,
-                    "search_id": page_obj_search_id
+                    "search_id": "_delivery"
                 },
-                "units": unit,
-                "category": category,
+                "units": units,
+                "category": categories,
                 "sales_record": sales_records
             },
 
@@ -270,7 +279,7 @@ class DeliveryComponentView(BaseComponentView):
                 "delete": reverse('process_delete', args=['delivery'])
             },
 
-            "content_label":{
+            "content_label": {
                 "add": "Add a delivery record",
                 "search_query": search_query,
             },

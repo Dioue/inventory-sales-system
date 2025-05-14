@@ -84,6 +84,15 @@ class Command(BaseCommand):
         units = list(Unit.objects.all())
 
         categories = list(Category.objects.all())
+        critical_level = random.randint(5, 20)
+        quantity = random.randint(10, 500)
+        prod_status = '-'
+        if quantity < critical_level:
+            prod_status = 'Critical'
+        elif quantity == critical_level:
+            prod_status = 'Low'
+        else:
+            prod_status = 'Available'
 
         self.stdout.write('Creating products...')
         products = [
@@ -95,10 +104,11 @@ class Command(BaseCommand):
                 application=fake.word(),
                 side=fake.word(),
                 description=fake.text(max_nb_chars=100),
-                quantity=random.randint(10, 500),
+                quantity=quantity,
                 cost_price=round(random.uniform(100, 500), 2),
                 selling_price=round(random.uniform(500, 1000), 2),
-                critical_level=random.randint(5, 20),
+                critical_level=critical_level,
+                status= prod_status,
                 created_by=user
             ) for i in range(10000)
         ]

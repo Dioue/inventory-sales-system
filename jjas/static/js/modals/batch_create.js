@@ -133,103 +133,91 @@ const fetchBatchData = async () => {
 let allUnits = [];
 let allCategory = [];
 
-// Fetch all units once when the page loads
-const fetchUnits = async () => {
+async function fetchFilteredUnits(query) {
     try {
-        const response = await fetch(`/api/units/`);
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-        allUnits = await response.json();
+        const response = await fetch(`/api/units/search/?query=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error('Failed to fetch units');
+        return await response.json();
+    } catch (err) {
+        console.error('Error fetching filtered units:', err);
+        return [];
+    }
+}
+
+async function fetchFilteredCategories(query) {
+    try {
+        const response = await fetch(`/api/categories/search/?query=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error('Failed to fetch categories');
+        return await response.json();
+    } catch (err) {
+        console.error('Error fetching filtered categories:', err);
+        return [];
+    }
+}
+
+const fetchFilteredProducts = async (query) => {
+    try {
+        const url = `/api/products/search/?query=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch search results: ${response.statusText}`);
+        }
+        return await response.json();
     } catch (error) {
-        console.error('Error fetching units:', error);
+        console.error('Error fetching filtered products:', error);
+        return [];
     }
 };
 
-const fetchCategory = async () => {
-    try {
-        const response = await fetch(`/api/category/`);
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-        allCategory = await response.json();
-    } catch (error) {
-        console.error('Error fetching category:', error);
-    }
-};
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('table-search');
     const dropdown = document.getElementById('product-dropdown');
     const noData = document.getElementById('no-data');
     const tableBody = document.getElementById('batch_table_body');
-    let allProducts = [];
     
-    await fetchUnits();
-    await fetchCategory()
     
-
-    searchInput.addEventListener('click', async () => {
-        // Fetch all api once when the page loads
-        allProducts = await fetchBatchData();
-    });
-
     // Search functionality
-    searchInput.addEventListener('input', () => {
-        const filter = searchInput.value.toLowerCase();
-
+    searchInput.addEventListener('input', async () => {
+        const filter = searchInput.value.trim().toLowerCase();
         if (filter.length > 0) {
-            const filteredProducts = allProducts.filter(product => {
-                const regex = new RegExp(`^${filter}`, 'i');
-                return regex.test(product.code) || regex.test(product.name);
-            });
+            const filteredProducts = await fetchFilteredProducts(filter);
             populateDropdown(filteredProducts);
+            
         } else {
             resetDropdown();
         }
     });
 
-
     function populateDropdown(products) {
         // Remove dynamically added items but keep the "no-data" element
         const dynamicItems = dropdown.querySelectorAll('li:not(#no-data)');
         dynamicItems.forEach(item => item.remove());
-    
+
         if (products.length > 0) {
-            products.forEach(async product => {
-    
-                let unitName = 'No unit'; 
-                if (product.unit) {
-                    const unit = update_units.find(unit => unit.id === product.unit);
-    
-                    if (unit) {
-                        unitName = unit.name;
-                    }
-                }
-    
-                if (product.category) {
-                    const category = update_category.find(cat => cat.id === product.category);
-    
-                    if (category) {
-                        product_category = category.code;
-                    }
-                }
-    
-    
-    
+            products.forEach(product => {
+                const unitName = unit ? unit.name : 'No unit';
+                const categoryCode = category ? category.code : 'NoCat';
+
                 const item = document.createElement('li');
                 item.className = 'product-item px-4 py-2 text-sm cursor-pointer hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white';
                 item.dataset.id = product.id;
                 item.dataset.cost = product.cost_price;
                 item.dataset.selling = product.selling_price;
-                item.dataset.crit = product.critical_level
+                item.dataset.crit = product.critical_level;
                 item.dataset.name = product.name;
-                item.textContent = `(${product_category}-${product.code}) ${product.name}`;
                 item.dataset.unit = unitName;
-    
+
+                item.textContent = `(${categoryCode}-${product.code}) ${product.name}`;
                 dropdown.appendChild(item);
             });
+
             dropdown.classList.remove('hidden');
             noData.classList.add('hidden');
         } else {
-            dropdown.classList.remove('hidden'); // Show the dropdown to display "no-data"
-            noData.classList.remove('hidden');  // Make sure "no-data" is visible
+            dropdown.classList.remove('hidden');
+            noData.classList.remove('hidden');
         }
     }
 

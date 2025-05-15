@@ -70,6 +70,20 @@ const fetchProducts = async (params = null) => {
     }
 }
 
+const fetchFilteredProducts = async (query) => {
+    try {
+        const url = `/api/products/search/?query=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch search results: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching filtered products:', error);
+        return [];
+    }
+};
+
 const fetchUnits = async () => {
     try {
         const response = await fetch(`/api/units/`);
@@ -98,8 +112,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     allProducts = await fetchProducts();
     allUnits = await fetchUnits();
     allCategory = await fetchCategory();
-
-    console.log('loaded')
 });
 
 
@@ -164,9 +176,9 @@ updateBtn.forEach(el => {
             formProvince.value = sale.client.province;
             formZip.value = sale.client.zip_code;
 
-            sale.items.forEach(item => {
-                const prod = allProducts.find(prod => prod.id === item.product)
-                appendToTBody(item.product, item.product_name, prod.cost_price, prod.selling_price, item.quantity, item.surcharge)
+            sale.items.forEach(async item => {
+                const prod = await fetchFilteredProducts(item.product)
+                appendToTBody(item.product, item.product_name, prod[0].cost_price, prod[0].selling_price, prod[0].quantity, prod[0].surcharge)
             })
 
             const handleSubmit = async () => {
@@ -224,14 +236,16 @@ const hitTheQuan = () => {
 }
 
 // Search controllers
-formSearch.addEventListener('input', debounce(() => {
-    const filter = formSearch.value.toLowerCase();
+formSearch.addEventListener('input', debounce(async () => {
+    const filter = formSearch.value.trim().toLowerCase();
     if (filter.length > 0) {
-        const filteredProducts = allProducts.filter(product => {
-            const regex = new RegExp(`^${filter}`, 'i');
-            return regex.test(product.code) || regex.test(product.name);
-        });
-        populateDropdown(filteredProducts);
+        try {
+            const products = await fetchFilteredProducts(filter);
+            populateDropdown(products);
+        } catch (error) {
+            console.error('Search failed:', error);
+            resetDropdown();
+        }
     } else {
         resetDropdown();
     }
@@ -248,24 +262,14 @@ function resetDropdown() {
 
 // Dropdown populator for form search
 function populateDropdown(products) {
-    // Remove dynamically added items but keep the "no-data" element
+    // Remove all items except the "no-data" element
     const dynamicItems = formSearchDropdown.querySelectorAll('li:not(#no-data)');
     dynamicItems.forEach(item => item.remove());
+
     if (products.length > 0) {
-        products.forEach(async product => {
-            let unitName = 'No unit'; 
-            if (product.unit) {
-                const unit = allUnits.find(unit => unit.id === product.unit);
-                if (unit) {
-                    unitName = unit.name;
-                }
-            }
-            if (product.category) {
-                const category = allCategory.find(cat => cat.id === product.category);
-                if (category) {
-                    product_category = category.code;
-                }
-            }
+        products.forEach(product => {
+            console.log(product.unit.name)
+
             const item = document.createElement('li');
             item.className = 'sales-form-items px-4 py-2 text-sm cursor-pointer hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white';
             item.dataset.id = product.id;
@@ -275,20 +279,26 @@ function populateDropdown(products) {
             item.dataset.quantity = product.quantity;
             item.dataset.name = product.name;
             item.dataset.unit = unitName;
-            item.textContent = `(${product_category}-${product.code}) ${product.name}`;
-            if(product.quantity === 0) {
-                item.className = 'sales-form-items px-4 py-2 text-sm cursor-pointer  bg-gray-100 text-gray-600   hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white disabled';
-                item.textContent = `(${product_category}-${product.code}) ${product.name} (No stock)`;
+            item.textContent = `(${categoryCode}-${product.code}) ${product.name}`;
+
+            // If product has no stock, mark accordingly
+            if (product.quantity === 0) {
+                item.className = 'sales-form-items px-4 py-2 text-sm cursor-pointer bg-gray-100 text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white disabled';
+                item.textContent += ' (No stock)';
             }
+
             formSearchDropdown.appendChild(item);
         });
+
         formSearchDropdown.classList.remove('hidden');
         formNoData.classList.add('hidden');
     } else {
-        formSearchDropdown.classList.remove('hidden'); // Show the dropdown to display "no-data"
-        formNoData.classList.remove('hidden');  // Make sure "no-data" is visible
+        // Show the "no-data" placeholder
+        formSearchDropdown.classList.remove('hidden');
+        formNoData.classList.remove('hidden');
     }
 }
+
 
 // The populator
 formSearchDropdown.addEventListener('click', (event) =>{
@@ -507,8 +517,7 @@ const salesAPI = async (mode, id = null) => {
     // Determine the API endpoint based on mode
     const url = mode === 'POST' ? '/api/sales-records/' : `/api/sales-records/${id}/`;
     const method = mode === 'POST' ? 'POST' : 'PUT';
-    console.log('API URL:', url);
-    console.log('API Method:', method);
+
 
     // Extract the grand total value
     const grand_total = parseFloat(salesFormGrand.innerText.replace(/[^\d.]/g, ''), 10);

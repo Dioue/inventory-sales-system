@@ -397,9 +397,9 @@ class SalesComponentView(BaseComponentView):
         order_prefix = "-" if order_direction == "desc" else ""
 
         sales_records = SalesRecord.objects.all().order_by(f"{order_prefix}{order_by_field}")
-        page_obj_search_id = "_sales"
+        page_obj_search_id = "sales"
         search_query = self.request.GET.get(page_obj_search_id, "")
-        _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["id"])
+        _, page_obj = self.apply_search_and_pagination(sales_records, search_query, ["id", "client__name"])
 
         
 

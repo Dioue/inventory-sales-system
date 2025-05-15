@@ -8,6 +8,7 @@ from .models import BatchOrder, BatchOrderItem
 from .serializers import BatchOrderSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.db.models import Q
 from django.db.models import Max
 
 class CustomUserThrottle(UserRateThrottle):
@@ -26,6 +27,26 @@ class ProductViewSet(viewsets.ModelViewSet):
     def max_id(self, request):
         max_id = Product.objects.aggregate(Max('id'))['id__max'] or 0
         return Response({'max_id': max_id})
+    
+    # Add a new action to handle search filtering
+    @action(detail=False, methods=['get'])
+    def search(self, request):
+        query = request.query_params.get('query', None)
+        if query:
+            try:
+                query_id = int(query)
+            except ValueError:
+                query_id = None
+
+            filters = Q(code__icontains=query) | Q(name__icontains=query)
+            if query_id is not None:
+                filters |= Q(id=query_id)
+
+            filtered_products = Product.objects.filter(filters)
+            serializer = self.get_serializer(filtered_products, many=True)
+            return Response(serializer.data)
+        else:
+            return Response([])
 
 class SalesViewSet(viewsets.ModelViewSet):
     queryset = SalesRecord.objects.prefetch_related('items').all()
@@ -48,6 +69,24 @@ class UnitViewSet(viewsets.ReadOnlyModelViewSet):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
+    @action(detail=False, methods=['get'])
+    def search(self, request):
+        query = request.query_params.get('query', '').strip()
+        if query:
+            try:
+                query_id = int(query)
+            except ValueError:
+                query_id = None
+
+            filters = Q(name__icontains=query)
+            if query_id is not None:
+                filters |= Q(id=query_id)
+
+            units = Unit.objects.filter(filters)
+            serializer = self.get_serializer(units, many=True)
+            return Response(serializer.data)
+        return Response([])
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -61,6 +100,25 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def max_id(self, request):
         max_id = Category.objects.aggregate(Max('id'))['id__max'] or 0
         return Response({'max_id': max_id})
+    
+    @action(detail=False, methods=['get'])
+    def search(self, request):
+        query = request.query_params.get('query', '').strip()
+        if query:
+            try:
+                query_id = int(query)
+            except ValueError:
+                query_id = None
+
+            filters = Q(name__icontains=query) | Q(code__icontains=query)
+            if query_id is not None:
+                filters |= Q(id=query_id)
+
+            categories = Category.objects.filter(filters)
+            serializer = self.get_serializer(categories, many=True)
+            return Response(serializer.data)
+        return Response([])
+    
 
 
 class BatchOrderViewSet(viewsets.ModelViewSet):

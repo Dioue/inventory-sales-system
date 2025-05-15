@@ -14,11 +14,11 @@ const fetchAllCategory = async () => {
     }
 }
 
-const fetchCatId = async (id) => {
+const fetchCat = async (params = null) => {
     try {
-        const response = await fetch(`/api/category/${id}`);
+        const response = (params == null) ?  await fetch(`/api/category/`): await fetch(`/api/category/${params}`);
         if (!response.ok) {
-            throw new Error(`Failed to fetch batch (ID: ${id}): ${response.statusText}`);
+            throw new Error(`Failed to fetch batch (ID: ${params}): ${response.statusText}`);
         }
         return await response.json();
     } catch (error) {
@@ -53,9 +53,8 @@ const catName = document.getElementById('category-name');
 const catCode = document.getElementById('category-code');
 
 modalCreateBtn.addEventListener('click', async () => {
-    const cat = await fetchAllCategory();
-    const maxId = Math.max(...cat.map(category => category.id), 0) + 1;
-    formId.innerText = `CN-${(maxId).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}`;
+    const maxId = await fetchCat('max_id')
+    formId.innerText = `CN-${(maxId.max_id).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}`;
     catName.value = '';
     catCode.value = '';
 
@@ -92,7 +91,7 @@ modalCreateBtn.addEventListener('click', async () => {
 modalUpdateBtns.forEach(el => {
     el.addEventListener('click', async (event) => {
         const id = event.currentTarget.dataset.id;
-        const cat = await fetchCatId(id);
+        const cat = await fetchCat(id);
 
         formId.innerText = `CN-${cat.id}`;
         catName.value = cat.name;

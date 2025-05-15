@@ -64,7 +64,7 @@ ROOT_URLCONF = 'jjas.urls'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 100,  # You can tweak this size
+    'PAGE_SIZE': 200,  # You can tweak this size
 }
 
 TEMPLATES = [

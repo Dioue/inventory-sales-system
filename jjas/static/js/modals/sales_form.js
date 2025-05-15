@@ -39,61 +39,76 @@ function debounce(fn, delay) {
     };
 }
 
-// Store JSON data with expiration
-const setCache = (key, data, ttlMinutes = 30) => {
-    const record = {
-        data: data,
-        expiry: new Date().getTime() + ttlMinutes * 60 * 1000,
-    };
-    localStorage.setItem(key, JSON.stringify(record));
-};
 
-// Retrieve cached data if not expired
-const getCache = (key) => {
-    const record = localStorage.getItem(key);
-    if (!record) return null;
-
+// API Fetch
+const fetchSales = async (params = null) => {
     try {
-        const parsed = JSON.parse(record);
-        if (new Date().getTime() > parsed.expiry) {
-            localStorage.removeItem(key);
-            return null;
+        const url = id === null ? `/api/sales-records/` : `/api/sales-records/${params}/`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch sales: ${response.statusText}`);
         }
-        return parsed.data;
-    } catch {
-        return null;
+        return await response.json();
+        
+    } catch (error) {
+        console.error('Error fetching sales records:', error);
+        throw error;
+    }
+}
+
+const fetchProducts = async (params = null) => {
+    try {
+        const url = id === null ? `/api/products/` : `/api/products/${params}/`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch product: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(`Error fetching product: `, error);
+        throw error;
+    }
+}
+
+const fetchUnits = async () => {
+    try {
+        const response = await fetch(`/api/units/`);
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching units:', error);
+    }
+
+};
+
+const fetchCategory = async () => {
+    try {
+        const response = await fetch(`/api/category/`);
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching category:', error);
     }
 };
 
-const fetchWithCache = async (key, url) => {
-    const cachedData = getCache(key);
-    if (cachedData) {
-        console.log(`Using cached ${key}`);
-        return cachedData;
-    }
 
-    console.log(`Fetching ${key} from API`);
-    const data = await fetchAllPaginated(url);
-    setCache(key, data);
-    return data;
-};
-
+// On DOM Load Calls
 document.addEventListener('DOMContentLoaded', async () => {
-    [allUnits, allCategory, allProducts, allSales] = await Promise.all([
-        fetchWithCache('allUnits', '/api/units/'),
-        fetchWithCache('allCategory', '/api/category/'),
-        fetchWithCache('allProducts', '/api/products/'),
-        fetchWithCache('allSales', '/api/sales-records/')
-    ]);
+    allSales = await fetchSales();
+    allProducts = await fetchProducts();
+    allUnits = await fetchUnits();
+    allCategory = await fetchCategory();
 
-    console.log('ready')
+    console.log('loaded')
 });
-
 
 
 // DOM controllers
 createBtn.addEventListener('click', async () => {
-    const maxId = Math.max(...allSales.map(sale => sale.id), 0) + 1;
+    const maxId = 0;
+    fetch('api/sales-records/max_id/').then(data => {
+        console.log(data)
+    });
 
     // form data injection to DOM
     formId.innerText = `SN-${(maxId).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}`;
@@ -133,7 +148,6 @@ let isSubmitHandlerAttached = false;
 updateBtn.forEach(el => {
     el.addEventListener('click', async (event) => {
         try {
-            const allProducts = await fetchProducts();
             const sale = await fetchSales(event.target.dataset.id);
             const dateParts = sale.date_issued.split('-');
             const formattedDate = `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}`;

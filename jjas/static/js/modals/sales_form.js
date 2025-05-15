@@ -17,6 +17,7 @@ const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
 let allProducts = null;
 let allUnits = null;
 let allCategory = null;
+let allSales = null;
 
 // Global form control
 const formId = document.querySelector('#sales-form-id');
@@ -30,73 +31,69 @@ const formCity = document.querySelector('#sales-form-city');
 const formProvince = document.querySelector('#sales-form-province');
 const formZip = document.querySelector('#sales-form-zip');
 
-// API Fetch
-const fetchSales = async (id = null) => {
-    try {
-        const url = id === null ? `/api/sales-records/` : `/api/sales-records/${id}/`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch sales: ${response.statusText}`);
-        }
-        return await response.json();
-        
-    } catch (error) {
-        console.error('Error fetching sales records:', error);
-        throw error;
-    }
+function debounce(fn, delay) {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn(...args), delay);
+    };
 }
 
-const fetchProducts = async (id = null) => {
-    try {
-        const url = id === null ? `/api/products/` : `/api/products/${id}/`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch product: ${response.statusText}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error(`Error fetching product: `, error);
-        throw error;
-    }
-}
-
-const fetchUnits = async () => {
-    try {
-        const response = await fetch(`/api/units/`);
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching units:', error);
-    }
-
+// Store JSON data with expiration
+const setCache = (key, data, ttlMinutes = 30) => {
+    const record = {
+        data: data,
+        expiry: new Date().getTime() + ttlMinutes * 60 * 1000,
+    };
+    localStorage.setItem(key, JSON.stringify(record));
 };
 
-const fetchCategory = async () => {
+// Retrieve cached data if not expired
+const getCache = (key) => {
+    const record = localStorage.getItem(key);
+    if (!record) return null;
+
     try {
-        const response = await fetch(`/api/category/`);
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching category:', error);
+        const parsed = JSON.parse(record);
+        if (new Date().getTime() > parsed.expiry) {
+            localStorage.removeItem(key);
+            return null;
+        }
+        return parsed.data;
+    } catch {
+        return null;
     }
 };
 
+const fetchWithCache = async (key, url) => {
+    const cachedData = getCache(key);
+    if (cachedData) {
+        console.log(`Using cached ${key}`);
+        return cachedData;
+    }
 
-// On DOM Load Calls
-document.addEventListener('DOMContentLoaded', async () =>{
-    allUnits = await fetchUnits();
-    allCategory = await fetchCategory();
+    console.log(`Fetching ${key} from API`);
+    const data = await fetchAllPaginated(url);
+    setCache(key, data);
+    return data;
+};
 
-    formSearch.addEventListener('click', async () => {
-        allProducts = await fetchProducts();
-    })
-})
+document.addEventListener('DOMContentLoaded', async () => {
+    [allUnits, allCategory, allProducts, allSales] = await Promise.all([
+        fetchWithCache('allUnits', '/api/units/'),
+        fetchWithCache('allCategory', '/api/category/'),
+        fetchWithCache('allProducts', '/api/products/'),
+        fetchWithCache('allSales', '/api/sales-records/')
+    ]);
+
+    console.log('ready')
+});
+
 
 
 // DOM controllers
 createBtn.addEventListener('click', async () => {
-    const sales = await fetchSales();
-    const maxId = Math.max(...sales.map(sale => sale.id), 0) + 1;
+    const maxId = Math.max(...allSales.map(sale => sale.id), 0) + 1;
 
     // form data injection to DOM
     formId.innerText = `SN-${(maxId).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}`;
@@ -215,7 +212,7 @@ const hitTheQuan = () => {
 }
 
 // Search controllers
-formSearch.addEventListener('input', async() => {
+formSearch.addEventListener('input', debounce(() => {
     const filter = formSearch.value.toLowerCase();
     if (filter.length > 0) {
         const filteredProducts = allProducts.filter(product => {
@@ -226,7 +223,7 @@ formSearch.addEventListener('input', async() => {
     } else {
         resetDropdown();
     }
-})
+}, 200));
 
 // form search reset
 function resetDropdown() {

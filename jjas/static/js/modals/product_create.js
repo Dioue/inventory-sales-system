@@ -18,13 +18,8 @@ document.getElementById('confirm_product_submit').addEventListener('click', asyn
 
         if (response.ok) {
             const responseData = await response.json();
-            console.log('Product created successfully', responseData);
-            showAlert(
-                'info',
-                'Product created successfully',
-                'Would you like to create another product entry?',
-                true
-            );
+            generic_alert(`Product ${responseData.name} created successfully!`);
+            document.getElementById('product_create_form').reset();
         } else {
             const errorData = await response.json();
             console.error('Error creating product:', errorData);
@@ -37,7 +32,7 @@ document.getElementById('confirm_product_submit').addEventListener('click', asyn
                             .replace(/(^\w{1}|\.\s*\w{1})/gi, match => match.toUpperCase())}`;
                     }
                 })
-                .join('<br>');
+                .join('');
 
             generic_alert(`Unsuccessful product entry. Cause:\n${formattedMessage}`);
         }
@@ -117,6 +112,7 @@ document.getElementById('create-product-btn').addEventListener('click', function
     if (!form.checkValidity()) {
         alert('Please correctly fill in all the fields before submitting.');
         event.preventDefault();
+        
     } else {
         const modalElement = document.getElementById('confirm_product_create');
         const modal = new Modal(modalElement);

@@ -79,12 +79,12 @@
 
                     <div class="grid gap-4 mb-4 grid-cols-4 col-span-2">
                         <div class="col-span-1">
-                            <label id="product-label-cost_price" for="cost_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cost Price (₱)<span class="text-red-400">*</span></label>
-                            <input id="product-input-cost_price" type="number" name="cost_price" id="cost_price" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="9999" required="true" min="0" max="9999999" onkeydown="if(event.key === 'e' || event.key === 'E' || event.key === '+' || event.key === '-') event.preventDefault();">
+                            <label id="product-label-cost_price"  for="cost_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cost Price (₱)<span class="text-red-400">*</span></label>
+                            <input id="product-input-cost_price" step="any" type="number" name="cost_price" id="cost_price" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="9999" required="true" min="0" max="9999999" onkeydown="if(event.key === 'e' || event.key === 'E' || event.key === '+' || event.key === '-') event.preventDefault();">
                         </div>
                         <div class="col-span-1">
                             <label id="product-label-selling_price" for="selling_price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Selling Price (₱)<span class="text-red-400">*</span></label>
-                            <input id="product-input-selling_price" type="number" name="selling_price" id="selling_price" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="9999" required="true" min="0" max="9999999" onkeydown="if(event.key === 'e' || event.key === 'E' || event.key === '+' || event.key === '-') event.preventDefault();">
+                            <input id="product-input-selling_price" step="any" type="number" name="selling_price" id="selling_price" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="9999" required="true" min="0" max="9999999" onkeydown="if(event.key === 'e' || event.key === 'E' || event.key === '+' || event.key === '-') event.preventDefault();">
                         </div>
                         <div class="col-span-2">
                             <label id="product-label-application" for="application" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Application</label>
@@ -130,4 +130,6 @@
 </div>
 
 {% include 'components/modals/products/confirm_product_create.html' %}
+{% include 'components/modals/generic_alert.html' %}
 <script src="{% static 'js/modals/product_create.js' %}"></script>
+<script src="{% static 'js/generic_alert.js' %}"></script>

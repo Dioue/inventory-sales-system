@@ -43,7 +43,7 @@ function debounce(fn, delay) {
 // API Fetch
 const fetchSales = async (params = null) => {
     try {
-        const url = id === null ? `/api/sales-records/` : `/api/sales-records/${params}/`;
+        const url = params === null ? `/api/sales-records/` : `/api/sales-records/${params}/`;
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Failed to fetch sales: ${response.statusText}`);
@@ -58,7 +58,7 @@ const fetchSales = async (params = null) => {
 
 const fetchProducts = async (params = null) => {
     try {
-        const url = id === null ? `/api/products/` : `/api/products/${params}/`;
+        const url = params === null ? `/api/products/` : `/api/products/${params}/`;
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Failed to fetch product: ${response.statusText}`);
@@ -105,10 +105,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // DOM controllers
 createBtn.addEventListener('click', async () => {
-    const maxId = 0;
-    fetch('api/sales-records/max_id/').then(data => {
-        console.log(data)
-    });
+    const fetchMaxId = await fetchSales('max_id')
+    const maxId = fetchMaxId.max_id;
 
     // form data injection to DOM
     formId.innerText = `SN-${(maxId).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}`;

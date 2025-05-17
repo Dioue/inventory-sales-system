@@ -14,6 +14,7 @@ const confirmHide = document.querySelectorAll('.confirm-sales-hide');
 const modalOptions = {'backdrop': 'static'};
 const salesFormGrand = document.querySelector('.sales-form-grand-total');
 const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+const productInTable = [];
 let allProducts = null;
 let allUnits = null;
 let allCategory = null;
@@ -84,6 +85,20 @@ const fetchFilteredProducts = async (query) => {
     }
 };
 
+const fetchFilteredProductsReadOnly = async (query) => {
+    try {
+        const url = `/api/products-readonly/search/?query=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch search results: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching filtered products:', error);
+        return [];
+    }
+};
+
 const fetchUnits = async () => {
     try {
         const response = await fetch(`/api/units/`);
@@ -102,6 +117,36 @@ const fetchCategory = async () => {
         return await response.json();
     } catch (error) {
         console.error('Error fetching category:', error);
+    }
+};
+
+
+const fetchFilteredCategory = async (query) => {
+    try {
+        const url = `/api/category/search/?query=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch search results: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching filtered products:', error);
+        return [];
+    }
+};
+
+
+const fetchFilteredUnits = async (query) => {
+    try {
+        const url = `/api/units/search/?query=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch search results: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching filtered units:', error);
+        return [];
     }
 };
 
@@ -240,7 +285,7 @@ formSearch.addEventListener('input', debounce(async () => {
     const filter = formSearch.value.trim().toLowerCase();
     if (filter.length > 0) {
         try {
-            const products = await fetchFilteredProducts(filter);
+            const products = await fetchFilteredProductsReadOnly(filter);
             populateDropdown(products);
         } catch (error) {
             console.error('Search failed:', error);
@@ -267,8 +312,7 @@ function populateDropdown(products) {
     dynamicItems.forEach(item => item.remove());
 
     if (products.length > 0) {
-        products.forEach(product => {
-            console.log(product.unit.name)
+        products.forEach(async product =>  {
 
             const item = document.createElement('li');
             item.className = 'sales-form-items px-4 py-2 text-sm cursor-pointer hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white';
@@ -278,13 +322,13 @@ function populateDropdown(products) {
             item.dataset.crit = product.critical_level;
             item.dataset.quantity = product.quantity;
             item.dataset.name = product.name;
-            item.dataset.unit = unitName;
-            item.textContent = `(${categoryCode}-${product.code}) ${product.name}`;
+            item.dataset.unit = product.unit.name;
+            item.textContent = `(${product.category.code}-${product.code}) ${product.name}`;
 
             // If product has no stock, mark accordingly
             if (product.quantity === 0) {
                 item.className = 'sales-form-items px-4 py-2 text-sm cursor-pointer bg-gray-100 text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white disabled';
-                item.textContent += ' (No stock)';
+                item.textContent += '(No stock)';
             }
 
             formSearchDropdown.appendChild(item);
@@ -309,7 +353,7 @@ formSearchDropdown.addEventListener('click', (event) =>{
             const prodCost = event.target.dataset.cost;
             const prodSelling = event.target.dataset.selling;
             const prodQuantity = event.target.dataset.quantity;
-            if(!isProductInTable(prodName)){
+            if(!isProductInTable(prodId)){
                 appendToTBody(prodId, prodName, prodCost, prodSelling, prodQuantity);
             }
         }
@@ -327,9 +371,9 @@ formTbody.addEventListener('click', (event) => {
 });
 
 // Check if a product is already in the table
-function isProductInTable(productName) {
+function isProductInTable(prodId) {
     return Array.from(formTbody.querySelectorAll('tr')).some(row => {
-        return row.querySelector('.product-name')?.textContent === productName;
+        return row.dataset.id === prodId;
     });
 }
 

@@ -303,3 +303,12 @@ class TreeMapSerializer(serializers.Serializer):
 class CategorySalesSerializer(serializers.Serializer):
     category_code = serializers.CharField()
     total_quantity = serializers.IntegerField()
+
+
+class ProductDetailSerializer(serializers.ModelSerializer):
+    unit = UnitSerializer()
+    category = CategorySerializer()
+
+    class Meta:
+        model = Product
+        fields = ['id', 'code', 'name', 'cost_price', 'selling_price', 'quantity', 'critical_level', 'unit', 'category']

@@ -169,6 +169,19 @@ const fetchFilteredProducts = async (query) => {
     }
 };
 
+const fetchFilteredProductsReadOnly = async (query) => {
+    try {
+        const url = `/api/products-readonly/search/?query=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch search results: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching filtered products:', error);
+        return [];
+    }
+};
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -182,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     searchInput.addEventListener('input', async () => {
         const filter = searchInput.value.trim().toLowerCase();
         if (filter.length > 0) {
-            const filteredProducts = await fetchFilteredProducts(filter);
+            const filteredProducts = await fetchFilteredProductsReadOnly(filter);
             populateDropdown(filteredProducts);
             
         } else {
@@ -196,9 +209,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         dynamicItems.forEach(item => item.remove());
 
         if (products.length > 0) {
+            console.log(products)
             products.forEach(product => {
-                const unitName = unit ? unit.name : 'No unit';
-                const categoryCode = category ? category.code : 'NoCat';
 
                 const item = document.createElement('li');
                 item.className = 'product-item px-4 py-2 text-sm cursor-pointer hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white';
@@ -207,9 +219,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 item.dataset.selling = product.selling_price;
                 item.dataset.crit = product.critical_level;
                 item.dataset.name = product.name;
-                item.dataset.unit = unitName;
+                item.dataset.unit = product.unit.name;
 
-                item.textContent = `(${categoryCode}-${product.code}) ${product.name}`;
+                item.textContent = `(${product.category.code}-${product.code}) ${product.name}`;
                 dropdown.appendChild(item);
             });
 

@@ -3,7 +3,7 @@ from .utils import ProcessDeleteView
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from .api import ProductViewSet, UnitViewSet, BatchOrderViewSet, CategoryViewSet, SalesRecordViewSet, DeliveryViewSet
+from .api import ProductViewSet, UnitViewSet, BatchOrderViewSet, CategoryViewSet, SalesRecordViewSet, DeliveryViewSet, ProductReadOnlyViewSet
 from rest_framework.routers import DefaultRouter
 from .views import ProductForecastAPIView
 
@@ -15,7 +15,7 @@ router.register(r'batch-orders', BatchOrderViewSet, basename='batchorder')
 router.register(r'category', CategoryViewSet, basename='category')
 router.register(r'sales-records', SalesRecordViewSet, basename='salesrecord')
 router.register(r'delivery', DeliveryViewSet, basename='delivery')
-
+router.register(r'products-readonly', ProductReadOnlyViewSet, basename='products-readonly')
 
 urlpatterns = [
     path('', views.LoginView.as_view(), name='login_view'),

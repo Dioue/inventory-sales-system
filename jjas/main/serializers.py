@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import Product, Unit, Category, BatchOrder, BatchOrderItem, SalesRecord, SalesRecordItem, Delivery, Client, DailySales, WeeklySales, MonthlySales
 from datetime import timedelta, datetime
 from decimal import Decimal
+from rest_framework import serializers
+from .models import ActivityLog
 
 ### HELPERS ###
 def active_queryset(model):
@@ -312,3 +314,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'code', 'name', 'cost_price', 'selling_price', 'quantity', 'critical_level', 'unit', 'category']
+
+class ActivityLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivityLog
+        fields = '__all__'

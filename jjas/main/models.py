@@ -4,6 +4,27 @@ from django.utils.timezone import now
 from datetime import timedelta
 
 
+# Activity Log Fields
+class ActivityLog(models.Model):
+    ACTION_CHOICES = [
+        ("CREATE", "Create"),
+        ("UPDATE", "Update"),
+        ("DELETE", "Delete"),
+        ("SOFT_DELETE", "Soft Delete"),
+        ("RESTORE", "Restore"),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    model_name = models.CharField(max_length=100)
+    object_id = models.PositiveIntegerField()
+    description = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+
+# Deletion manager
 class SoftDeletionManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)

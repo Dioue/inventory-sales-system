@@ -198,7 +198,7 @@ class CategoryComponentView(BaseComponentView):
                     {"name": "Code", "key": "code"},
                     {"name": "Created by", "key": "created_by"},
                 ],
-                    "fill_count": 4,
+                    "fill_count": 5,
                     "search_id": page_obj_search_id
                 },
             },
@@ -331,7 +331,6 @@ class ProductComponentView(BaseComponentView):
         search_query = self.request.GET.get(page_obj_search_id, "")
         _, page_obj = self.apply_search_and_pagination(products, search_query, ["name"])
     
-
         context.update({
             "content_label":{
                 "add": "Add a product",

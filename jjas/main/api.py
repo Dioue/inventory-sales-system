@@ -8,7 +8,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
 from django.db.models import Max
-
+from .utils import log_activity
+from .models import ActivityLog
+from .serializers import ActivityLogSerializer
 
 from .models import (
     Product, Unit, Category, SalesRecord, Delivery, BatchOrder, BatchOrderItem
@@ -27,9 +29,14 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
-    
+
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        instance = serializer.save(created_by=self.request.user)
+        log_activity(self.request.user, "CREATE", instance, f"Created product {instance.name}")
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_activity(self.request.user, "UPDATE", instance, f"Updated product {instance.name}")
     
     @action(detail=False, methods=['get'])
     def max_id(self, request):
@@ -161,6 +168,7 @@ class ProductReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductDetailSerializer
     permission_classes = [IsAuthenticated]
 
+
     @action(detail=False, methods=['get'])
     def search(self, request):
         query = request.query_params.get('query', '').strip()
@@ -192,3 +200,8 @@ class DeliveryViewSet(viewsets.ModelViewSet):
     def max_id(self, request):
         max_id = Delivery.objects.aggregate(Max('id'))['id__max'] or 0
         return Response({'max_id': max_id})
+    
+class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = ActivityLog.objects.select_related('user').all()
+    serializer_class = ActivityLogSerializer
+    permission_classes = [IsAuthenticated]

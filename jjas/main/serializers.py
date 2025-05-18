@@ -316,6 +316,11 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'code', 'name', 'cost_price', 'selling_price', 'quantity', 'critical_level', 'unit', 'category']
 
 class ActivityLogSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
     class Meta:
         model = ActivityLog
-        fields = '__all__'
+        fields = ['id', 'timestamp', 'user', 'action', 'model_name', 'object_id', 'description']
+
+    def get_user(self, obj):
+        return obj.user.username

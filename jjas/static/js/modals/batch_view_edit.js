@@ -66,6 +66,7 @@ const fetchCategoryUpdate = async () => {
     }
 };
 
+
 // Start of function handling
 async function handleViewClick(event) {
     const id = event.currentTarget.dataset.id;
@@ -101,14 +102,30 @@ async function handleViewClick(event) {
                     perPageSelect: [5, 10],
                 });
 
-                // Use a short delay to wait for internal setup (hacky but effective)
-                setTimeout(() => {
+                // Use a short delay to wait for internal setup
+                setTimeout(async () => {
                     if (batch_table_instance && batch && Array.isArray(batch.items)) {
-                        const rows = batch.items.map(item => Object.values(item));
+                        console.log(batch.items)
+                        const rows = [];
+
+                        const fetchPromises = batch.items.map(item => fetchFilteredProductsReadOnly(item.product));
                         try {
+                            const productDataList = await Promise.all(fetchPromises); // Wait for all product fetches
+                            console.log(productDataList)
+                            batch.items.forEach((item, index) => {
+                                const productData = productDataList[index];
+                                rows.push([
+                                    item.product,
+                                    productData[index].name,
+                                    item.cost_price,
+                                    item.quantity,
+                                    item.defective
+                                ]);
+                            });
+
                             batch_table_instance.insert({ data: rows });
                         } catch (err) {
-                            console.error("Error inserting rows into DataTable:", err);
+                            console.error("Error fetching product data or inserting rows:", err);
                         }
                     }
                 }, 50); // 10–50ms is usually enough

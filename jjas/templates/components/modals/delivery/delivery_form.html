@@ -28,11 +28,6 @@
                         <label for="delivery-form-sale" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sales Record<span class="text-red-400">*</span></label>
                         <select id="delivery-form-sale"  name="sale" class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             <option value="" selected="" disabled>Select a sale record</option>
-                            {% if tables.sales_record %}
-                                {% for d in tables.sales_record%}
-                                <option value={{d.id}}>({{d.id}}) {{d.client.name}}</option>
-                                {% endfor %}
-                            {% endif %}
                         </select>
                     </div>
                     <div class="relative max-w-sm col-span-2">

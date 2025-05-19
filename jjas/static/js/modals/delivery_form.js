@@ -21,19 +21,16 @@ let allDel = null;
 // Global form control
 const formId = document.querySelector('#delivery-form-id');
 
-
-// API Fetch
-const fetchDelivery = async (id = null) => {
+const fetchDelivery = async (params = null) => {
     try {
-        const url = id === null ? `/api/delivery/` : `/api/delivery/${id}/`;
+        const url = params === null ? `/api/delivery/` : `/api/delivery/${params}/`;
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Failed to fetch delivery: ${response.statusText}`);
         }
         return await response.json();
-        
     } catch (error) {
-        console.error('Error fetching delivery:', error);
+        console.error(`Error fetching delivery: `, error);
         throw error;
     }
 }
@@ -57,16 +54,19 @@ const fetchSales = async (id = null) => {
 // Load on DOM
 document.addEventListener('DOMContentLoaded', async () => {
     allDel = await fetchDelivery();
+    const saleData = await fetchSales();
+    saleData.results.forEach(sale => {
+        saleSelected.add(new Option(`${sale.id} - ${sale.client.name}`, sale.id))
+    })
 })
 
 // DOM controllers
 createBtn.addEventListener('click', async () => {
     familyGuy();
-    const delivery = await fetchDelivery();
-    const maxId = Math.max(...delivery.map(d => d.id), 0) + 1;
+    const fetchMaxId = await fetchDelivery('max_id')
 
     // form data injection to DOM
-    formId.innerText = `DN-${(maxId).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}`;
+    formId.innerText = `DN-${(fetchMaxId.max_id).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}`;
 
     saleSelected.addEventListener("change", async function (event) {
         try {
@@ -120,7 +120,6 @@ createBtn.addEventListener('click', async () => {
 
 editBtn.forEach(el => {
     el.addEventListener('click', async (event) => {
-
         const del = await fetchDelivery(event.target.dataset.id);
         if (del) {
             formId.innerText = `DN-${del.id}`

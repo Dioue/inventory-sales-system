@@ -252,11 +252,6 @@ class DeliveryComponentView(BaseComponentView):
         search_query = self.request.GET.get("_delivery", "")
         _, page_obj = self.apply_search_and_pagination(delivery_qs, search_query, ["id", "sale__id"])
 
-        # Limit Units, Categories, and Sales Records (or fetch dynamically via AJAX)
-        units = Unit.objects.only("id", "name").order_by("id")[:100]
-        categories = Category.objects.only("id", "name").order_by("id")[:100]
-        sales_records = SalesRecord.objects.only("id", "date_issued").order_by("id")[:100]
-
         context.update({
             "tables": {
                 "page_obj": {
@@ -270,9 +265,6 @@ class DeliveryComponentView(BaseComponentView):
                     "fill_count": 9,
                     "search_id": "_delivery"
                 },
-                "units": units,
-                "category": categories,
-                "sales_record": sales_records
             },
 
             "form_action": {

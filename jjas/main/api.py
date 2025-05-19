@@ -67,7 +67,12 @@ class SalesViewSet(viewsets.ModelViewSet):
     queryset = SalesRecord.objects.prefetch_related('items').all()
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        instance = serializer.save(created_by=self.request.user)
+        log_activity(self.request.user, "CREATE", instance, f"Created a sale transaction {instance.name}")
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_activity(self.request.user, "UPDATE", instance, f"Updated a sale transaction {instance.name}")
 
     @action(detail=False, methods=['get'])
     def max_id(self, request):
@@ -109,7 +114,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        instance = serializer.save(created_by=self.request.user)
+        log_activity(self.request.user, "CREATE", instance, f"Created a category {instance.name}")
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_activity(self.request.user, "UPDATE", instance, f"Updated a category {instance.name}")
 
     @action(detail=False, methods=['get'])
     def max_id(self, request):
@@ -142,7 +152,12 @@ class BatchOrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        instance = serializer.save(created_by=self.request.user)
+        log_activity(self.request.user, "CREATE", instance, f"Created a batch order {instance.name}")
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_activity(self.request.user, "UPDATE", instance, f"Updated a batch order {instance.name}")
 
     @action(detail=False, methods=['get'])
     def max_id(self, request):
@@ -194,7 +209,12 @@ class DeliveryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        instance = serializer.save(created_by=self.request.user)
+        log_activity(self.request.user, "CREATE", instance, f"Created a delivery record {instance.name}")
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_activity(self.request.user, "UPDATE", instance, f"Updated a delivery record {instance.name}")
     
     @action(detail=False, methods=['get'])
     def max_id(self, request):

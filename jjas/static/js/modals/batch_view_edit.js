@@ -12,6 +12,7 @@ const _searchInput = document.getElementById('table-search-update');
 const _tableBody = document.getElementById('batch-tbody-update');
 const _setStatic = {"backdrop": "static"}
 const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+let _table_filled = false;
 let _products = null;
 let update_units = [];
 let update_category = [];
@@ -188,14 +189,15 @@ async function handleEditClick(event) {
 
             if (batch.items.length > 0) {
                 _tableBody.innerHTML = '';
-                batch.items.forEach(item => {
-                    const _p = _products.find(prod => prod.id === item.product)
-                    const _u = update_units.find(u => u.id === _p.unit)
-                    const nRow = createRow(_p.id, _p.name, _u.name, item.cost_price, _p.critical_level, item.quantity, item.defective)
+                batch.items.forEach(async item => {
+                    const _p = await fetchFilteredProductsReadOnly(item.product)
+                    console.log(_p)
+                    const nRow = createRow(_p[0].id, _p[0].name, _p[0].unit.name, item.cost_price, _p[0].critical_level, item.quantity, item.defective)
                     _tableBody.appendChild(nRow);
-                    updateTotalBU(_p.id);
+                    updateTotalBU(_p[0].id);
                 })
                 updateGrandBU();
+                _table_filled = true;
             }
 
             /* For batch confirmation */
@@ -215,7 +217,9 @@ async function handleEditClick(event) {
             });
             });
 
-            new Modal(_modalEdit, _setStatic).show();
+            if(_table_filled){
+                new Modal(_modalEdit, _setStatic).show();
+            }
         } catch (error) {
             console.error('Error handling view click:', error);
         }

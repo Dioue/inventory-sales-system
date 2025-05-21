@@ -8,11 +8,11 @@ from django.http import HttpRequest, HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q, Count
+from django.db.models import Q, Count, FloatField
 from .utils import request_user_info
 from .models import (BatchOrder, BatchOrderItem, Category, Delivery, Product, SalesRecord, SalesRecordItem, Unit)
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.db.models import Sum
 from datetime import timedelta
@@ -25,6 +25,7 @@ from .forecast import forecast_all
 from rest_framework.throttling import UserRateThrottle
 from django.core.cache import cache
 from django.db.models.functions import TruncMonth
+from collections import defaultdict
 
 class ThrottleTimer(UserRateThrottle):
     rate = '60/min'
@@ -768,4 +769,56 @@ def product_insight_data(request, product_id):
         "purchased": purchased_data,
         "sold": sold_data,
         "forecast": forecast_data
+    })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def BatchReportAPIView(request):
+    today = now().date()
+    start_date = today - timedelta(days=30)
+
+    # Query batches in last 30 days, not deleted
+    batches = BatchOrder.objects.filter(
+        purchase_date__range=(start_date, today),
+        is_deleted=False
+    ).only('id', 'supplier', 'purchase_date', 'grand_total')
+
+    # Get BatchOrderItems linked to those batches, not deleted, with related product and category
+    batch_items = BatchOrderItem.objects.filter(
+        batch__in=batches,
+        is_deleted=False
+    ).select_related('product__category')
+
+    # Annotate total_cost per item (cost_price * quantity)
+    batch_items = batch_items.annotate(
+        total_cost=ExpressionWrapper(F('cost_price') * F('quantity'), output_field=FloatField())
+    )
+
+    # Aggregate overall totals
+    agg = batch_items.aggregate(
+    total_quantity=Sum('quantity'),
+    total_cost=Sum(ExpressionWrapper(F('cost_price') * F('quantity'), output_field=FloatField())))
+
+    item_received = agg['total_quantity'] or 0
+    total_cost = agg['total_cost'] or 0
+    average_cost = total_cost / item_received if item_received else 0
+
+    # Category totals (sum of total_cost grouped by category name)
+    category_totals_qs = batch_items.values('product__category__name').annotate(
+        amount=Sum('total_cost')
+    ).order_by('-amount')[:20]
+
+    category_data = [
+        {'name': entry['product__category__name'], 'amount': round(entry['amount'], 2)}
+        for entry in category_totals_qs if entry['product__category__name']
+    ]
+
+    return Response({
+        "last30Days": {
+            "batch_total": batches.count(),
+            "item_received": item_received,
+            "total_cost": round(total_cost, 2),
+            "average_cost_per_item": round(average_cost, 2),
+            "category": category_data,
+        }
     })

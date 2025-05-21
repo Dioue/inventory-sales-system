@@ -244,3 +244,5 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ActivityLogSerializer
     permission_classes = [IsAuthenticated]
     filterset_class = ActivityLogFilter
+
+

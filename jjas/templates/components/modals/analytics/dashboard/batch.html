@@ -1,0 +1,102 @@
+{% load static %}
+
+
+<style>
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    #batch-report-content, #batch-report-content * {
+      visibility: visible;
+    }
+
+    #batch-report-chart {
+      max-width: 100% !important;
+      height: auto !important;
+      overflow: hidden;
+    }
+
+    #batch-report-content {
+      width: 100% !important;
+      overflow: visible !important;
+      padding: 20px;
+      background: white;
+    }
+
+    /* Optional: Remove the print button itself from being shown on paper */
+    #product-insight-submit {
+      display: none;
+    }
+  }
+</style>
+
+<div id="batch-report" tabindex="-1" aria-hidden="true"
+  class="fixed inset-0 z-50 hidden justify-center items-start overflow-y-auto bg-black bg-opacity-50 p-4">
+  <div class="relative w-full max-w-5xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+      
+      <!-- Header -->
+      <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
+        <h3 id="batch-report-title" class="text-2xl font-bold text-gray-900 dark:text-white">
+        📦 Batch Procurement Report – Jan 2025
+        </h3>
+        <button id="batch-report-hide" type="button"
+          class="text-gray-500 hover:text-gray-900 dark:hover:text-white rounded-lg focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600 p-1.5">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 
+              8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 
+              10l4.293 4.293a1 1 0 01-1.414 
+              1.414L10 11.414l-4.293 4.293a1 1 
+              0 01-1.414-1.414L8.586 10 4.293 
+              5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div id="batch-report-content" class="space-y-6">
+        <!-- Summary -->
+        <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">🔍 Summary</h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-800 dark:text-gray-200">
+            <div><span class="font-medium">Total Batches:</span> 12</div>
+            <div><span class="font-medium">Items Received:</span> 1,380</div>
+            <div><span class="font-medium">Total Cost:</span> ₱256,000.00</div>
+            <div><span class="font-medium">Avg. Cost per Item:</span> ₱185.51</div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div>
+          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">📊 Batch Distribution</h4>
+          <div id="batch-report-chart"
+            class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 p-4"></div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <section>
+            <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">🗂 Purchases by Category</h4>
+            <div class="overflow-x-auto">
+                <table id="batch-category-table" class="w-full text-sm text-gray-700 dark:text-gray-300 table-fixed border-separate border-spacing-2">
+                <!-- Rows will be dynamically inserted here -->
+                </table>
+            </div>
+        </section>
+
+
+      </div>
+
+      <!-- Footer -->
+      <div class="flex justify-end mt-6">
+        <button id="batch-report-submit" type="button"
+          class="inline-flex items-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full transition">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linejoin="round"
+              d="M16.444 18H19a1 1 0 001-1v-5a1 1 0 00-1-1H5a1 1 0 00-1 1v5a1 1 0 001 1h2.556M17 11V5a1 1 0 00-1-1H8a1 1 0 00-1 1v6h10zM7 15h10v4a1 1 0 01-1 1H8a1 1 0 01-1-1v-4z" />
+          </svg>
+          Print Report
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

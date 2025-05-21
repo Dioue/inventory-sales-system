@@ -3,14 +3,13 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets, serializers
 from .models import BatchOrder, BatchOrderItem
-from .serializers import BatchOrderSerializer
+from .serializers import BatchOrderSerializer, ActivityLogSerializer, ActivityLogFilter
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
 from django.db.models import Max
 from .utils import log_activity
 from .models import ActivityLog
-from .serializers import ActivityLogSerializer
 
 from .models import (
     Product, Unit, Category, SalesRecord, Delivery, BatchOrder, BatchOrderItem
@@ -210,18 +209,38 @@ class DeliveryViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
-        log_activity(self.request.user, "CREATE", instance, f"Created a delivery record {instance.name}")
+        log_activity(self.request.user, "CREATE", instance, f"Created a delivery record {instance.id}")
 
     def perform_update(self, serializer):
         instance = serializer.save()
-        log_activity(self.request.user, "UPDATE", instance, f"Updated a delivery record {instance.name}")
+        log_activity(self.request.user, "UPDATE", instance, f"Updated a delivery record {instance.id}")
     
     @action(detail=False, methods=['get'])
     def max_id(self, request):
         max_id = Delivery.objects.aggregate(Max('id'))['id__max'] or 0
         return Response({'max_id': max_id})
     
+    @action(detail=False, methods=['get'])
+    def search(self, request):
+        query = request.query_params.get('query', None)
+        if query:
+            try:
+                query_id = int(query)
+            except ValueError:
+                query_id = None
+
+            filters = Q(name__icontains=query) | Q(status__icontains=query)
+            if query_id is not None:
+                filters |= Q(id=query_id)
+
+            results = Delivery.objects.filter(filters).select_related('sale')
+            serializer = self.get_serializer(results, many=True)
+            return Response(serializer.data)
+        else:
+            return Response([])
+    
 class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ActivityLog.objects.select_related('user').all()
     serializer_class = ActivityLogSerializer
     permission_classes = [IsAuthenticated]
+    filterset_class = ActivityLogFilter

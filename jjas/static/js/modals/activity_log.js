@@ -7,9 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let activityLogTable = null;
 
 
-    activityLogBtn.addEventListener('click', async () => {
+    activityLogBtn.addEventListener('click', async (event) => {
         try {
-            const response = await fetch('/api/activity-logs/');
+            const instanceType = event.currentTarget?.dataset?.instanceType;
+            if (!instanceType) {
+                console.error("No instanceType found on the clicked button");
+                return;
+            }
+            console.log(instanceType)
+            const response = await fetch(`/api/activity-logs/?model_name=${encodeURIComponent(instanceType)}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch activity log data.');
             }

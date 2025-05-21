@@ -17,7 +17,6 @@ const confirmHide = document.querySelectorAll('.confirm-delivery-hide');
 const modalOptions = {'backdrop': 'static'};
 let allSales = null;
 let sale_issued = null;
-let allDel = null;
 // Global form control
 const formId = document.querySelector('#delivery-form-id');
 
@@ -35,6 +34,19 @@ const fetchDelivery = async (params = null) => {
     }
 }
 
+const searchDelivery = async (query) => {
+    try {
+        const url = `/api/delivery/search/?query=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch search results: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching filtered products:', error);
+        return [];
+    }
+};
 
 const fetchSales = async (id = null) => {
     try {
@@ -53,7 +65,6 @@ const fetchSales = async (id = null) => {
 
 // Load on DOM
 document.addEventListener('DOMContentLoaded', async () => {
-    allDel = await fetchDelivery();
     const saleData = await fetchSales();
     saleData.results.forEach(sale => {
         saleSelected.add(new Option(`${sale.id} - ${sale.client.name}`, sale.id))
@@ -196,9 +207,9 @@ const deliveryAPI = async (method, id = null) => {
         generic_alert('Error: delivery date cannot be earlier than the sale issued date.');
         return;
     } else if (method === 'POST') {
-        const existingDel = allDel.find(del => del.sale == saleSelected.dataset.id) // if exists
-        console.log(allDel)
-        if(existingDel) {
+        const existingDel = await searchDelivery(saleSelected.dataset.id)
+        console.log(existingDel.length > 0)
+        if(existingDel.length > 0) {
             generic_alert('Error: Cannot save another delivery with the same sale number.');
             return;
         }

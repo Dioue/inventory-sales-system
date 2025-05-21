@@ -4,6 +4,7 @@ from datetime import timedelta, datetime
 from decimal import Decimal
 from rest_framework import serializers
 from .models import ActivityLog
+from django_filters import rest_framework as filters
 
 ### HELPERS ###
 def active_queryset(model):
@@ -324,3 +325,11 @@ class ActivityLogSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return obj.user.username
+    
+# Filterset class not an actual serializer
+class ActivityLogFilter(filters.FilterSet):
+    model_name = filters.CharFilter(field_name='model_name', lookup_expr='icontains')
+
+    class Meta:
+        model = ActivityLog
+        fields = ['model_name']

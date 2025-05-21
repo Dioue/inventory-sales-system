@@ -132,6 +132,7 @@ class BatchOrderComponentView(BaseComponentView):
                 {"name": "Batch Orders", "url": reverse("auth_batch_order_component")},
             ],
             "list_action_modal": "batch_form",
+            "instance_type": "batch",
             "modal": {
                 "batch_form": {
                     "last_fetch_batch_id": _last_batch_order_id
@@ -202,7 +203,7 @@ class CategoryComponentView(BaseComponentView):
                     "search_id": page_obj_search_id
                 },
             },
-
+            "instance_type": "category",
             "form_action": {
                 "delete": reverse('process_delete', args=['category'])
             },
@@ -266,7 +267,7 @@ class DeliveryComponentView(BaseComponentView):
                     "search_id": "_delivery"
                 },
             },
-
+            "instance_type": "delivery",
             "form_action": {
                 "delete": reverse('process_delete', args=['delivery'])
             },
@@ -338,6 +339,7 @@ class ProductComponentView(BaseComponentView):
             ],
 
             "list_action_modal": "product_form",
+            "instance_type": "product",
             "modal": {
                 "product_form":{
                     "last_fetch_batch_id": _last_product_id
@@ -411,7 +413,7 @@ class SalesComponentView(BaseComponentView):
                     "search_id": page_obj_search_id
                 },
             },
-
+            "instance_type": "delivery",
             "form_action": {
                 "delete": reverse('process_delete', args=['sales_record'])
             },

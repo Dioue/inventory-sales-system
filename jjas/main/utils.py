@@ -62,8 +62,6 @@ class ProcessDeleteView(View):
             self._delete_sales_records(request.user, selected_items, hard_delete)
         elif model_key == "batch_order":
             self._delete_batch_orders(request.user, selected_items, hard_delete)
-        elif model_key == "batch_order_item":
-            self._delete_batch_order_items(request.user, selected_items, hard_delete)
         else:
             queryset = model.objects.filter(pk__in=selected_items)
             for obj in queryset:

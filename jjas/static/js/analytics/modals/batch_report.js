@@ -70,7 +70,7 @@ const populateBatchReport = async () => {
 
           if (i < items.length) {
             const item = items[i];
-            cell.innerHTML = `🗂 <strong>${item.name}</strong> – ${peso(item.amount)}`;
+            cell.innerHTML = `<strong>${item.name}</strong> – ${peso(item.amount)}`;
           } else {
             cell.innerHTML = ''; // empty cell if no more items
           }

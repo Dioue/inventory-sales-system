@@ -38,6 +38,7 @@ urlpatterns = [
     path('api/forecast/', ProductForecastAPIView.as_view(), name='generate-forecast'),
     path('api/product-insight/<int:product_id>/', views.product_insight_data, name='product-insight'),
     path('api/batch-report/', views.BatchReportAPIView, name='batch-reports'),
+    path('api/sales-report/', views.SalesReportAPIView.as_view(), name='sales-reports'),
 
     # function routes
     path('delete/<str:model_key>/', ProcessDeleteView.as_view(), name='process_delete'),

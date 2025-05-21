@@ -822,3 +822,105 @@ def BatchReportAPIView(request):
             "category": category_data,
         }
     })
+
+
+class SalesReportAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        today = now().date()
+        start_of_month = today.replace(day=1)
+        end_of_month = (start_of_month + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+
+        # Sales Summary
+        sales = SalesRecord.objects.filter(date_issued__range=(start_of_month, end_of_month))
+        total_sales = sales.aggregate(total=Sum('total'))['total'] or 0
+        number_of_sales = sales.count()
+        average_sale_value = round(total_sales / number_of_sales, 2) if number_of_sales else 0
+
+        # Top Selling Products
+        top_products = (
+            SalesRecordItem.objects.filter(sales_record__date_issued__range=(start_of_month, end_of_month))
+            .values('product__name')
+            .annotate(quantity_sold=Sum('quantity'), revenue=Sum('total'))
+            .order_by('-quantity_sold')[:5]
+        )
+        top_selling_products = [
+            {
+                "product": p['product__name'],
+                "quantity_sold": p['quantity_sold'],
+                "revenue": float(p['revenue'])
+            }
+            for p in top_products
+        ]
+
+        sales_by_category_qs = (
+            SalesRecordItem.objects.filter(sales_record__date_issued__range=(start_of_month, end_of_month))
+            .values("product__category__name")
+            .annotate(sales=Sum("total"))[:20]
+        )
+        sales_by_category = [
+            {
+                "category": c["product__category__name"],
+                "sales": float(c["sales"])
+            }
+            for c in sales_by_category_qs if c["product__category__name"]
+        ]
+
+        # Inventory Movement
+        fast_moving = (
+            SalesRecordItem.objects.filter(sales_record__date_issued__range=(start_of_month, end_of_month))
+            .values("product__name")
+            .annotate(quantity_sold=Sum("quantity"))
+            .order_by("-quantity_sold")[:3]
+        )
+        slow_moving = (
+            SalesRecordItem.objects.filter(sales_record__date_issued__range=(start_of_month, end_of_month))
+            .values("product__name")
+            .annotate(quantity_sold=Sum("quantity"))
+            .order_by("quantity_sold")[:3]
+        )
+        low_stock_alerts = Product.objects.filter(quantity__lte=F('critical_level')).values("name", "quantity")[:5]
+
+        inventory_movement = {
+            "fast_moving": [item["product__name"] for item in fast_moving],
+            "slow_moving": [item["product__name"] for item in slow_moving],
+            "low_stock_alerts": list(low_stock_alerts)
+        }
+
+        # Top Clients
+        top_clients_qs = (
+            sales.values("client__name")
+            .annotate(sales=Sum("total"))
+            .order_by("-sales")[:3]
+        )
+        top_clients = [
+            {"name": c["client__name"], "sales": float(c["sales"])}
+            for c in top_clients_qs if c["client__name"]
+        ]
+
+        # Delivery Insights
+        deliveries = Delivery.objects.filter(sale__date_issued__range=(start_of_month, end_of_month))
+        total_deliveries = deliveries.count()
+        on_time = deliveries.filter(date_claimed__lte=F('delivery_date')).count()
+        late = deliveries.filter(date_claimed__gt=F('delivery_date')).count()
+
+        delivery_insights = {
+            "total_deliveries": total_deliveries,
+            "on_time": on_time,
+            "late": late
+        }
+
+        return Response({
+            "report_month": today.strftime("%B %Y"),
+            "sales_summary": {
+                "total_sales": float(total_sales),
+                "number_of_sales": number_of_sales,
+                "average_sale_value": float(average_sale_value)
+            },
+            "top_selling_products": top_selling_products,
+            "sales_by_category": sales_by_category,
+            "inventory_movement": inventory_movement,
+            "top_clients": top_clients,
+            "delivery_insights": delivery_insights
+        })

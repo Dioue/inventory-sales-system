@@ -1,131 +1,155 @@
-{% load static %}
+<style>
+@media print {
+  body {
+    margin: 0.5in;
+    font-family: sans-serif;
+    background: white;
+  }
 
-<div id="sales-report" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
-    <div class="relative p-4 w-8/12 h-full md:h-auto">
+  /* Hide everything by default */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Make only the print area visible */
+  #sr-print-area, #sr-print-area * {
+    visibility: visible !important;
+  }
+
+  /* Position the print area at the top-left corner */
+  #sr-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* Chart fixes */
+  .apexcharts-toolbar {
+    display: none !important;
+  }
+
+  .apexcharts-canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  svg {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Hide buttons or UI elements like close/submit if present */
+  #sr-submit, .modal-footer, .modal-header, button {
+    display: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+</style>
+
+<div id="sales-report" tabindex="-1" aria-hidden="true"
+    class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full flex items-center justify-center">
+    <div class="relative w-full max-w-4xl max-h-full">
         <!-- Modal content -->
-        <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+        <div class="relative bg-white rounded-2xl shadow dark:bg-gray-800">
             <!-- Modal header -->
-            <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b border-black sm:mb-5 dark:border-gray-600">
-                
-                <h3 class="sales-report-text text-lg font-semibold text-gray-900 dark:text-white">
-                    Sales Report
+            <div class="no-print flex items-center justify-between p-4 border-b rounded-t dark:border-gray-600">
+                <h3 id="sales-report-month" class="text-xl font-bold text-gray-900 dark:text-white">
+                    📊 Monthly Sales Report
                 </h3>
-                
-                <button type="button" id="sales-report-hide" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white">
-                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                <button id="sales-report-hide" type="button"
+                    class="no-print inline-flex items-center justify-center w-8 h-8 text-gray-400 bg-transparent rounded-lg hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
                     <span class="sr-only">Close modal</span>
                 </button>
             </div>
 
-<div class="p-6 bg-white text-gray-900 rounded-lg shadow-md space-y-6">
-  <h1 class="text-2xl font-bold border-b pb-2">📦 Batch Purchase Report – May 2025</h1>
+            <!-- Modal body -->
+            <div id="sr-print-area">
+              <div class="p-6 space-y-6 text-gray-900 dark:text-gray-100">
+                <!-- 1. Sales Summary -->
+                <section>
+                    <h4 class="text-lg font-semibold mb-2">Sales Summary</h4>
+                    <ul class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <li class="bg-gray-50 dark:bg-gray-700 p-3 rounded shadow-sm" id="sr-total-sales">💰 Total Sales: <strong>₱152,300.00</strong></li>
+                        <li class="bg-gray-50 dark:bg-gray-700 p-3 rounded shadow-sm" id="sr-number-of-sales">🧾 Number of Sales: <strong>87</strong></li>
+                        <li class="bg-gray-50 dark:bg-gray-700 p-3 rounded shadow-sm" id="sr-average-sale">📈 Avg. Sale: <strong>₱1,750.57</strong></li>
+                    </ul>
+                </section>
 
-  <!-- 1. Summary -->
-  <section>
-    <h2 class="text-xl font-semibold mb-2">Summary</h2>
-    <ul class="grid grid-cols-2 gap-4 text-sm">
-      <li>Total Batches: <strong>12</strong></li>
-      <li>Total Items Received: <strong>1,380</strong></li>
-      <li>Total Cost: <strong>₱256,000.00</strong></li>
-      <li>Average Cost per Item: <strong>₱185.51</strong></li>
-    </ul>
-  </section>
+                <div id="sr-chart"class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 p-4"></div>
 
-  <!-- 2. Batch Table -->
-  <section>
-    <h2 class="text-xl font-semibold mb-2 mt-6">Batch Details</h2>
-    <table class="w-full text-sm border">
-      <thead class="bg-gray-100 text-left">
-        <tr>
-          <th class="p-2 border">Batch ID</th>
-          <th class="p-2 border">Supplier</th>
-          <th class="p-2 border">Date</th>
-          <th class="p-2 border">Total Cost</th>
-          <th class="p-2 border">Items</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="p-2 border">#101</td>
-          <td class="p-2 border">AutoSupply Inc.</td>
-          <td class="p-2 border">2025-05-02</td>
-          <td class="p-2 border">₱58,000.00</td>
-          <td class="p-2 border">150</td>
-        </tr>
-        <!-- More batches... -->
-      </tbody>
-    </table>
-  </section>
+                <!-- 2. Top-Selling Products -->
+                <section>
+                    <h4 class="text-lg font-semibold mb-2">Top-Selling Products</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left border border-gray-200 dark:border-gray-700">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
+                                <tr>
+                                    <th class="px-4 py-2">Product</th>
+                                    <th class="px-4 py-2">Qty Sold</th>
+                                    <th class="px-4 py-2">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sr-top-products-body" class="bg-white dark:bg-gray-800">
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
 
-  <!-- 3. Product Procurement Stats -->
-  <section>
-    <h2 class="text-xl font-semibold mb-2 mt-6">Top Purchased Products</h2>
-    <table class="w-full text-sm border">
-      <thead class="bg-gray-100 text-left">
-        <tr>
-          <th class="p-2 border">Product</th>
-          <th class="p-2 border">Total Quantity</th>
-          <th class="p-2 border">Average Cost</th>
-          <th class="p-2 border">Total Cost</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="p-2 border">Brake Pad A</td>
-          <td class="p-2 border">200</td>
-          <td class="p-2 border">₱150.00</td>
-          <td class="p-2 border">₱30,000.00</td>
-        </tr>
-        <!-- More products... -->
-      </tbody>
-    </table>
-  </section>
+                <!-- 3. Sales by Category -->
+                <section>
+                    <h4 class="text-lg font-semibold mb-2">Sales by Category</h4>
+                    <div class="overflow-x-auto">
+                        <table id="sr-category-sales-table" class="w-full text-sm text-left">
+                            <tbody class="bg-white dark:bg-gray-800">
+                                <!-- JavaScript will populate rows here -->
+                            </tbody>
+                        </table>
+                    </div>
 
-  <!-- 4. Defective Items -->
-  <section>
-    <h2 class="text-xl font-semibold mb-2 mt-6">Defective Items</h2>
-    <table class="w-full text-sm border">
-      <thead class="bg-gray-100 text-left">
-        <tr>
-          <th class="p-2 border">Product</th>
-          <th class="p-2 border">Batch ID</th>
-          <th class="p-2 border">Defective Qty</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="p-2 border">Oil Filter B</td>
-          <td class="p-2 border">#104</td>
-          <td class="p-2 border">8</td>
-        </tr>
-        <!-- More rows... -->
-      </tbody>
-    </table>
-  </section>
+                </section>
 
-  <!-- 5. Category-Based Procurement -->
-  <section>
-    <h2 class="text-xl font-semibold mb-2 mt-6">Purchases by Category</h2>
-    <ul class="text-sm">
-      <li>🔧 Engine Parts – ₱125,000.00</li>
-      <li>🛠 Suspension – ₱65,000.00</li>
-      <li>⚙️ Transmission – ₱66,000.00</li>
-    </ul>
-  </section>
-</div>
+                <!-- 4. Inventory Movement -->
+                <section>
+                    <h4 class="text-lg font-semibold mb-2">Inventory Movement</h4>
+                    <ul id="sr-inventory-movement-list" class="space-y-1 text-sm">
+                    </ul>
+                </section>
 
-            <div class="flex">
-                <button id="product-insight-submit" type="button" class="ml-auto text-gray-600 inline-flex items-center bg-white border border-gray-400 rounded-full px-4 py-2.5">
-                    <svg class="w-6 h-6 text-gray-600 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M16.444 18H19a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h2.556M17 11V5a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v6h10ZM7 15h10v4a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-4Z"/>
-                        </svg>
+                <!-- 5. Top Clients -->
+                <section>
+                    <h4 class="text-lg font-semibold mb-2">Top Clients</h4>
+                    <ol id="sr-top-clients-list" class="list-decimal pl-5 space-y-1 text-sm">
+                    </ol>
+                </section>
 
-                    Print Insight
-                </button>
+                <!-- 6. Delivery Insights -->
+                <section>
+                    <h4 class="text-lg font-semibold mb-2">Delivery Insights</h4>
+                    <ul id="sr-delivery-insights-list" class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                    </ul>
+                </section>
+              </div>
             </div>
 
+            <!-- Modal footer -->
+            <div class="flex justify-end items-center p-4 border-t rounded-b dark:border-gray-600">
+                <button id="sr-submit" type="button"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-800 bg-white border border-gray-300 rounded-full hover:bg-gray-100 dark:text-white dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600">
+                    <svg class="w-5 h-5 text-gray-600 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M16.444 18H19a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h2.556M17 11V5a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v6h10ZM7 15h10v4a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-4Z"/>
+                        </svg>
+                    Print Sales Report
+                </button>
+            </div>
         </div>
     </div>
 </div>
-
-

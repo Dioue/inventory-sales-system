@@ -93,7 +93,6 @@ function getBatchItems() {
 }
 
 async function submitBatch(batchContent, csrfToken) {
-    console.log("payload: " + batchContent)
     const response = await fetch('/api/batch-orders/', {
         method: 'POST',
         headers: {
@@ -209,7 +208,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         dynamicItems.forEach(item => item.remove());
 
         if (products.length > 0) {
-            console.log(products)
             products.forEach(product => {
 
                 const item = document.createElement('li');

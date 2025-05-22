@@ -61,9 +61,17 @@
                         <td class="px-6 py-4">{{ obj.purchase_date|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.created_by|default:"system" }}</td>
                         <td class="flex items-center px-6 py-4">
-                            <button type="button" data-id="{{obj.id}}" class="batch_view font-medium text-blue-600 dark:text-blue-500 hover:underline">Details</button>
+                            <button type="button" data-id="{{obj.id}}" class="batch_view font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                <svg class="w-5 h-5 text-blue-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 3v4a1 1 0 0 1-1 1H5m8 7.5 2.5 2.5M19 4v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1Zm-5 9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/>
+                                </svg>
+                            </button>
                             <span class="mx-2">|</span>
-                            <button type="button" data-id="{{obj.id}}" class="batch_edit font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</button>
+                            <button type="button" data-id="{{obj.id}}" class="batch_edit font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                <svg class="w-5 h-5 text-blue-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
+                                </svg>
+                            </button>
                         </td>
                     </tr>
                 {% endfor %}

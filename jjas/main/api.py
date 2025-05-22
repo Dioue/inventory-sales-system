@@ -6,8 +6,7 @@ from .models import BatchOrder, BatchOrderItem
 from .serializers import BatchOrderSerializer, ActivityLogSerializer, ActivityLogFilter
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Q
-from django.db.models import Max
+from django.db.models import Q, Max, F
 from .utils import log_activity
 from .models import ActivityLog
 
@@ -182,6 +181,11 @@ class ProductReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductDetailSerializer
     permission_classes = [IsAuthenticated]
 
+    @action(detail=False, methods=['get'])
+    def critical(self, request):
+        """Return products where quantity is less than critical_level."""
+        count = Product.objects.filter(quantity__lt=F('critical_level')).count()
+        return Response({'critical_count': count})
 
     @action(detail=False, methods=['get'])
     def search(self, request):

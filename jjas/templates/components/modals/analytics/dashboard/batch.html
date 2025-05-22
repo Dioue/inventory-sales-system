@@ -1,34 +1,59 @@
 {% load static %}
-
-
 <style>
-  @media print {
-    body * {
-      visibility: hidden;
-    }
-    #batch-report-content, #batch-report-content * {
-      visibility: visible;
-    }
-
-    #batch-report-chart {
-      max-width: 100% !important;
-      height: auto !important;
-      overflow: hidden;
-    }
-
-    #batch-report-content {
-      width: 100% !important;
-      overflow: visible !important;
-      padding: 20px;
-      background: white;
-    }
-
-    /* Optional: Remove the print button itself from being shown on paper */
-    #product-insight-submit {
-      display: none;
-    }
+@media print {
+  body * {
+    visibility: hidden !important;
   }
+
+  #batch-report.print-mode,
+  #batch-report.print-mode * {
+    visibility: visible !important;
+  }
+
+  #batch-report.print-mode {
+    position: static !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    overflow: visible !important;
+    z-index: 9999 !important;
+  }
+
+  /* Remove parent padding/margin/alignment from Flexbox modal structure */
+  #batch-report.print-mode > .relative {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  #batch-report.print-mode .bg-white,
+  #batch-report.print-mode .dark\:bg-gray-800 {
+    background: white !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  #batch-report-hide,
+  #batch-report-submit,
+  .modal-backdrop,
+  .modal-header {
+    display: none !important;
+  }
+
+  html, body {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
 </style>
+
 
 <div id="batch-report" tabindex="-1" aria-hidden="true"
   class="fixed inset-0 z-50 hidden justify-center items-start overflow-y-auto bg-black bg-opacity-50 p-4">

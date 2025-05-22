@@ -77,12 +77,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     _viewUnits = await fetchUnits();
 })
 
-
-
 // DOM controllers/listeners
 viewBtn.forEach(el => {
     el.addEventListener('click', async (event) => {
-        const id = event.target.dataset.id;
+        const id = event.currentTarget.dataset.id;
         const product = await fetchFilteredProductsReadOnly(id);
         viewId.innerText = `PN-${id}`
 

@@ -20,9 +20,28 @@ batchReportBtn.addEventListener('click', async () => {
 });
 
 printBtn.addEventListener('click', () => {
-    window.print()
+    const modal = document.querySelector('#batch-report');
+    const reportContent = document.querySelector('#batch-report-content');
 
+    // Backup current display styles
+    const previousDisplay = modal.style.display;
+
+    // Show modal content explicitly for printing
+    modal.style.display = 'block';
+
+    // Add a temporary print class to control visibility
+    modal.classList.add('print-mode');
+
+    // Give the browser time to render styles
+    setTimeout(() => {
+        window.print();
+
+        // Revert modal display after printing
+        modal.classList.remove('print-mode');
+        modal.style.display = previousDisplay || '';
+    }, 100);
 });
+
 
 const batch_getMonthYear = () => {
     const date = new Date();

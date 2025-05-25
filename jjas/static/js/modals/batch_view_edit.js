@@ -106,13 +106,11 @@ async function handleViewClick(event) {
                 // Use a short delay to wait for internal setup
                 setTimeout(async () => {
                     if (batch_table_instance && batch && Array.isArray(batch.items)) {
-                        console.log(batch.items)
                         const rows = [];
 
                         const fetchPromises = batch.items.map(item => fetchFilteredProductsReadOnly(item.product));
                         try {
-                            const productDataList = await Promise.all(fetchPromises); // Wait for all product fetches
-                            console.log(productDataList)
+                            const productDataList = await Promise.all(fetchPromises); 
                             batch.items.forEach((item, index) => {
                                 const productData = productDataList[index];
                                 rows.push([
@@ -191,7 +189,6 @@ async function handleEditClick(event) {
                 _tableBody.innerHTML = '';
                 batch.items.forEach(async item => {
                     const _p = await fetchFilteredProductsReadOnly(item.product)
-                    console.log(_p)
                     const nRow = createRow(_p[0].id, _p[0].name, _p[0].unit.name, item.cost_price, _p[0].critical_level, item.quantity, item.defective)
                     _tableBody.appendChild(nRow);
                     updateTotalBU(_p[0].id);
@@ -579,7 +576,6 @@ async function batchPut() {
             items,
         };
 
-        console.log('Payload:', JSON.stringify(payload));
 
         // Send the PUT request
         const response = await fetch(`/api/batch-orders/${batchId}/`, {
@@ -596,7 +592,6 @@ async function batchPut() {
         }
 
         const data = await response.json();
-        console.log('Batch updated successfully:', data);
 
         // Optionally, reload or refresh the UI after success
         alert('Batch updated successfully!');

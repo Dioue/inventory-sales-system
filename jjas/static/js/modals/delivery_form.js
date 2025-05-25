@@ -131,7 +131,7 @@ createBtn.addEventListener('click', async () => {
 
 editBtn.forEach(el => {
     el.addEventListener('click', async (event) => {
-        const del = await fetchDelivery(event.target.dataset.id);
+        const del = await fetchDelivery(event.currentTarget.dataset.id);
         if (del) {
             formId.innerText = `DN-${del.id}`
             familyGuy();

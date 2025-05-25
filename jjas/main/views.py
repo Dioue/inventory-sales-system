@@ -468,7 +468,7 @@ class SKUComponentView(BaseComponentView):
 
         context.update({
             "header_crumbs": [
-                {"name": "Sales Analytics", "url": reverse("auth_sku_component")},
+                {"name": "Sales Report", "url": reverse("auth_sku_component")},
             ],
             "tables": {
                 "page_obj": {

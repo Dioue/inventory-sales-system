@@ -2,7 +2,7 @@
 const revenueOptions = {
   series: [],
   chart: {
-    height: "100%",
+    height: 250,
     type: "area",
     fontFamily: "Inter, sans-serif",
     dropShadow: { enabled: false },
@@ -83,15 +83,6 @@ async function fetchRevenueData(period = 'last7') {
 
     // ---- DOM UPDATES ----
     // Update sales total
-    const netTotal = data.net_total ?? 0;
-    const salesTotalEl = document.getElementById("revenue-sales");
-    if (salesTotalEl) {
-      salesTotalEl.textContent = Intl.NumberFormat('en-US', {
-        style: "currency",
-        currency: "Php",
-        minimumFractionDigits: 0,
-      }).format(netTotal);
-    }
 
     // Update subtitle
     const salesRangeEl = document.getElementById("revenue-sales-range");

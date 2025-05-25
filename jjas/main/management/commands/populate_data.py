@@ -84,19 +84,24 @@ class Command(BaseCommand):
         units = list(Unit.objects.all())
 
         categories = list(Category.objects.all())
-        critical_level = random.randint(5, 20)
-        quantity = random.randint(10, 500)
-        prod_status = '-'
-        if quantity < critical_level:
-            prod_status = 'Critical'
-        elif quantity == critical_level:
-            prod_status = 'Low'
-        else:
-            prod_status = 'Available'
+        
+        
 
         self.stdout.write('Creating products...')
-        products = [
-            Product(
+        products = []
+
+        for i in range(10000):
+            quantity = random.randint(10, 500)
+            critical_level = random.randint(5, 500)
+
+            if quantity < critical_level:
+                status = 'Critical'
+            elif quantity == critical_level:
+                status = 'Low'
+            else:
+                status = 'Available'
+
+            product = Product(
                 name=f"{fake.word().capitalize()}{i}",
                 code=f"P{str(i).zfill(5)}",
                 category=random.choice(categories),
@@ -108,10 +113,12 @@ class Command(BaseCommand):
                 cost_price=round(random.uniform(100, 500), 2),
                 selling_price=round(random.uniform(500, 1000), 2),
                 critical_level=critical_level,
-                status= prod_status,
+                status=status,
                 created_by=user
-            ) for i in range(10000)
-        ]
+            )
+
+            products.append(product)
+            
         Product.objects.bulk_create(products)
         reset_sequence(Product)
         products = list(Product.objects.all())

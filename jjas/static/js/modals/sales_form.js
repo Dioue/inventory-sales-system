@@ -203,7 +203,7 @@ let isSubmitHandlerAttached = false;
 updateBtn.forEach(el => {
     el.addEventListener('click', async (event) => {
         try {
-            const sale = await fetchSales(event.target.dataset.id);
+            const sale = await fetchSales(event.currentTarget.dataset.id);
             const dateParts = sale.date_issued.split('-');
             const formattedDate = `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}`;
             

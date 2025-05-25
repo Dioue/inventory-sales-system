@@ -13,6 +13,7 @@ const viewStatus = document.getElementById('view_status');
 const viewSelling = document.getElementById('view_selling');
 let _viewCategory = null;
 let _viewUnits = null;
+let _populatedProductView;
 
 // API
 const fetchProducts = async (id = null) => {
@@ -57,35 +58,45 @@ const fetchCategory = async (id = null) => {
     }
 }
 
+const fetchFilteredProductsReadOnly = async (query) => {
+    try {
+        const url = `/api/products-readonly/search/?query=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch search results: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching filtered products:', error);
+        return [];
+    }
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
     _viewCategory = await fetchCategory();
     _viewUnits = await fetchUnits();
 })
 
-
-
 // DOM controllers/listeners
 viewBtn.forEach(el => {
     el.addEventListener('click', async (event) => {
-        const id = event.target.dataset.id;
-        const product = await fetchProducts(id);
+        const id = event.currentTarget.dataset.id;
+        const product = await fetchFilteredProductsReadOnly(id);
         viewId.innerText = `PN-${id}`
 
         if (product) {
-            const _category = _viewCategory.find(cat => cat.id === product.category);
-            const _unit = _viewUnits.find(unit => unit.id === product.unit)
-
-            const costPrice = parseFloat(product.cost_price);
-            const sellingPrice = parseFloat(product.selling_price);
-            viewName.innerText = product.name || 'N/A';
-            viewCode.innerText = product.code || 'N/A';
-            viewCategory.innerText = `${_category.code} - ${_category.name}` || 'N/A';
-            viewApplication.innerText = product.application || 'N/A';
-            viewQuantity.innerText = `${product.quantity || '0'} ${_unit.name || ''}`;
+            const costPrice = parseFloat(product[0].cost_price);
+            const sellingPrice = parseFloat(product[0].selling_price);
+            viewName.innerText = product[0].name || 'N/A';
+            viewCode.innerText = product[0].code || 'N/A';
+            viewCategory.innerText = `${product[0].category.code} - ${product[0].category.name}` || 'N/A';
+            viewApplication.innerText = product[0].application || 'N/A';
+            viewQuantity.innerText = `${product[0].quantity || '0'} ${product[0].unit.name || ''}`;
             viewCost.innerText = `₱${!isNaN(costPrice) ? costPrice.toFixed(2) : '0.00'}`;
-            viewCritical.innerText = product.critical_level || 'N/A';
-            viewStatus.innerText = product.status || 'N/A';
-            viewSelling.innerText = `₱${!isNaN(sellingPrice) ? sellingPrice.toFixed(2) : '0.00'}`;  
+            viewCritical.innerText = product[0].critical_level || 'N/A';
+            viewStatus.innerText = product[0].status || 'N/A';
+            viewSelling.innerText = `₱${!isNaN(sellingPrice) ? sellingPrice.toFixed(2) : '0.00'}`;
+            _populatedProductView = true;
           } 
 
 
@@ -108,6 +119,9 @@ viewBtn.forEach(el => {
         };
 
         viewModalHide.addEventListener('click', handleModalHide);
-        new Modal(viewModal, modalOptions).show();  
+        if(_populatedProductView)
+        {
+            new Modal(viewModal, modalOptions).show();  
+        }
     })
 })

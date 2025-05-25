@@ -2845,6 +2845,10 @@ input:checked + .toggle-bg {
   text-align: center;
 }
 
+.text-right {
+  text-align: right;
+}
+
 .align-top {
   vertical-align: top;
 }

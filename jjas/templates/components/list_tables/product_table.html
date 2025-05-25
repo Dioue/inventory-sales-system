@@ -53,15 +53,15 @@
                                 <label for="checkbox-{{ obj.id }}" class="sr-only">checkbox</label>
                             </div>
                         </td>
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white" style="text-align: right !important;">
                             {{ obj.id|default:"--" }}
                         </th>
                         <td class="px-6 py-4">{{ obj.name|default:"--" }}</td>
                         <td class="px-6 py-4">{{ obj.code|default:"-" }}</td>
-                        <td class="px-6 py-4">{{ obj.quantity|default:"-" }}</td>
+                        <td class="px-6 py-4" style="text-align: right !important;">{{ obj.quantity|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.unit.name|lower|default:"-" }}</td>
-                        <td class="px-6 py-4">₱ {{ obj.selling_price|intcomma|default:"-" }}</td>
-                        <td class="px-6 py-4">{{ obj.critical_level|default:"-" }}</td>
+                        <td class="px-6 py-4" style="text-align: right !important;">₱ {{ obj.selling_price|intcomma|default:"-" }}</td>
+                        <td class="px-6 py-4" style="text-align: right !important;">{{ obj.critical_level|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.status|default:"-" }}</td>
                         <td class="flex items-center px-6 py-4">
                             <button type="button" class="product-view-btn font-medium text-blue-600 dark:text-blue-500 hover:underline" 

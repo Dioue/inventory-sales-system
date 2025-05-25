@@ -115,7 +115,7 @@ async function handleViewClick(event) {
                                 const productData = productDataList[index];
                                 rows.push([
                                     item.product,
-                                    productData[index].name,
+                                    productData.name,
                                     item.cost_price,
                                     item.quantity,
                                     item.defective

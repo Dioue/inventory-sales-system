@@ -56,8 +56,8 @@
                         </th>
                         <td class="px-6 py-4">{{ obj.product__code|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.product__category__name|default:"-" }}</td>
-                        <td class="px-6 py-4">{{ obj.total_quantity_sold|default:"-" }}</td>
-                        <td class="px-6 py-4">₱ {{ obj.product__selling_price|intcomma|default:"-" }}</td>                        
+                        <td class="px-6 py-4" style="text-align: right;">{{ obj.total_quantity_sold|default:"-" }}</td>
+                        <td class="px-6 py-4" style="text-align: right;">₱ {{ obj.product__selling_price|intcomma|default:"-" }}</td>                        
                         <td class="flex items-center px-6 py-4">
                             <button type="button" class="show-insight-btn font-medium text-blue-600 dark:text-blue-500 hover:underline"
                             data-id="{{obj.product__id}}">

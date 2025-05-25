@@ -383,8 +383,8 @@ const appendToTBody = (prodId, prodName, prodCost, prodSelling, prodQuantity, su
     newRow.className = "bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600";
     newRow.innerHTML = `
         <td class="product-name-${prodId} px-6 py-4 font-semibold text-gray-900 dark:text-white">${prodName}</td>
-        <td class="product-cost-${prodId} px-6 py-4 font-semibold text-gray-900 dark:text-white">₱${prodCost}</td>
-        <td class="product-selling-${prodId} px-6 py-4 font-semibold text-gray-900 dark:text-white">₱${prodSelling}
+        <td class="product-cost-${prodId} px-6 py-4 font-semibold text-gray-900 dark:text-white" style="text-align: right !important;">₱${prodCost}</td>
+        <td class="product-selling-${prodId} px-6 py-4 font-semibold text-gray-900 dark:text-white" style="text-align: right !important;">₱${prodSelling}
         </td>
         <td class="pl-6 py-4">
             <div class="relative flex items-start w-10/12 max-w-[11rem]">

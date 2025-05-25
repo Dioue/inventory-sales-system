@@ -53,12 +53,12 @@
                                 <label for="checkbox-{{ obj.id }}" class="sr-only">checkbox</label>
                             </div>
                         </td>
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white" style="text-align: right !important;">
                             {{ obj.id|default:"--" }}
                         </th>
                         <td class="px-6 py-4">{{ obj.supplier|default:"-" }}</td>
-                        <td class="px-6 py-4">₱ {{ obj.grand_total|intcomma|default:"-" }}</td>
-                        <td class="px-6 py-4">{{ obj.purchase_date|default:"-" }}</td>
+                        <td class="px-6 py-4 text-right" style="text-align: right !important;">₱ {{ obj.grand_total|intcomma|default:"-" }}</td>
+                        <td class="px-6 py-4" >{{ obj.purchase_date|default:"-" }}</td>
                         <td class="px-6 py-4">{{ obj.created_by|default:"system" }}</td>
                         <td class="flex items-center px-6 py-4">
                             <button type="button" data-id="{{obj.id}}" class="batch_view font-medium text-blue-600 dark:text-blue-500 hover:underline">

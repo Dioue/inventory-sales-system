@@ -15,7 +15,7 @@ from ...models import (
 fake = Faker()
 
 START_DATE = datetime(2025, 1, 1)
-END_DATE = datetime(2025, 5, 13)
+END_DATE = datetime(2025, 5, 27)
 
 def random_date():
     return START_DATE + timedelta(
@@ -90,7 +90,7 @@ class Command(BaseCommand):
         self.stdout.write('Creating products...')
         products = []
 
-        for i in range(10000):
+        for i in range(1000):
             quantity = random.randint(10, 500)
             critical_level = random.randint(5, 500)
 
@@ -126,7 +126,7 @@ class Command(BaseCommand):
         self.stdout.write('Creating batch orders...')
         batch_orders = []
         batch_items = []
-        for i in range(10000):
+        for i in range(843):
             date = random_date()
             bo = BatchOrder(
                 supplier=fake.company(),
@@ -165,7 +165,7 @@ class Command(BaseCommand):
         clients = list(Client.objects.all())
         sales_records = []
         sales_items = []
-        for i in range(10000):
+        for i in range(1256):
             date_issued = random_date()
             net_day = 30
             due_date = date_issued + timedelta(days=net_day)
@@ -210,15 +210,22 @@ class Command(BaseCommand):
         reset_sequence(SalesRecordItem)
 
         self.stdout.write('Creating deliveries...')
+        today = datetime.today().date()
+        end_of_last_month = today.replace(day=1) - timedelta(days=1)
+        start_of_last_month = end_of_last_month.replace(day=1)
+        filtered_sales_records = [
+            sr for sr in sales_records
+            if start_of_last_month <= sr.date_issued <= end_of_last_month
+        ]
         deliveries = [
             Delivery(
                 sale=sr,
                 delivery_date=sr.date_issued + timedelta(days=random.randint(1, 10)),
-                date_claimed=sr.date_issued + timedelta(days=random.randint(5, 15)),
+                date_claimed=min(sr.date_issued + timedelta(days=random.randint(5, 15)), today),  # Limit date_claimed to today's date
                 created_by=user,
                 date_added=sr.date_issued,
                 date_modified=sr.date_issued
-            ) for sr in sales_records
+            ) for sr in filtered_sales_records
         ]
         Delivery.objects.bulk_create(deliveries)
         reset_sequence(Delivery)

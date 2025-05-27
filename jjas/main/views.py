@@ -414,7 +414,7 @@ class SalesComponentView(BaseComponentView):
                     "search_id": page_obj_search_id
                 },
             },
-            "instance_type": "delivery",
+            "instance_type": "sales",
             "form_action": {
                 "delete": reverse('process_delete', args=['sales_record'])
             },

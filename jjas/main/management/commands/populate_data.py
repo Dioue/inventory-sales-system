@@ -126,27 +126,40 @@ class Command(BaseCommand):
         self.stdout.write('Creating batch orders...')
         batch_orders = []
         batch_items = []
+        batch_order_data = []  # Store temp data with items and total per batch
+
+        # Step 1: Create empty batch orders first
         for i in range(843):
             date = random_date()
             bo = BatchOrder(
                 supplier=fake.company(),
                 purchase_date=date,
-                grand_total=random.randint(1000, 250000),
+                grand_total=0,  # Temporary value, will be updated later
                 created_by=user,
                 date_added=date,
                 date_modified=date
             )
             batch_orders.append(bo)
+
         BatchOrder.objects.bulk_create(batch_orders)
         reset_sequence(BatchOrder)
+
+        # Step 2: Fetch created orders from DB
         batch_orders = list(BatchOrder.objects.all())
 
+        # Step 3: Create items & calculate totals
         for bo in batch_orders:
             item_count = random.randint(1, 5)
+            grand_total = 0
+            items = []
+            
             for _ in range(item_count):
                 product = random.choice(products)
                 quantity = random.randint(1, 20)
                 cost_price = product.cost_price
+                total_price = quantity * cost_price
+                grand_total += total_price
+                
                 item = BatchOrderItem(
                     batch=bo,
                     product=product,
@@ -157,9 +170,17 @@ class Command(BaseCommand):
                     date_added=bo.date_added,
                     date_modified=bo.date_modified
                 )
+                items.append(item)
                 batch_items.append(item)
+
+            batch_order_data.append((bo.id, grand_total))  # Store for later update
+
         BatchOrderItem.objects.bulk_create(batch_items)
         reset_sequence(BatchOrderItem)
+
+        # Step 4: Bulk update grand_total per BatchOrder
+        for bo_id, total in batch_order_data:
+            BatchOrder.objects.filter(id=bo_id).update(grand_total=total)
 
         self.stdout.write('Creating sales records...')
         clients = list(Client.objects.all())

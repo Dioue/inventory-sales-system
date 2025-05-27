@@ -1,7 +1,7 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework import viewsets, serializers
+from rest_framework import viewsets, serializers, status
 from .models import BatchOrder, BatchOrderItem
 from .serializers import BatchOrderSerializer, ActivityLogSerializer, ActivityLogFilter
 from rest_framework.decorators import action
@@ -60,6 +60,27 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         else:
             return Response([])
+
+    @action(detail=False, methods=['get'])
+    def exists(self, request):
+        name = request.query_params.get('name')
+        code = request.query_params.get('code')
+        product_id = request.query_params.get('id')  # Optional for updates
+
+        filters = Q()
+        if name:
+            filters |= Q(name__iexact=name)
+        if code:
+            filters |= Q(code__iexact=code)
+
+        if filters:
+            qs = Product.objects.filter(filters)
+            if product_id:
+                qs = qs.exclude(id=product_id)
+            exists = qs.exists()
+            return Response({'exists': exists})
+
+        return Response({'detail': 'Missing parameters'}, status=status.HTTP_400_BAD_REQUEST)
 
 class SalesViewSet(viewsets.ModelViewSet):
     queryset = SalesRecord.objects.prefetch_related('items').all()
@@ -151,11 +172,11 @@ class BatchOrderViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
-        log_activity(self.request.user, "CREATE", instance, f"Created a batch order {instance.name}")
+        log_activity(self.request.user, "CREATE", instance, f"Created a batch order {instance.id}")
 
     def perform_update(self, serializer):
         instance = serializer.save()
-        log_activity(self.request.user, "UPDATE", instance, f"Updated a batch order {instance.name}")
+        log_activity(self.request.user, "UPDATE", instance, f"Updated a batch order {instance.id}")
 
     @action(detail=False, methods=['get'])
     def max_id(self, request):
@@ -168,7 +189,12 @@ class SalesRecordViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        instance = serializer.save(created_by=self.request.user)
+        log_activity(self.request.user, "CREATE", instance, f"Created a sales order {instance.id}")
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_activity(self.request.user, "UPDATE", instance, f"Updated a sales order {instance.id}")
 
     @action(detail=False, methods=['get'])
     def max_id(self, request):

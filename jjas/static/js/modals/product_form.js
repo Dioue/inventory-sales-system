@@ -35,14 +35,22 @@ const fetchProductId = async (id) => {
     }
 }
 
+const checkProductExists = async (name, code, id = null) => {
+    const params = new URLSearchParams();
+    if (name) params.append('name', name);
+    if (code) params.append('code', code);
+    if (id) params.append('id', id);
 
+    const response = await fetch(`/api/products/exists/?${params.toString()}`);
+    if (!response.ok) throw new Error('Error checking for product existence.');
+    const data = await response.json();
+    return data.exists;
+};
 
 // DOM handlers
 productUpdateButton.forEach(el => {
     el.addEventListener('click', async (event) => {
         const targetProduct = await fetchProductId(event.currentTarget.dataset.id);
-        console.log(targetProduct)
-
         formId.innerText = `PN-${targetProduct.id}`;
         formName.value = targetProduct.name;
         formCode.value = targetProduct.code;
@@ -73,8 +81,6 @@ productUpdateButton.forEach(el => {
             })
         };
 
-       
-
         const handleModalHide = () => {
             new Modal(updateForm, modalOptions).hide();
             updateFormSubmit.removeEventListener('click', handleSubmit);
@@ -96,67 +102,61 @@ function sanitizer(input) {
 const productAPI = async (method, id = null) => {
     const name = sanitizer(formName.value);
     const code = sanitizer(formCode.value);
-    const application = sanitizer(formApplication.value); // Fixed the correct input for application
-    const description = sanitizer(formDescription.value); // Fixed the correct input for description
+    const application = sanitizer(formApplication.value);
+    const description = sanitizer(formDescription.value);
     const cost_price = formCost.value;
     const selling_price = formSelling.value;
-    const side = formSide.value; // Assuming there's a form input for side
+    const side = formSide.value;
     const category = formCategory.value;
     const unit = formUnit.value;
     const crit = formCrit.value;
 
-    // Validate mandatory fields
-    if (!name || !code || !category || !unit ) {
+    // Validations
+    if (!name || !code || !category || !unit) {
         generic_alert('Please fill in all required fields.');
         return;
-    } else if (cost_price > selling_price) {
-        generic_alert('Cost price cannot be greater than selling price.');
     }
 
-    // Construct the payload
-    const payload = {
-        name,
-        code,
-        application,
-        description,
-        cost_price,
-        selling_price,
-        side,
-        category,
-        unit,
-        critical_level: crit  
-    };
-
-    // Define the URL
-    const url = id ? `/api/products/${id}/` : '/api/products/';
+    if (parseFloat(cost_price) > parseFloat(selling_price)) {
+        generic_alert('Cost price cannot be greater than selling price.');
+        return;
+    }
 
     try {
-        // Configure headers and body
-        const headers = {
-            'X-CSRFToken': csrfToken,
+        const duplicateExists = await checkProductExists(name, code, id);
+        if (duplicateExists) {
+            generic_alert('Product name or code already exists.');
+            return;
+        }
+
+        const payload = {
+            name, code, application, description,
+            cost_price, selling_price, side,
+            category, unit, critical_level: crit
         };
 
-        const body = new FormData(); // Use FormData for handling image uploads
-        Object.keys(payload).forEach(key => {
-            if (payload[key] !== null && payload[key] !== undefined) {
-                body.append(key, payload[key]);
+        const url = id ? `/api/products/${id}/` : '/api/products/';
+        const headers = { 'X-CSRFToken': csrfToken };
+        const body = new FormData();
+
+        Object.entries(payload).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+                body.append(key, value);
             }
         });
 
-        // Fetch API call
         const response = await fetch(url, {
             method,
             headers,
-            body,
+            body
         });
 
-        if (!response.ok) {
-            throw new Error(`Failed to ${method === 'POST' ? 'create' : 'update'} the product.`);
-        }
+        if (!response.ok) throw new Error(`Failed to ${method === 'POST' ? 'create' : 'update'} the product.`);
 
-        generic_alert(`Product ${method === 'POST' ? 'created' : 'updated'} successfully.`)
+        generic_alert(`Product ${method === 'POST' ? 'created' : 'updated'} successfully.`, reload = true);
     } catch (error) {
-        generic_alert(error)
+        generic_alert(error.message || 'Something went wrong.');
     }
 };
+
 

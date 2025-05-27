@@ -81,7 +81,7 @@ class ProcessDeleteView(View):
         if hard_delete:
             SalesRecordItem.objects.filter(sales_record__in=records).delete()
             for record in records:
-                log_activity(user, "DELETE", record, f"Permanently deleted sales record: {record}")
+                log_activity(user, "DELETE", record, f"Permanently deleted sales record: {record.id}")
             records.delete()
         else:
             SalesRecordItem.objects.filter(sales_record__in=records).update(deleted_at=now(), is_deleted=True)
@@ -89,7 +89,7 @@ class ProcessDeleteView(View):
                 record.deleted_at = now()
                 record.is_deleted = True
                 record.save(update_fields=["deleted_at", "is_deleted"])
-                log_activity(user, "SOFT_DELETE", record, f"Removed sales record: {record.name}")
+                log_activity(user, "SOFT_DELETE", record, f"Removed sales record: {record.id}")
 
     def _delete_batch_orders(self, user, selected_items, hard_delete):
         orders = BatchOrder.objects.filter(pk__in=selected_items)

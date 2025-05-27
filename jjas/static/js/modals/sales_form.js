@@ -222,8 +222,10 @@ updateBtn.forEach(el => {
             formZip.value = sale.client.zip_code;
 
             sale.items.forEach(async item => {
+                console.log(item)
                 const prod = await fetchFilteredProducts(item.product)
-                appendToTBody(item.product, item.product_name, prod[0].cost_price, prod[0].selling_price, prod[0].quantity, prod[0].surcharge)
+                console.log(prod)
+                appendToTBody(item.product, item.product_name, prod[0].cost_price, prod[0].selling_price, item.quantity, prod[0].surcharge)
             })
 
             const handleSubmit = async () => {

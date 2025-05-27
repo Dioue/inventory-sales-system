@@ -18,7 +18,7 @@ document.getElementById('confirm_product_submit').addEventListener('click', asyn
 
         if (response.ok) {
             const responseData = await response.json();
-            generic_alert(`Product ${responseData.name} created successfully!`);
+            generic_alert(`Product ${responseData.name} created successfully!`, reload=true);
             document.getElementById('product_create_form').reset();
         } else {
             const errorData = await response.json();

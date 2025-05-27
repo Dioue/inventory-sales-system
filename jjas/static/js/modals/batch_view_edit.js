@@ -115,7 +115,7 @@ async function handleViewClick(event) {
                                 const productData = productDataList[index];
                                 rows.push([
                                     item.product,
-                                    productData.name,
+                                    productData[0].name,
                                     item.cost_price,
                                     item.quantity,
                                     item.defective
@@ -588,7 +588,7 @@ async function batchPut() {
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to update batch: ${response.status}`);
+            throw new Error(`Failed to update batch: ${response}`);
         }
 
         const data = await response.json();

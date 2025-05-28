@@ -3,7 +3,7 @@ from .utils import ProcessDeleteView
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from .api import ProductViewSet, UnitViewSet, BatchOrderViewSet, CategoryViewSet, SalesRecordViewSet, DeliveryViewSet, ProductReadOnlyViewSet, ActivityLogViewSet
+from .api import ProductViewSet, UnitViewSet, BatchOrderViewSet, CategoryViewSet, SalesRecordViewSet, DeliveryViewSet, ProductReadOnlyViewSet, ActivityLogViewSet, ClientViewSet, SupplierViewSet
 from rest_framework.routers import DefaultRouter
 from .views import ProductForecastAPIView
 
@@ -17,6 +17,8 @@ router.register(r'sales-records', SalesRecordViewSet, basename='salesrecord')
 router.register(r'delivery', DeliveryViewSet, basename='delivery')
 router.register(r'products-readonly', ProductReadOnlyViewSet, basename='products-readonly')
 router.register(r'activity-logs', ActivityLogViewSet, basename='activitylog')
+router.register(r'client', ClientViewSet, basename='client')
+router.register(r'supplier', SupplierViewSet, basename='supplier')
 
 urlpatterns = [
     path('', views.LoginView.as_view(), name='login_view'),
@@ -30,6 +32,8 @@ urlpatterns = [
     path('delivery/', views.DeliveryComponentView.as_view(), name='auth_delivery_component'),
     path('product-analytics/', views.SKUComponentView.as_view(), name='auth_sku_component'),
     path('sales-insights/', views.InsightsComponentView.as_view(), name='auth_insights_component'),
+    path('client/', views.ClientComponentView.as_view(), name='auth_client_component'),
+    path('supplier/', views.SupplierComponentView.as_view(), name='auth_supplier_component'),
     path('api/volume-stats/', views.combined_stats, name='volume-stats'),
     path('api/revenue-expense/', views.RevenueExpenseReportAPIView.as_view(), name='revenue-expense-api'),
     path('api/top-products/', views.TopProductsAPIView.as_view(), name='top-products'),

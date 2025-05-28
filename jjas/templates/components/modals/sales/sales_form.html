@@ -21,10 +21,13 @@
             {% csrf_token %}
             <div class="grid gap-4 mb-4 grid-cols-10">
                 <div class="col-span-4">
-                    <label for="sales-form-client" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Company Name<span class="text-red-400">*</span></label>
-                    <input id="sales-form-client" type="text" name="client" 
-                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                    placeholder="Enter company name" required="true" maxlength="60" oninput="toTitleCase(this)">
+                    <label for="sales-form-client" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Company Name<span class="text-red-400">*</span>
+                    </label>
+                    <select id="sales-form-client" name="client" required
+                    class="shadow-md rounded-lg w-100 bg-white text-sm focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option value="" disabled selected>Select a client</option>
+                    </select>
                 </div>
                 <div class="relative max-w-sm col-span-2">
                     <label for="sales-form-issued" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date issued<span class="text-red-400">*</span></label>
@@ -36,7 +39,7 @@
                     <div class="col-span-2 mr-4">
                         <label for="sales-form-net" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Net day<span class="text-red-400">*</span></label>
                         <select id="sales-form-net"  name="net_day" class="shadow-md rounded-lg bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                            <option value="" selected disabled>Select a net day</option>
+                            <option value="" selected disabled>Select a term</option>
                                 <option value="30" sele>30 days</option>
                                 <option value="45" sele>45 days</option>
                                 <option value="60" sele>60 days</option>
@@ -51,36 +54,6 @@
                             <option value="true">Paid</option>
                         </select>
                     </div>
-                </div>
-                <div class="col-span-4">
-                    <label for="sales-form-address-line-1" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address line 1<span class="text-red-400">*</span></label>
-                    <input id="sales-form-address-line-1" type="text" name="address_line_1" 
-                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                    placeholder="e.g., house or building number, street name" required="true" maxlength="120">
-                </div>
-                <div class="col-span-4">
-                    <label for="sales-form-address-line-2" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address line 2<span class="font-italic text-gray-600 text-xs"> (Optional)</span></label>
-                    <input id="sales-form-address-line-2" type="text" name="address_line_2" 
-                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                    placeholder="e.g., apartment, suite, or floor numbers, or a PO Box number" required="true" maxlength="120">
-                </div>
-                <div class="col-span-3">
-                    <label for="sales-form-city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">City<span class="text-red-400">*</span></label>
-                    <input id="sales-form-city" type="text" name="city" 
-                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                    placeholder="e.g., Carmona City" required="true" maxlength="60" oninput="toTitleCase(this)">
-                </div>
-                <div class="col-span-3">
-                    <label for="sales-form-province" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Province<span class="text-red-400">*</span></label>
-                    <input id="sales-form-province" type="text" name="province" 
-                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                    placeholder="e.g., Cavite" required="true" maxlength="60" oninput="toTitleCase(this)">
-                </div>
-                <div class="col-span-2">
-                    <label for="sales-form-zip" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Zip Code<span class="text-red-400">*</span></label>
-                    <input id="sales-form-zip" type="text" name="zip_code" 
-                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                    placeholder="e.g., 4116" required="true" maxlength="4" oninput="sanitizeZipCode(this)">
                 </div>
                 <div class="bg-white dark:bg-gray-900 col-span-10 relative border-t border-black mt-5 pt-2">
                     <div class="grid grid-cols-10 gap-4 mb-2">

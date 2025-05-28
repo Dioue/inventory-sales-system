@@ -9,7 +9,7 @@ from ...models import (
     Category, Client, Unit, Product,
     BatchOrder, BatchOrderItem,
     SalesRecord, SalesRecordItem,
-    Delivery
+    Delivery, Supplier
 )
 
 fake = Faker()
@@ -46,39 +46,52 @@ class Command(BaseCommand):
         Unit.all_objects.all().delete()
         Client.all_objects.all().delete()
         Category.all_objects.all().delete()
+        Supplier.all_objects.all().delete()
 
         self.stdout.write(self.style.WARNING('All existing records deleted.'))
 
         user = User.objects.first()
 
         self.stdout.write('Creating categories...')
+        category_names = [
+            "Engine Components", "Suspension", "Braking System", "Transmission", "Electrical", 
+            "Cooling System", "Exhaust", "Filters", "Steering", "Lighting"
+        ]
         categories = [
-            Category(
-                code=f"CAT{str(i).zfill(4)}",
-                name=fake.word(),
-                created_by=user
-            ) for i in range(1000)
+            Category(code=f"CAT{str(i).zfill(4)}", name=name, created_by=user)
+            for i, name in enumerate(category_names)
         ]
         Category.objects.bulk_create(categories)
         reset_sequence(Category)
 
+        self.stdout.write('Creating suppliers...')
+        supplier_name = [
+            "Alibaba", "CNFastwin", "HBHaolu", "AutoPartsHub", "GlobalParts",
+        ]
+        supplier = [
+            Supplier(name=f"{str(i)}", address=fake.address(), contact_number=fake.phone_number(), email=fake.email(), website=fake.url(), created_by=user)
+            for i in supplier_name
+        ]
+        Supplier.objects.bulk_create(supplier)
+        reset_sequence(Supplier)
+
         self.stdout.write('Creating clients...')
         clients = [
             Client(
-                name=fake.name(),
+                name=f"{fake.company()} Auto Parts",
                 address_line_1=fake.street_address(),
                 address_line_2=fake.secondary_address(),
                 city=fake.city(),
                 province=fake.state(),
                 zip_code=fake.zipcode(),
                 created_by=user
-            ) for _ in range(1000)
+            ) for _ in range(300)
         ]
         Client.objects.bulk_create(clients)
         reset_sequence(Client)
 
         self.stdout.write('Creating units...')
-        units = [Unit(name=unit, created_by=user) for unit in ['Piece', 'Box', 'Pack', 'Set']]
+        units = [Unit(name=unit, created_by=user) for unit in ['Piece', 'Box', 'Set', 'Roll', 'Liter', 'Gallon']]
         Unit.objects.bulk_create(units)
         reset_sequence(Unit)
         units = list(Unit.objects.all())
@@ -89,10 +102,49 @@ class Command(BaseCommand):
 
         self.stdout.write('Creating products...')
         products = []
+        used_names = set()
 
-        for i in range(1000):
-            quantity = random.randint(10, 500)
-            critical_level = random.randint(5, 500)
+        part_names = [
+            "Brake Pad", "Oil Filter", "Air Filter", "Alternator", "Timing Belt",
+            "Fuel Injector", "Radiator", "Shock Absorber", "Spark Plug", "Clutch Disc",
+            "Transmission Gear", "Steering Rack", "Drive Shaft", "Wheel Bearing", "CV Joint",
+            "Engine Mount", "Fuel Pump", "Water Pump", "Ignition Coil", "Serpentine Belt",
+            "Thermostat", "Control Arm", "Ball Joint", "Brake Caliper", "Camshaft",
+            "Crankshaft", "Piston Ring", "Head Gasket", "Valve Cover", "Flywheel",
+            "Throttle Body", "Oxygen Sensor", "Mass Air Flow Sensor", "Power Steering Pump", "Battery Cable",
+            "Strut Assembly", "ABS Sensor", "Tie Rod End", "Exhaust Manifold", "Muffler",
+            "Catalytic Converter", "Timing Chain", "Blower Motor", "AC Compressor", "Radiator Hose",
+            "Fan Clutch", "Brake Rotor", "Windshield Wiper Motor", "Fuel Tank Cap", "Air Intake Hose"
+        ]
+
+        applications = [
+            "Toyota",
+            "Audi",
+            "Honda",
+            "Ford",
+            "Chevrolet",
+            "BMW",
+            "Mercedes-Benz",
+            "Hyundai",
+            "Nissan",
+            "Kia",
+            "Volkswagen",
+            "Subaru",
+            "Mazda",
+            "Lexus",
+            "Jeep",
+            "Tesla",
+            "Porsche",
+            "Land Rover",
+            "Volvo",
+            "Mitsubishi"
+        ]
+
+        selected_parts = random.sample(part_names, 50)
+
+        for i, part in enumerate(selected_parts):
+            quantity = random.randint(5, 200)
+            critical_level = random.randint(5, 50)
 
             if quantity < critical_level:
                 status = 'Critical'
@@ -101,24 +153,27 @@ class Command(BaseCommand):
             else:
                 status = 'Available'
 
+            name = f"{part}"  # Ensure uniqueness
+            code = f"P{str(i+1).zfill(5)}"
+
             product = Product(
-                name=f"{fake.word().capitalize()}{i}",
-                code=f"P{str(i).zfill(5)}",
-                category=random.choice(categories),
-                unit=random.choice(units),
-                application=fake.word(),
-                side=fake.word(),
-                description=fake.text(max_nb_chars=100),
+                name=name,
+                code=code,
+                category=random.choice(categories),  # Ensure 'categories' is defined
+                unit=random.choice(units),          # Ensure 'units' is defined
+                application=random.choice(applications),
+                side=random.choice(['Front', 'Rear']),
+                description=f"A high-quality {part.lower()} suitable for various models.",
                 quantity=quantity,
                 cost_price=round(random.uniform(100, 500), 2),
                 selling_price=round(random.uniform(500, 1000), 2),
                 critical_level=critical_level,
                 status=status,
-                created_by=user
+                created_by=user                    # Ensure 'user' is defined in the context
             )
 
             products.append(product)
-            
+        
         Product.objects.bulk_create(products)
         reset_sequence(Product)
         products = list(Product.objects.all())
@@ -127,12 +182,13 @@ class Command(BaseCommand):
         batch_orders = []
         batch_items = []
         batch_order_data = []  # Store temp data with items and total per batch
+        suppliers = ["Alibaba", "CNFastwin", "HBHaolu"]
 
         # Step 1: Create empty batch orders first
         for i in range(843):
             date = random_date()
             bo = BatchOrder(
-                supplier=fake.company(),
+                supplier=random.choice(suppliers),
                 purchase_date=date,
                 grand_total=0,  # Temporary value, will be updated later
                 created_by=user,
@@ -165,7 +221,7 @@ class Command(BaseCommand):
                     product=product,
                     quantity=quantity,
                     cost_price=cost_price,
-                    defective=random.randint(0, 2),
+                    defective=random.randint(0, 3),
                     created_by=user,
                     date_added=bo.date_added,
                     date_modified=bo.date_modified
@@ -211,7 +267,8 @@ class Command(BaseCommand):
             for _ in range(item_count):
                 product = random.choice(products)
                 quantity = random.randint(1, 10)
-                surcharge = Decimal(str(round(random.uniform(0, 100), 2)))
+                base_total = product.selling_price * quantity
+                surcharge = Decimal(str(round(float(base_total) * random.uniform(0.05, 0.25), 2)))
                 item_total = product.selling_price * quantity + surcharge
                 total += item_total
                 item = SalesRecordItem(
@@ -241,8 +298,8 @@ class Command(BaseCommand):
         deliveries = [
             Delivery(
                 sale=sr,
-                delivery_date=sr.date_issued + timedelta(days=random.randint(1, 10)),
-                date_claimed=min(sr.date_issued + timedelta(days=random.randint(5, 15)), today),  # Limit date_claimed to today's date
+                delivery_date=sr.date_issued + timedelta(days=random.choice([1, 2, 3, 5, 7])),
+                date_claimed=min(sr.date_issued + timedelta(days=random.choice([1, 2, 3, 5, 7])), today),  # Limit date_claimed to today's date
                 created_by=user,
                 date_added=sr.date_issued,
                 date_modified=sr.date_issued

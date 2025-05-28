@@ -19,6 +19,7 @@ let allProducts = null;
 let allUnits = null;
 let allCategory = null;
 let allSales = null;
+let clientsFilled;
 
 // Global form control
 const formId = document.querySelector('#sales-form-id');
@@ -26,11 +27,6 @@ const formClient = document.querySelector("#sales-form-client");
 const formIssued = document.querySelector('#sales-form-issued');
 const formNet = document.querySelector("#sales-form-net");
 const formPayment = document.querySelector('#sales-form-status');
-const formAdressOne = document.querySelector('#sales-form-address-line-1');
-const formAdressTwo = document.querySelector('#sales-form-address-line-2');
-const formCity = document.querySelector('#sales-form-city');
-const formProvince = document.querySelector('#sales-form-province');
-const formZip = document.querySelector('#sales-form-zip');
 
 function debounce(fn, delay) {
     let timeout;
@@ -42,6 +38,20 @@ function debounce(fn, delay) {
 
 
 // API Fetch
+const fetchClient = async (params = null) => {
+    try {
+        const response = (params == null) ?  await fetch(`/api/client/`): await fetch(`/api/client/${params}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch client (ID: ${params}): ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching client:', error);
+        throw error;
+    }
+}
+
+
 const fetchSales = async (params = null) => {
     try {
         const url = params === null ? `/api/sales-records/` : `/api/sales-records/${params}/`;
@@ -157,6 +167,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     allProducts = await fetchProducts();
     allUnits = await fetchUnits();
     allCategory = await fetchCategory();
+
+    clientsFilled = false;
+    const clients = await fetchClient();
+    clients.results.forEach(client => {
+        const option = document.createElement("option");
+        option.value = client.id;
+        option.textContent = client.name;
+        formClient.appendChild(option);
+    });
+
+    clientsFilled = true;
 });
 
 
@@ -195,7 +216,9 @@ createBtn.addEventListener('click', async () => {
 
     submitBtn.addEventListener('click', handleSubmit);
     salesFormHide.addEventListener('click', handleModalHide, { once: true });
-    new Modal(salesForm, modalOptions).show();
+    if(clientsFilled){
+        new Modal(salesForm, modalOptions).show();
+    }
 })
 
 let isSubmitHandlerAttached = false;
@@ -211,20 +234,14 @@ updateBtn.forEach(el => {
             // reset the form
             hitTheQuan();
             formId.innerText = `SN-${sale.id}`;
-            formClient.value = sale.client.name;
+            formClient.value = sale.client;
+            formClient.disabled = true;
             formIssued.value = formattedDate;
             formNet.value = sale.net_day;
             formPayment.value = sale.status;
-            formAdressOne.value = sale.client.address_line_1;
-            formAdressTwo.value = sale.client.address_line_2;
-            formCity.value = sale.client.city;
-            formProvince.value = sale.client.province;
-            formZip.value = sale.client.zip_code;
 
             sale.items.forEach(async item => {
-                console.log(item)
                 const prod = await fetchFilteredProducts(item.product)
-                console.log(prod)
                 appendToTBody(item.product, item.product_name, prod[0].cost_price, prod[0].selling_price, item.quantity, prod[0].surcharge)
             })
 
@@ -260,7 +277,9 @@ updateBtn.forEach(el => {
             }
 
             salesFormHide.addEventListener('click', handleModalHide, { once: true });
-            new Modal(salesForm, modalOptions).show();
+            if(clientsFilled) {
+                new Modal(salesForm, modalOptions).show();
+            }
         } catch (error) {
             console.error('Error fetching sale data:', error);
         }
@@ -274,11 +293,6 @@ const hitTheQuan = () => {
     formIssued.value = '';
     formNet.value = '';
     formPayment.value = '';
-    formAdressOne.value = '';
-    formAdressTwo.value = '';
-    formCity.value = '';
-    formProvince.value = ''; 
-    formZip.value ='';
     formTbody.innerHTML = '';
 }
 
@@ -552,9 +566,6 @@ const salesAPI = async (mode, id = null) => {
     } else if (formNet.value === '' || formPayment.value === ''){
         generic_alert("Please select a net day.")
         return;
-    } else if (!formAdressOne.value || !formCity.value || !formProvince.value || !formZip.value) {
-        generic_alert("Please fill out all required address fields")
-        return;
     } else if (formTbody.rows.length === 0) { // Check if tbody has rows
         generic_alert("Please add at least one product to the sales record.");
         return;
@@ -585,26 +596,15 @@ const salesAPI = async (mode, id = null) => {
         });
     });
 
-
     // Construct the payload
     const payload = {
-        client: {
-            name: formClient.value.trim(),
-            address_line_1: formAdressOne.value.trim(),
-            address_line_2: formAdressTwo.value.trim(),
-            city: formCity.value.trim(),
-            province: formProvince.value.trim(),
-            zip_code: formZip.value.trim(),
-        },
+        client: parseInt(formClient.value),
         date_issued: formatDate(formIssued.value.trim()),
         net_day: parseInt(formNet.value) || 30,
         status: formPayment.value === "true",
         total: grand_total,
         items,
     };
-
-    // Log the payload for debugging
-    console.log('Payload:', payload);
 
     try {
         const response = await fetch(url, {
@@ -618,7 +618,6 @@ const salesAPI = async (mode, id = null) => {
     
         if (response.ok) {
             const data = await response.json();
-            console.log('API Response Submitted:', data);
             generic_alert('Sales record successfully saved.', reload = true);
         } else {
             let errorText = '';
@@ -628,12 +627,10 @@ const salesAPI = async (mode, id = null) => {
             } catch {
                 errorText = await response.json();
             }
-            console.error('API Error:', errorText);
             generic_alert('Error saving sales record. Please check your input.');
         }        
     
     } catch (error) {
-        console.error(error);
         generic_alert('An unexpected error occurred.');
     }
     

@@ -68,3 +68,29 @@ const dateToday = () => {
     let dt = new Date().toISOString().split('T')[0];
     return dt
 };
+
+
+function validatePhoneNumber(input) {
+    // Remove all non-digit characters
+    input.value = input.value.replace(/\D/g, '');
+
+    // Limit to 10 digits
+    if (input.value.length > 10) {
+        input.value = input.value.slice(0, 10);
+    }
+}
+
+
+const isValidEmail = (email) => {
+    // Simple but effective email validation
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+const isValidURL = (url) => {
+    try {
+        new URL(url);
+        return true;
+    } catch (_) {
+        return false;
+    }
+};

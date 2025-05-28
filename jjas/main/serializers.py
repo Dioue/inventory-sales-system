@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Unit, Category, BatchOrder, BatchOrderItem, SalesRecord, SalesRecordItem, Delivery, Client, DailySales, WeeklySales, MonthlySales
+from .models import Product, Unit, Category, BatchOrder, BatchOrderItem, SalesRecord, SalesRecordItem, Delivery, Client, Supplier, DailySales, WeeklySales, MonthlySales
 from datetime import timedelta, datetime
 from decimal import Decimal
 from rest_framework import serializers
@@ -19,7 +19,16 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name', 'code']
+        
+class SupplierSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Supplier
+        fields = ['name', 'address', 'contact_number', 'email', 'website']
 
+class ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = ['id', 'name', 'address_line_1', 'address_line_2', 'city', 'province', 'zip_code']
 
 class ProductSerializer(serializers.ModelSerializer):
     unit = serializers.PrimaryKeyRelatedField(queryset=Unit.objects.all())
@@ -195,7 +204,7 @@ class SalesRecordItemSerializer(serializers.ModelSerializer):
 
 class SalesRecordSerializer(serializers.ModelSerializer):
     items = SalesRecordItemSerializer(many=True)
-    client = ClientSerializer()
+    client = serializers.PrimaryKeyRelatedField(queryset=Client.objects.all())
 
     class Meta:
         model = SalesRecord
@@ -205,19 +214,8 @@ class SalesRecordSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        client_data = validated_data.pop('client')
         items_data = validated_data.pop('items')
-
-        client, created = Client.objects.get_or_create(
-            name=client_data['name'],
-            defaults=client_data
-        )
-        if not created:
-            for key, value in client_data.items():
-                setattr(client, key, value)
-            client.save()
-
-        sales_record = SalesRecord.objects.create(client=client, **validated_data)
+        sales_record = SalesRecord.objects.create(**validated_data)
 
         for item_data in items_data:
             SalesRecordItem.objects.create(sales_record=sales_record, **item_data)
@@ -226,13 +224,7 @@ class SalesRecordSerializer(serializers.ModelSerializer):
         return sales_record
 
     def update(self, instance, validated_data):
-        client_data = validated_data.pop('client', None)
         items_data = validated_data.pop('items', [])
-
-        if client_data:
-            for field, value in client_data.items():
-                setattr(instance.client, field, value)
-            instance.client.save()
 
         for field, value in validated_data.items():
             setattr(instance, field, value)
@@ -242,7 +234,6 @@ class SalesRecordSerializer(serializers.ModelSerializer):
         for item_data in items_data:
             SalesRecordItem.objects.create(sales_record=instance, **item_data)
 
-        # Recalculate aggregates (unchanged)
         self.update_sales_aggregates(instance)
         return instance
 

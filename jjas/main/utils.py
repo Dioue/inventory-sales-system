@@ -1,4 +1,4 @@
-from .models import (BatchOrder, BatchOrderItem, Category, Delivery, Product, SalesRecord, SalesRecordItem, Client, Unit)
+from .models import (BatchOrder, BatchOrderItem, Category, Delivery, Product, SalesRecord, SalesRecordItem, Client, Unit, Supplier)
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.shortcuts import render, redirect, reverse
@@ -47,7 +47,9 @@ class ProcessDeleteView(View):
             "sales_record": SalesRecord,
             "delivery": Delivery,
             "batch_order": BatchOrder,
-            "batch_order_item": BatchOrderItem
+            "batch_order_item": BatchOrderItem,
+            "client": Client,
+            "supplier": Supplier,
         }
 
         model_key = kwargs.get("model_key")

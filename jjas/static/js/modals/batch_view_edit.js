@@ -588,7 +588,16 @@ async function batchPut() {
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to update batch: ${response}`);
+            let errorMessage = `Failed to update batch. Status: ${response.status} ${response.statusText}`;
+            
+            try {
+                const errorBody = await response.text();  // or response.json() if you expect JSON
+                errorMessage += ` | Response: ${errorBody}`;
+            } catch (e) {
+                errorMessage += ' | Failed to read response body.';
+            }
+
+            throw new Error(errorMessage);
         }
 
         const data = await response.json();

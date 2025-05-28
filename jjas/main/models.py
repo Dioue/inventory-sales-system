@@ -70,6 +70,21 @@ class Category(SystemGeneratedData):
         ordering = ["-date_added"]
         verbose_name_plural = "Categories"
 
+# Supplier Model
+class Supplier(SystemGeneratedData):
+    name = models.CharField(max_length=255, unique=True)
+    address = models.TextField(blank=True, default="")
+    contact_number = models.CharField(max_length=20, blank=True, default="")
+    email = models.CharField(blank=True, default="")
+    website = models.CharField(blank=True, default="")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name_plural = "Suppliers"
+
 
 # Unit of Measure Model
 class Unit(SystemGeneratedData):
@@ -111,7 +126,7 @@ class Product(SystemGeneratedData):
 class BatchOrder(SystemGeneratedData):
     supplier = models.CharField(max_length=255, blank=True, default="")
     purchase_date = models.DateField(default=now)
-    grand_total = models.DecimalField(max_digits=13, decimal_places=2)
+    grand_total = models.DecimalField(max_digits=19, decimal_places=2)
     
 
     def __str__(self):
@@ -151,9 +166,6 @@ class Client(SystemGeneratedData):
     city = models.CharField(max_length=100)
     province = models.CharField(max_length=100)
     zip_code = models.CharField(max_length=20)
-
-    # Additional client info (e.g. name, email, etc. can be added as needed)
-    name = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name

@@ -10,7 +10,7 @@ from django.views.generic import TemplateView, View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Count, FloatField
 from .utils import request_user_info
-from .models import (BatchOrder, BatchOrderItem, Category, Delivery, Product, SalesRecord, SalesRecordItem, Unit)
+from .models import (BatchOrder, BatchOrderItem, Category, Delivery, Product, SalesRecord, SalesRecordItem, Unit, Client, Supplier)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -216,6 +216,112 @@ class CategoryComponentView(BaseComponentView):
 
             "header_crumbs": [
                 {"name": "Category List", "url": reverse("auth_category_component")},
+            ]
+        })
+
+        return context
+
+    
+class ClientComponentView(BaseComponentView):
+    template_name = 'pages/client_list.html'
+
+    @method_decorator(never_cache)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+
+        order_by_field = self.request.GET.get("order_by", "id")
+        order_direction = self.request.GET.get("direction", "asc")
+        order_prefix = "-" if order_direction == "desc" else ""
+
+
+        client = Client.objects.all().order_by(f"{order_prefix}{order_by_field}")
+        page_obj_search_id = "_client"
+        search_query = self.request.GET.get(page_obj_search_id, "")
+        _, page_obj = self.apply_search_and_pagination(client, search_query, ["name", "city", "province", "zip_code"])
+
+        context.update({
+            "tables": {
+                "page_obj": {
+                    "data": page_obj,
+                    "fields": [
+                    {"name": "Client Name", "key": "name"},
+                    {"name": "Address 1", "key": "address_line_1"},
+                    {"name": "Address 2", "key": "address_line_2"},
+                    {"name": "City", "key": "city"},
+                    {"name": "Province", "key": "province"},
+                    {"name": "Zip Code", "key": "zip_code"},
+                ],
+                    "fill_count": 7,
+                    "search_id": page_obj_search_id
+                },
+            },
+            "instance_type": "client",
+            "form_action": {
+                "delete": reverse('process_delete', args=['client'])
+            },
+
+            "content_label":{
+                "add": "Add a client",
+                "search_query": search_query,
+            },
+
+            "header_crumbs": [
+                {"name": "Client List", "url": reverse("auth_client_component")},
+            ]
+        })
+
+        return context
+    
+class SupplierComponentView(BaseComponentView):
+    template_name = 'pages/supplier_list.html'
+
+    @method_decorator(never_cache)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        order_by_field = self.request.GET.get("order_by", "id")
+        order_direction = self.request.GET.get("direction", "asc")
+        order_prefix = "-" if order_direction == "desc" else ""
+
+        supplier = Supplier.objects.all().order_by(f"{order_prefix}{order_by_field}")
+        page_obj_search_id = "_supplier"
+        search_query = self.request.GET.get(page_obj_search_id, "")
+        _, page_obj = self.apply_search_and_pagination(supplier, search_query, ["name", "city", "province", "zip_code"])
+
+        context.update({
+            "tables": {
+                "page_obj": {
+                    "data": page_obj,
+                    "fields": [
+                    {"name": "Supplier Name", "key": "name"},
+                    {"name": "Address", "key": "address"},
+                    {"name": "Contact", "key": "contact_number"},
+                    {"name": "Email", "key": "email"},
+                    {"name": "Website", "key": "website"},
+                ],
+                    "fill_count": 8,
+                    "search_id": page_obj_search_id
+                },
+            },
+            "instance_type": "supplier",
+            "form_action": {
+                "delete": reverse('process_delete', args=['supplier'])
+            },
+
+            "content_label":{
+                "add": "Add a supplier",
+                "search_query": search_query,
+            },
+
+            "header_crumbs": [
+                {"name": "Supplier List", "url": reverse("auth_supplier_component")},
             ]
         })
 

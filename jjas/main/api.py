@@ -11,11 +11,11 @@ from .utils import log_activity
 from .models import ActivityLog
 
 from .models import (
-    Product, Unit, Category, SalesRecord, Delivery, BatchOrder, BatchOrderItem
+    Product, Unit, Category, SalesRecord, Delivery, BatchOrder, BatchOrderItem, Client, Supplier
 )
 from .serializers import (
     ProductSerializer, UnitSerializer, CategorySerializer, SalesRecordSerializer,
-    DeliverySerializer, ProductDetailSerializer, BatchOrderSerializer
+    DeliverySerializer, ProductDetailSerializer, BatchOrderSerializer, ClientSerializer, SupplierSerializer
 )
 
 
@@ -162,9 +162,79 @@ class CategoryViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(categories, many=True)
             return Response(serializer.data)
         return Response([])
+
+class SupplierViewSet(viewsets.ModelViewSet):
+    queryset = Supplier.objects.all()
+    serializer_class = SupplierSerializer
+    permission_classes = [IsAuthenticated]
     
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        log_activity(self.request.user, "CREATE", instance, f"Created a supplier {instance.name}")
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_activity(self.request.user, "UPDATE", instance, f"Updated a supplier {instance.name}")
 
+    @action(detail=False, methods=['get'])
+    def max_id(self, request):
+        max_id = Supplier.objects.aggregate(Max('id'))['id__max'] or 0
+        return Response({'max_id': max_id})
+    
+    @action(detail=False, methods=['get'])
+    def search(self, request):
+        query = request.query_params.get('query', '').strip()
+        if query:
+            try:
+                query_id = int(query)
+            except ValueError:
+                query_id = None
+
+            filters = Q(name__icontains=query) | Q(code__icontains=query)
+            if query_id is not None:
+                filters |= Q(id=query_id)
+
+            supplier = Supplier.objects.filter(filters)
+            serializer = self.get_serializer(Supplier, many=True)
+            return Response(serializer.data)
+        return Response([])    
+
+class ClientViewSet(viewsets.ModelViewSet):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        log_activity(self.request.user, "CREATE", instance, f"Created a client {instance.name}")
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        log_activity(self.request.user, "UPDATE", instance, f"Updated a client {instance.name}")
+
+    @action(detail=False, methods=['get'])
+    def max_id(self, request):
+        max_id = Client.objects.aggregate(Max('id'))['id__max'] or 0
+        return Response({'max_id': max_id})
+    
+    @action(detail=False, methods=['get'])
+    def search(self, request):
+        query = request.query_params.get('query', '').strip()
+        if query:
+            try:
+                query_id = int(query)
+            except ValueError:
+                query_id = None
+
+            filters = Q(name__icontains=query) | Q(code__icontains=query)
+            if query_id is not None:
+                filters |= Q(id=query_id)
+
+            client = Client.objects.filter(filters)
+            serializer = self.get_serializer(client, many=True)
+            return Response(serializer.data)
+        return Response([])
+    
 class BatchOrderViewSet(viewsets.ModelViewSet):
     queryset = BatchOrder.objects.prefetch_related('items').all()
     serializer_class = BatchOrderSerializer

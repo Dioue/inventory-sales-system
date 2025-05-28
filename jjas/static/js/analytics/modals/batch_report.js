@@ -20,26 +20,76 @@ batchReportBtn.addEventListener('click', async () => {
 });
 
 printBtn.addEventListener('click', () => {
-    const modal = document.querySelector('#batch-report');
-    const reportContent = document.querySelector('#batch-report-content');
+    const reportContent = document.querySelector('#batch-report');
+    if (!reportContent) return;
 
-    // Backup current display styles
-    const previousDisplay = modal.style.display;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
-    // Show modal content explicitly for printing
-    modal.style.display = 'block';
+    const doc = printWindow.document;
 
-    // Add a temporary print class to control visibility
-    modal.classList.add('print-mode');
+    // Build HTML structure
+    const html = doc.createElement('html');
+    const head = doc.createElement('head');
+    const body = doc.createElement('body');
 
-    // Give the browser time to render styles
-    setTimeout(() => {
-        window.print();
+    const title = doc.createElement('title');
+    title.textContent = 'Batch Procurement Report';
 
-        // Revert modal display after printing
-        modal.classList.remove('print-mode');
-        modal.style.display = previousDisplay || '';
-    }, 100);
+    const tailwind = doc.createElement('link');
+    tailwind.rel = 'stylesheet';
+    tailwind.href = 'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css';
+
+    const style = doc.createElement('style');
+    style.textContent = `
+        @media print {
+            body {
+                font-family: sans-serif;
+                background: white;
+                margin: 0;
+                padding: 1rem;
+            }
+            .apexcharts-toolbar {
+                display: none !important;
+            }
+            .apexcharts-canvas,
+            svg {
+                width: 100% !important;
+                height: auto !important;
+            }
+        }
+        .modal-backdrop,
+        #batch-report-hide,
+        #batch-report-submit {
+          visibility: hidden !important;
+          display: none !important;
+        }
+    `;
+
+    head.appendChild(title);
+    head.appendChild(tailwind);
+    head.appendChild(style);
+
+    const contentClone = reportContent.cloneNode(true);
+    body.appendChild(contentClone);
+
+    const script = doc.createElement('script');
+    script.textContent = `
+        window.onload = function () {
+            try {
+                if (window.batchReportChart) {
+                    window.batchReportChart.resize();
+                }
+            } catch (e) {}
+            window.print();
+            window.onafterprint = () => window.close();
+        };
+    `;
+
+    body.appendChild(script);
+    html.appendChild(head);
+    html.appendChild(body);
+    doc.replaceChild(html, doc.documentElement);
 });
 
 

@@ -385,7 +385,7 @@ class DeliveryComponentView(BaseComponentView):
             },
 
             "header_crumbs": [
-                {"name": "Delivery Records", "url": reverse("auth_delivery_component")},
+                {"name": "After Delivery Records", "url": reverse("auth_delivery_component")},
             ]
         })
 

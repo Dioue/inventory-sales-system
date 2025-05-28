@@ -40,14 +40,6 @@
 
     
     <div class="flex items-center flex-column flex-wrap md:flex-row space-y-4 md:space-y-0">
-        <form method="get" class="mb-4 mt-4 mr-2">
-            <select name="last-month-projection" id="last-month-projection" onchange="this.form.submit()"
-                class="text-sm rounded-lg border border-gray-400 focus:ring-gray-100 focus:border-gray-500 block w-full md:w-auto p-2 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-700 dark:focus:border-gray-600 bg-white text-gray-900">
-                <option value="1m" {% if range_selected == '1m' %}selected{% endif %}>Last 1 Month</option>
-                <option value="3m" {% if range_selected == '3m' %}selected{% endif %}>Last 3 Months</option>
-                <option value="6m" {% if range_selected == '6m' %}selected{% endif %}>Last 6 Months</option>
-            </select>
-        </form>
 
         
         <button type="button" class="flex generate-projection-btn text-gray-900 bg-white border border-gray-400 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-2 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">

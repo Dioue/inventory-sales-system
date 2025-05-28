@@ -14,7 +14,7 @@ from ...models import (
 
 fake = Faker()
 
-START_DATE = datetime(2025, 1, 1)
+START_DATE = datetime(2024, 6, 1)
 END_DATE = datetime(2025, 5, 27)
 
 def random_date():

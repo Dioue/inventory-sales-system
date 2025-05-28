@@ -56,13 +56,19 @@ printBtn.addEventListener('click', () => {
             svg {
                 width: 100% !important;
                 height: auto !important;
+                max-width: 100% !important;
+                overflow: visible !important;
             }
-        }
-        .modal-backdrop,
-        #batch-report-hide,
-        #batch-report-submit {
-          visibility: hidden !important;
-          display: none !important;
+            #batch-report-chart {
+                display: block !important;
+                margin: 0 auto !important;
+                overflow: visible !important;
+            }
+            .modal-backdrop,
+            #batch-report-hide,
+            #batch-report-submit {
+                display: none !important;
+            }
         }
     `;
 
@@ -70,19 +76,29 @@ printBtn.addEventListener('click', () => {
     head.appendChild(tailwind);
     head.appendChild(style);
 
+    // Clone the report content
     const contentClone = reportContent.cloneNode(true);
+
+    // Clone the ApexCharts SVG
+    const originalChart = document.querySelector('#batch-report-chart .apexcharts-canvas');
+    if (originalChart) {
+        const clonedChart = originalChart.cloneNode(true);
+        const chartContainer = contentClone.querySelector('#batch-report-chart');
+        if (chartContainer) {
+            chartContainer.innerHTML = ''; // Clear placeholder
+            chartContainer.appendChild(clonedChart); // Insert cloned SVG
+        }
+    }
+
     body.appendChild(contentClone);
 
     const script = doc.createElement('script');
     script.textContent = `
         window.onload = function () {
-            try {
-                if (window.batchReportChart) {
-                    window.batchReportChart.resize();
-                }
-            } catch (e) {}
-            window.print();
-            window.onafterprint = () => window.close();
+            setTimeout(() => {
+                window.print();
+                window.onafterprint = () => window.close();
+            }, 300);
         };
     `;
 
@@ -91,6 +107,7 @@ printBtn.addEventListener('click', () => {
     html.appendChild(body);
     doc.replaceChild(html, doc.documentElement);
 });
+
 
 
 const batch_getMonthYear = () => {

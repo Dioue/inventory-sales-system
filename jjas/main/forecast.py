@@ -10,8 +10,10 @@ from django.utils.timezone import now
 import random
   
 
-def normalized_safe_mape():
-    return random.uniform(50.00, 99.00)
+def compute_mape(y_true, y_pred):
+    return 100 * np.mean(
+        2 * np.abs(y_pred - y_true) / (np.abs(y_true) + np.abs(y_pred) + 1e-10)
+    )
 
 
 def forecast_all():
@@ -75,7 +77,7 @@ def forecast_all():
             if forecast_row.empty or len(forecast_row) < 6:
                 raise ValueError("TSB returned insufficient forecast rows.")
 
-            mape = normalized_safe_mape()
+            
             # Compute MAPE if at least 4 months of history
             if num_unique_months >= 4:
                 train_cut = group_df.iloc[:-3]
@@ -86,7 +88,7 @@ def forecast_all():
                 pred_cut = sf_temp.predict(h=3)
                 pred_values = pred_cut[pred_cut['unique_id'] == product_id]['TSB'].values
                 test_values = test_cut['y'].values
-                
+                mape = compute_mape(test_values, pred_values)
 
             forecast_values = forecast_row['TSB'].values
             forecast_30 = int(float(forecast_values[0]))

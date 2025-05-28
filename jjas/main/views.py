@@ -118,7 +118,7 @@ class BatchOrderComponentView(BaseComponentView):
         search_query = self.request.GET.get(page_obj_search_id, "")
         
         # tables obj
-        _, page_obj = self.apply_search_and_pagination(batch_order, search_query, ["id", "created_by__username", "supplier"])
+        _, page_obj = self.apply_search_and_pagination(batch_order, search_query, ["id", "created_by__username", "supplier__name"])
 
         context.update({
             "content_label": {

@@ -12,7 +12,7 @@ document.getElementById('confirm_batch_submit').addEventListener('click', async 
     const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
 
     // Get and validate supplier name and purchase date
-    const supplierName = document.getElementById('supplier-input').value;
+    const supplierName = document.getElementById('supplier-create-input').value;
     const purchaseDate = document.getElementById('purchase_date').value;
 
     if (!supplierName || !purchaseDate) {

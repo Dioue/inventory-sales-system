@@ -28,7 +28,7 @@ def forecast_all():
     for item in items:
         if item.sales_record and item.sales_record.date_issued and item.product_id:
             data.append({
-                'unique_id': str(item.product_id),
+                'unique_id': item.product_id,  # keep as int, not str
                 'ds': item.sales_record.date_issued,
                 'y': item.quantity
             })
@@ -39,7 +39,7 @@ def forecast_all():
 
     # Convert to month start and aggregate
     df['ds'] = pd.to_datetime(df['ds']).dt.to_period('M').dt.to_timestamp()
-    df = df.groupby(['unique_id', 'ds']).agg({'y': 'sum'}).reset_index()
+    df = df.groupby(['unique_id', 'ds'], as_index=False).agg({'y': 'sum'})
 
     forecast_results = []
     horizon = 6  # months
@@ -113,7 +113,8 @@ def forecast_all():
             fallback = group_df[group_df['ds'] >= current_month - pd.DateOffset(months=6)]
             result = sum_recent_months_fallback(product_id, fallback, product_map.get(product_id, 'Unknown'))
             result['strategy'] = 'fallback-error'
-            forecast_results.append(result)
+            if not any(r['product_id'] == product_id for r in forecast_results):
+                forecast_results.append(result)
 
     cache.set(cache_key, forecast_results, timeout=60*60)
     return forecast_results

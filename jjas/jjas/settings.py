@@ -38,6 +38,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -195,3 +196,17 @@ EMAIL_USE_TLS = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_SSL_REDIRECTS = True
+
+
+JAZZMIN_SETTINGS = {
+
+    # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
+    "site_brand": "JJAS Admin",
+    "topmenu_links": [
+        {
+            "name": "Go to site",
+            "url": reverse_lazy("system_dashboard"),
+            "permissions": ["auth.view_user"],
+        },
+    ],
+}

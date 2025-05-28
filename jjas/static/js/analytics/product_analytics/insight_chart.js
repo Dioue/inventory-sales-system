@@ -1,5 +1,20 @@
 // Initialize chart with empty series and labels
 const insightChartOptions = {
+  title: {
+  text: 'Product Sales, Volume & Forecast',
+  align: 'left',
+  style: {
+    fontSize: '18px',
+    fontWeight: 'bold',
+    color: '#333'
+  }
+},
+legend: {
+  position: 'top',
+  horizontalAlign: 'right',
+  floating: false
+},
+
   series: [],
   chart: {
     height: 350,
@@ -44,7 +59,7 @@ const insightChartOptions = {
     y: {
       formatter: function (y) {
         if (typeof y !== "undefined") {
-          return y.toFixed(0) + " units";
+          return y.toFixed(0);
         }
         return y;
       }

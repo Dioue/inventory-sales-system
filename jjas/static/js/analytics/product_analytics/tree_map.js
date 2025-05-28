@@ -12,7 +12,8 @@ const mainTreeOptions = {
   legend: { show: false },
   chart: {
     height: 300,
-    type: 'treemap'
+    type: 'treemap',
+    toolbar: { show: false }
   },
   colors: colors,
   plotOptions: {

@@ -177,6 +177,8 @@ class BatchOrderSerializer(serializers.ModelSerializer):
             quantity_change = quantity - defective
             product.quantity = product.quantity + quantity_change if increment else product.quantity - quantity_change
 
+            product.quantity = max(product.quantity, 0)
+
             if product.quantity <= 0:
                 product.status = 'Out of Stock'
             elif product.quantity < product.critical_level:
@@ -243,20 +245,27 @@ class SalesRecordSerializer(serializers.ModelSerializer):
         for item_data in items_data:
             SalesRecordItem.objects.create(sales_record=sales_record, **item_data)
 
+        self.update_product_quantities(items_data, decrement=True)
         self.update_sales_aggregates(sales_record)
         return sales_record
 
     def update(self, instance, validated_data):
         items_data = validated_data.pop('items', [])
 
+        # Step 1: Revert old product quantities
+        self.update_product_quantities(instance.items.all(), decrement=False)
+
         for field, value in validated_data.items():
             setattr(instance, field, value)
         instance.save()
 
+        # Step 2: Replace with new items
         instance.items.all().delete()
         for item_data in items_data:
             SalesRecordItem.objects.create(sales_record=instance, **item_data)
 
+        # Step 3: Apply new quantity changes
+        self.update_product_quantities(items_data, decrement=True)
         self.update_sales_aggregates(instance)
         return instance
 

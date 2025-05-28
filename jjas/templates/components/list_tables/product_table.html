@@ -62,7 +62,15 @@
                         <td class="px-6 py-4">{{ obj.unit.name|lower|default:"-" }}</td>
                         <td class="px-6 py-4" style="text-align: right !important;">₱ {{ obj.selling_price|intcomma|default:"-" }}</td>
                         <td class="px-6 py-4" style="text-align: right !important;">{{ obj.critical_level|default:"-" }}</td>
-                        <td class="px-6 py-4">{{ obj.status|default:"-" }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded font-semibold text-sm
+                                {% if obj.status == 'Available' %} bg-green-100 text-green-700
+                                {% elif obj.status == 'Critical' %} bg-orange-100 text-orange-700
+                                {% elif obj.status == 'Out of Stock' or obj.status == 'Low' %} bg-red-100 text-red-700
+                                {% else %} bg-gray-100 text-gray-500 {% endif %}">
+                                {{ obj.status|default:"-" }}
+                            </span>
+                        </td>
                         <td class="flex items-center px-6 py-4">
                             
                             <button type="button" class="product-update-btn font-medium text-blue-600 dark:text-blue-500 hover:underline"
@@ -99,32 +107,3 @@
 <script src="{% static 'js/modals/product_view.js' %}"></script>
 <script src="{% static 'js/generic_alert.js' %}"></script>
 <script src="{% static 'js/input_functions.js' %}"></script>
-
-
-<button onclick="window.print()" class="print-btn text-white bg-blue-600 px-4 py-2 rounded">Print</button>
-
-
-<div id="print-section" class="hidden print:block">
-    <table class="w-full border border-black">
-        <thead>
-            <tr>
-                <th>ID</th><th>Name</th><th>Code</th><th>Quantity</th><th>Unit</th>
-                <th>Selling Price</th><th>Critical Level</th><th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for obj in tables.page_obj.data %}
-            <tr>
-                <td>{{ obj.id }}</td>
-                <td>{{ obj.name }}</td>
-                <td>{{ obj.code }}</td>
-                <td>{{ obj.quantity }}</td>
-                <td>{{ obj.unit.name }}</td>
-                <td>₱ {{ obj.selling_price|intcomma }}</td>
-                <td>{{ obj.critical_level }}</td>
-                <td>{{ obj.status }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>

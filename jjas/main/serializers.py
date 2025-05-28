@@ -23,7 +23,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
-        fields = ['name', 'address', 'contact_number', 'email', 'website']
+        fields = ['id', 'name', 'address', 'contact_number', 'email', 'website']
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -104,7 +104,9 @@ class BatchOrderItemSerializer(serializers.ModelSerializer):
 
 class BatchOrderSerializer(serializers.ModelSerializer):
     items = BatchOrderItemSerializer(many=True)
+    supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all())
 
+    
     class Meta:
         model = BatchOrder
         fields = ['id', 'supplier', 'purchase_date', 'grand_total', 'items']

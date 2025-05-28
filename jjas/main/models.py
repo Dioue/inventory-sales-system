@@ -124,7 +124,7 @@ class Product(SystemGeneratedData):
 
 # Batch Order Model
 class BatchOrder(SystemGeneratedData):
-    supplier = models.CharField(max_length=255, blank=True, default="")
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, related_name="batch_orders")
     purchase_date = models.DateField(default=now)
     grand_total = models.DecimalField(max_digits=19, decimal_places=2)
     

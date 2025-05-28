@@ -106,7 +106,7 @@ async function submitBatch(batchContent, csrfToken) {
 
 function resetForm() {
     document.getElementById('batch_table_body').innerHTML = '';
-    document.getElementById('supplier-input').value = '';
+    document.getElementById('supplier-create-input').value = '';
     document.getElementById('purchase_date').value = '';
     updateGrand()
 }
@@ -140,6 +140,19 @@ async function fetchFilteredUnits(query) {
     } catch (err) {
         console.error('Error fetching filtered units:', err);
         return [];
+    }
+}
+
+const fetchSupplier = async (params = null) => {
+    try {
+        const response = (params == null) ?  await fetch(`/api/supplier/`): await fetch(`/api/supplier/${params}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch supplier (ID: ${params}): ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching supplier:', error);
+        throw error;
     }
 }
 
@@ -188,6 +201,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dropdown = document.getElementById('product-dropdown');
     const noData = document.getElementById('no-data');
     const tableBody = document.getElementById('batch_table_body');
+
+    const suppliers = await fetchSupplier();
+    suppliers.results.forEach(supplier => {
+        const option = document.createElement("option");
+        option.value = supplier.id;
+        option.textContent = supplier.name;
+        document.getElementById('supplier-create-input').appendChild(option);
+    });
     
     
     // Search functionality

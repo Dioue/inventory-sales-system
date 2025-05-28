@@ -23,10 +23,14 @@
             <form action="#"></form>
             <div class="grid gap-4 mb-4 grid-cols-4">
                 <div class="col-span-2">
-                    <label id="supplier-label-update" for="supplier" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Supplier Name<span class="text-red-400">*</span></label>
-                    <input id="supplier-input-update" type="text" name="supplier" 
-                    class="shadow-md rounded-lg w-100 bg-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                    placeholder="i.e. Alibaba" required="true" maxlength="60" oninput="toTitleCase(this)">
+                    <label id="supplier-update-label" for="supplier" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        Supplier Name<span class="text-red-400">*</span>
+                    </label>
+                    <select id="supplier-update-input" name="supplier" 
+                        class="shadow-md rounded-lg w-100 bg-white text-sm focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                        required>
+                        <option value="" disabled selected>Select a supplier</option>
+                    </select>
                 </div>
                 <div class="relative max-w-sm col-span-2">
                     <label for="purchase-date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Purchase Date</label>

@@ -82,7 +82,6 @@ modalUpdateBtns.forEach(el => {
     el.addEventListener('click', async (event) => {
         const id = event.currentTarget.dataset.id;
         const supplier = await fetchSupplier(id);
-
         supplierName.value = '';
         supplierAddress.value = '';
         supplierContact.value = '';

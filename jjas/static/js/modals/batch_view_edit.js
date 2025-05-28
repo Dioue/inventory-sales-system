@@ -130,7 +130,9 @@ async function handleViewClick(event) {
                 }, 50); // 10–50ms is usually enough
             }
 
-            new Modal(_modalView, _setStatic).show();
+            if(supplierFilled){
+                new Modal(_modalView, _setStatic).show();
+            }
 
         } catch (error) {
             console.error('Error handling view click:', error);
@@ -159,7 +161,8 @@ async function handleEditClick(event) {
     if (id) {
         try {
             const batch = await fetchBatchDetails(id);
-            document.getElementById('supplier-input-update').value = batch.supplier;
+            console.log(batch.supplier)
+            document.getElementById('supplier-update-input').value = batch.supplier;
             const dateParts = batch.purchase_date.split('-');
             const formattedDate = `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}`;
             document.getElementById('purchase-date-update').value = formattedDate;
@@ -200,8 +203,10 @@ async function handleEditClick(event) {
             /* For batch confirmation */
             document.getElementById('batch-update-btn').addEventListener('click', function (event) {
                 const modalElement = document.getElementById('confirm_batch_update_popup');
-                new Modal(modalElement).show();
-
+                
+                if(supplierFilled){
+                    new Modal(modalElement).show();
+                }
             });
             
             document.getElementById('confirm_batch_update_submit').addEventListener('click', batchPut);
@@ -233,12 +238,23 @@ _modalEditHideBtn.addEventListener('click', () => {
 // Throw away functions that are copied from the batch create because I am tired of looking at them
 
 
-
+let supplierFilled;
 
 document.addEventListener('DOMContentLoaded', async () => {
     await fetchProductData();
     await fetchUnitsUpdate();
     await fetchCategoryUpdate();
+
+    supplierFilled = false;
+    const suppliers = await fetchSupplier();
+    suppliers.results.forEach(supplier => {
+        const option = document.createElement("option");
+        option.value = supplier.id;
+        option.textContent = supplier.name;
+        document.getElementById('supplier-update-input').appendChild(option);
+    });
+
+    supplierFilled = true;
 })
 
 function _populate_Dropdown(_products) {
@@ -543,7 +559,7 @@ const batch_function_increase_update = (item_name, item_id) => {
 async function batchPut() {
     try {
         // Gather data from the form
-        const supplier = document.getElementById('supplier-input-update').value.trim();
+        const supplier = document.getElementById('supplier-update-input').value.trim();
         const purchaseDate = document.getElementById('purchase-date-update').value.trim(); // MM/DD/YYYY format
         
         const items = [];

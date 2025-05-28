@@ -182,8 +182,7 @@ class Command(BaseCommand):
         batch_orders = []
         batch_items = []
         batch_order_data = []  # Store temp data with items and total per batch
-        suppliers = ["Alibaba", "CNFastwin", "HBHaolu"]
-
+        suppliers = list(Supplier.objects.all())
         # Step 1: Create empty batch orders first
         for i in range(843):
             date = random_date()
@@ -236,7 +235,7 @@ class Command(BaseCommand):
 
         # Step 4: Bulk update grand_total per BatchOrder
         for bo_id, total in batch_order_data:
-            BatchOrder.objects.filter(id=bo_id).update(grand_total=total)
+            BatchOrder.objects.filter(id=bo_id).update(grand_total=round(total, 2))
 
         self.stdout.write('Creating sales records...')
         clients = list(Client.objects.all())

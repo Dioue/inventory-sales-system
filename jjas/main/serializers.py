@@ -129,10 +129,17 @@ class BatchOrderSerializer(serializers.ModelSerializer):
         instance.save()
 
         existing_items = {item.product.id: item for item in instance.items.all()}
+
+        # Step 1: Reverse old product quantities before update
+        self.update_product_quantities(instance.items.all(), increment=False)
+
         new_items = []
 
         for item_data in items_data:
-            product_id = item_data['product'] 
+            product_id = item_data['product']
+            if isinstance(product_id, Product):
+                product_id = product_id.id  # In case it's a Product instance
+
             if product_id in existing_items:
                 existing_item = existing_items.pop(product_id)
                 existing_item.cost_price = item_data.get('cost_price', existing_item.cost_price)
@@ -140,24 +147,37 @@ class BatchOrderSerializer(serializers.ModelSerializer):
                 existing_item.defective = item_data.get('defective', existing_item.defective)
                 existing_item.save()
             else:
-                item_data['batch'] = instance 
+                item_data['batch'] = instance
                 new_items.append(BatchOrderItem(**item_data))
 
+        # Remove items that are no longer present
         for remaining_item in existing_items.values():
             remaining_item.delete()
 
         BatchOrderItem.objects.bulk_create(new_items)
 
-        self.update_product_quantities(items_data, increment=True)
+        # Step 2: Apply updated product quantities
+        self.update_product_quantities(instance.items.all(), increment=True)
+
         return instance
 
-    def update_product_quantities(self, items_data, increment=False):
-        for item_data in items_data:
-            product = Product.objects.get(id=item_data['product'].id)
-            quantity_change = item_data['quantity'] - item_data['defective']
+
+    def update_product_quantities(self, items, increment=False):
+        for item in items:
+            if isinstance(item, dict):
+                product_id = item['product'].id if hasattr(item['product'], 'id') else item['product']
+                quantity = item['quantity']
+                defective = item['defective']
+            else:
+                product_id = item.product.id
+                quantity = item.quantity
+                defective = item.defective
+
+            product = Product.objects.get(id=product_id)
+            quantity_change = quantity - defective
             product.quantity = product.quantity + quantity_change if increment else product.quantity - quantity_change
 
-            if product.quantity == 0:
+            if product.quantity <= 0:
                 product.status = 'Out of Stock'
             elif product.quantity < product.critical_level:
                 product.status = 'Low on Stock'
@@ -165,6 +185,7 @@ class BatchOrderSerializer(serializers.ModelSerializer):
                 product.status = 'Available'
 
             product.save()
+
 
 class DailySalesSerializer(serializers.ModelSerializer):
     class Meta:

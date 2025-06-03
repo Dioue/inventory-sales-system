@@ -181,8 +181,10 @@ class BatchOrderSerializer(serializers.ModelSerializer):
 
             if product.quantity <= 0:
                 product.status = 'Out of Stock'
-            elif product.quantity < product.critical_level:
+            elif product.quantity < product.critical_level and product.quantity > 0:
                 product.status = 'Low on Stock'
+            elif product.quantity < product.critical_level:
+                product.status = 'Critical'
             else:
                 product.status = 'Available'
 

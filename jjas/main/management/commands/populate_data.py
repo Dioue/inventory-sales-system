@@ -69,7 +69,7 @@ class Command(BaseCommand):
             "Alibaba", "CNFastwin", "HBHaolu", "AutoPartsHub", "GlobalParts",
         ]
         supplier = [
-            Supplier(name=f"{str(i)}", address=fake.address(), contact_number=fake.phone_number(), email=fake.email(), website=fake.url(), created_by=user)
+            Supplier(name=f"{str(i)}", address=fake.address(), contact_number=fake.phone_number()[:20], email=fake.email(), website=fake.url(), created_by=user)
             for i in supplier_name
         ]
         Supplier.objects.bulk_create(supplier)

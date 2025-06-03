@@ -136,9 +136,13 @@ class BatchOrderSerializer(serializers.ModelSerializer):
         new_items = []
 
         for item_data in items_data:
-            product_id = item_data['product']
-            if isinstance(product_id, Product):
-                product_id = product_id.id  # In case it's a Product instance
+            product_data = item_data['product']
+            if isinstance(product_data, dict):
+                product_id = product_data.get('id')
+            elif isinstance(product_data, Product):
+                product_id = product_data.id
+            else:
+                product_id = product_data
 
             if product_id in existing_items:
                 existing_item = existing_items.pop(product_id)
@@ -157,7 +161,8 @@ class BatchOrderSerializer(serializers.ModelSerializer):
         BatchOrderItem.objects.bulk_create(new_items)
 
         # Step 2: Apply updated product quantities
-        self.update_product_quantities(instance.items.all(), increment=True)
+        final_items = list(instance.items.all()) + new_items
+        self.update_product_quantities(final_items, increment=True)
 
         return instance
 
@@ -247,7 +252,7 @@ class SalesRecordSerializer(serializers.ModelSerializer):
         for item_data in items_data:
             SalesRecordItem.objects.create(sales_record=sales_record, **item_data)
 
-        self.update_product_quantities(items_data, decrement=True)
+        self.update_product_quantities(items_data, increment=False)
         self.update_sales_aggregates(sales_record)
         return sales_record
 
@@ -255,7 +260,7 @@ class SalesRecordSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop('items', [])
 
         # Step 1: Revert old product quantities
-        self.update_product_quantities(instance.items.all(), decrement=False)
+        self.update_product_quantities(instance.items.all(), increment=True)
 
         for field, value in validated_data.items():
             setattr(instance, field, value)
@@ -267,7 +272,7 @@ class SalesRecordSerializer(serializers.ModelSerializer):
             SalesRecordItem.objects.create(sales_record=instance, **item_data)
 
         # Step 3: Apply new quantity changes
-        self.update_product_quantities(items_data, decrement=True)
+        self.update_product_quantities(items_data, increment=False)
         self.update_sales_aggregates(instance)
         return instance
 
@@ -311,6 +316,28 @@ class SalesRecordSerializer(serializers.ModelSerializer):
         monthly_sales.total_sales += total
         monthly_sales.save()
 
+    def update_product_quantities(self, items, increment=False):
+        for item in items:
+            if isinstance(item, dict):
+                product_id = item['product'].id if hasattr(item['product'], 'id') else item['product']
+                quantity = item['quantity']
+            else:
+                product_id = item.product.id
+                quantity = item.quantity
+
+            product = Product.objects.get(id=product_id)
+            change = quantity if increment else -quantity
+
+            product.quantity = max(product.quantity + change, 0)
+
+            if product.quantity <= 0:
+                product.status = 'Out of Stock'
+            elif product.quantity < product.critical_level:
+                product.status = 'Low on Stock'
+            else:
+                product.status = 'Available'
+
+            product.save()
 
 class DeliverySerializer(serializers.ModelSerializer):
     class Meta:

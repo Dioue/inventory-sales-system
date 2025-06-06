@@ -56,7 +56,7 @@ def forecast_all():
         num_unique_months = group_df['ds'].nunique()
 
         if num_unique_months < 6:
-            # Fallback for less than 2 months of data
+            # Fallback for less than 6 months of data
             fallback = group_df[group_df['ds'] >= current_month - pd.DateOffset(months=6)]
             result = sum_recent_months_fallback(product_id, fallback, product_map.get(product_id, 'Unknown'))
             result['strategy'] = 'fallback'

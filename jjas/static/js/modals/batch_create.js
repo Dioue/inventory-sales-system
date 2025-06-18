@@ -16,20 +16,20 @@ document.getElementById('confirm_batch_submit').addEventListener('click', async 
     const purchaseDate = document.getElementById('purchase_date').value;
 
     if (!supplierName || !purchaseDate) {
-        alert('Please select a supplier and provide a purchase date.');
+        generic_alert('Please select a supplier and provide a purchase date.');
         return;
     }
 
     const formattedDate = formatDate(purchaseDate);
     if (!formattedDate) {
-        alert('Please provide a valid purchase date.');
+        generic_alert('Please provide a valid purchase date.');
         return;
     }
 
     // Get batch items
     const items = getBatchItems();
     if (items.length === 0) {
-        alert('Please add at least one product to the batch.');
+        generic_alert('Please add at least one product to the batch.');
         return;
     }
 
@@ -48,15 +48,15 @@ document.getElementById('confirm_batch_submit').addEventListener('click', async 
     try {
         const response = await submitBatch(batchContent, csrfToken);
         if (response.ok) {
-            alert('Batch Order created successfully!');
+            generic_alert('Batch Order created successfully!', reload = true);
             resetForm();
         } else {
             const errorData = await response.json();
-            alert(`Error creating batch: ${errorData}`);
+            generic_alert(`Error creating batch: ${errorData}`, reload = true);
         }
     } catch (error) {
         console.error('Error submitting batch:', error);
-        alert('An error occurred while submitting the batch.');
+        generic_alert('An error occurred while submitting the batch.', reload = true);
     }
 });
 
@@ -77,7 +77,7 @@ function getBatchItems() {
         const defective = parseInt(row.querySelector('[id^="defective-"]').value, 10);
 
         if (!productId || isNaN(quantity) || isNaN(costPrice) || isNaN(defective) || quantity <= 0 || costPrice <= 0) {
-            alert(`Please ensure all fields are correctly filled for product: ${productName}`);
+            generic_alert(`Please ensure all fields are correctly filled for product: ${productName}`);
             return; // Stop further processing if validation fails
         }
 
@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 resetDropdown();
                 
             } else {
-                alert('Product already added to the table.');
+                generic_alert('Product already added to the table.');
                 resetDropdown();
             }
         }

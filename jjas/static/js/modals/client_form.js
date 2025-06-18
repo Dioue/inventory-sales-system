@@ -131,19 +131,19 @@ const clientAPI = async (method, id = null) => {
     const zip = sanitizer(clientZip.value);
 
     if (!name) {
-        alert('Please add a valid client name.');
+        generic_alert('Please add a valid client name.');
         return;
     } else if (!address1) {
-        alert('Please add a valid address line 1.');
+        generic_alert('Please add a valid address line 1.');
         return;
     } else if (!city) {
-        alert('Please add a valid city.');
+        generic_alert('Please add a valid city.');
         return;
     } else if (!province) {
-        alert('Please add a valid province.');
+        generic_alert('Please add a valid province.');
         return;
     } else if (!zip) {
-        alert('Please add a valid zip code.');
+        generic_alert('Please add a valid zip code.');
         return;
     }
 

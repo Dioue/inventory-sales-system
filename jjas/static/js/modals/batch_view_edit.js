@@ -330,7 +330,7 @@ _dropdown.addEventListener('click', (event) => {
             reset_Dropdown();
             
         } else {
-            alert('Product already added to the table.');
+            generic_alert('Product already added to the table.');
             reset_Dropdown();
         }
     }
@@ -619,10 +619,10 @@ async function batchPut() {
         const data = await response.json();
 
         // Optionally, reload or refresh the UI after success
-        alert('Batch updated successfully!');
+        generic_alert('Batch updated successfully!', reload = true);
         location.reload();
     } catch (error) {
         console.error('Error updating batch:', error);
-        alert('Failed to update batch. Please try again.');
+        generic_alert('Failed to update batch. Please try again.', reload=true);
     }
 }

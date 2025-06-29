@@ -32,7 +32,7 @@
                             </span>
                         </th>
                     {% endfor %}
-                    <th scope="col" class="px-6 py-3">
+                    <th scope="col" class="px-6 py-3 no-print">
                         Action
                     </th>
                 {% endif %}
@@ -71,7 +71,7 @@
                                 {{ obj.status|default:"-" }}
                             </span>
                         </td>
-                        <td class="flex items-center px-6 py-4">
+                        <td class="flex items-center px-6 py-4 no-print">
                             
                             <button type="button" class="product-update-btn font-medium text-blue-600 dark:text-blue-500 hover:underline"
                             data-id="{{obj.id}}">
@@ -95,7 +95,10 @@
         </tbody>
     </table>
 </form>
+<div class="no-print">
     {% include 'components/page_obj_paginator.html' %}
+</div>
+    
 </div>
 
 {% include 'components/modals/products/product_create.html' %}

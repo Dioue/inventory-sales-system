@@ -2095,6 +2095,10 @@ input:checked + .toggle-bg {
   table-layout: fixed;
 }
 
+.border-collapse {
+  border-collapse: collapse;
+}
+
 .border-separate {
   border-collapse: separate;
 }

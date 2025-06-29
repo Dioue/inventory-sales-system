@@ -15,7 +15,7 @@ from ...models import (
 fake = Faker()
 
 START_DATE = datetime(2022, 6, 1)
-END_DATE = datetime(2025, 5, 27)
+END_DATE = datetime(2025, 6, 29)
 
 def random_date():
     return START_DATE + timedelta(
@@ -57,8 +57,10 @@ class Command(BaseCommand):
             "Engine Components", "Suspension", "Braking System", "Transmission", "Electrical", 
             "Cooling System", "Exhaust", "Filters", "Steering", "Lighting"
         ]
+
+        category_codes = ["MSX", "SUS", "BRK", "TRN", "ELC", "COL", "EXH", "FLT", "STR", "LIT"]
         categories = [
-            Category(code=f"CAT{str(i).zfill(4)}", name=name, created_by=user)
+            Category(code=f"{category_codes[i]}{str(i).zfill(3)}", name=name, created_by=user)
             for i, name in enumerate(category_names)
         ]
         Category.objects.bulk_create(categories)

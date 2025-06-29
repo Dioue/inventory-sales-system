@@ -67,7 +67,7 @@ const fetchSales = async (id = null) => {
 document.addEventListener('DOMContentLoaded', async () => {
     const saleData = await fetchSales();
     saleData.results.forEach(sale => {
-        saleSelected.add(new Option(`${sale.id} - ${sale.client.name}`, sale.id))
+        saleSelected.add(new Option(`${sale.id}`, sale.id))
     })
 })
 

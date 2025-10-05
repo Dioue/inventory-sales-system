@@ -1,3 +1,5 @@
+### Inventory and Sales Management System wtih Trial Demand Forecasting for short term forecasting using TSB Model
+
 ### requirements
 > cd jjas && pip install -r requirements.txt
 > npm install -g tailwindcss

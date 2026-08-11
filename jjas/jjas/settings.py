@@ -34,7 +34,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
-
+COMPRESS_OFFLINE = True
 # Application definition
 
 INSTALLED_APPS = [

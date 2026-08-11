@@ -32,3 +32,5 @@ node_modules/
 
 # Tailwind generated CSS
 /jjas/static/CACHE
+
+.env

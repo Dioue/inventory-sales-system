@@ -19,3 +19,5 @@ redis
 gunicorn
 django-cacheops
 django-jazzmin
+whitenoise
+gunicorn

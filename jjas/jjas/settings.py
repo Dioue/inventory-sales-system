@@ -30,9 +30,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -54,7 +54,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -170,7 +169,7 @@ STATICFILES_FINDERS = [
 
 
 # In settings.py
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 
 LOGIN_URL = 'login_view'
@@ -184,7 +183,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 
 
 UNFOLD = {
-    "SITE_HEADER": "JJAS Trading Admin",
+    "SITE_HEADER": "Demo IMS Admin",
 }
 
 # Email Password Reset
@@ -196,13 +195,13 @@ EMAIL_USE_TLS = True
 #Setup HTTP
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECTS = True
 
 
 JAZZMIN_SETTINGS = {
 
     # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
-    "site_brand": "JJAS Admin",
+    "site_brand": "IMS Admin",
     "topmenu_links": [
         {
             "name": "Go to site",

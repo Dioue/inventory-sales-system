@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
       salesChartData = {
         today: {
           series: [{ name: 'Sales', data: [data.today.sales_total || 0] }],
-          xaxis: { categories: [data.today.dates] },
+          xaxis: { categories: [data.today.date] },
         },
         last7Days: {
           series: [{ name: 'Sales', data: data.last7Days.sales_data || [] }],

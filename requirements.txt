@@ -1,7 +1,7 @@
 django
 pillow
 python-dotenv
-psycopg2
+psycopg2-binary
 djangorestframework
 django-compressor
 requests

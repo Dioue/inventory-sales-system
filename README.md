@@ -3,7 +3,7 @@
 
 ![Demo Img](https://github.com/Dioue/JJAS-ISS/blob/main/jjas/media/products/images/Demonstration%20System.png)
 
-DEMO: https://ims-demo-9wpw.onrender.com
+DEMO: https://isms.dioue.dev/
 
 ### requirements
 > cd jjas && pip install -r requirements.txt

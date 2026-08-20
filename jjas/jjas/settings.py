@@ -13,8 +13,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-from django.templatetags.static import static
-from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 import urllib.parse
 
@@ -117,7 +115,10 @@ else:
         }
     }
 
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
 
 CACHES = {
     "default": {
@@ -221,7 +222,7 @@ JAZZMIN_SETTINGS = {
     "topmenu_links": [
         {
             "name": "Go to site",
-            "url": reverse_lazy("system_dashboard"),
+            "url": "system_dashboard",
             "permissions": ["auth.view_user"],
         },
     ],
